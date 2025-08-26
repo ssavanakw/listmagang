@@ -423,7 +423,7 @@
             <div class="mb-3">
                 <label for="video_software" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     Jika Anda memilih minat program magang Digital Marketing, materi mana yang anda ingin praktikan? 
-                    <span class="font-normal">(jika minat Anda bukan ini, cukup pilih opsi "other")</span>
+                    <span class="font-normal">(jika minat Anda bukan ini, cukup diisi dg strip "-")</span>
                 </label>
                 <input type="text" id="video_software" name="video_software"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
@@ -436,8 +436,8 @@
             {{-- Programming Languages --}}
             <div class="mb-3">
                 <label for="programming_languages" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    If you choose the Programmer internship program interest, what programming languages ​​have you mastered? 
-                    <span class="font-normal">(if your interest is not this, just fill in with a dash "-")</span>
+                    Jika kamu memilih minat program magang Programmer, bahasa pemrograman apa saja yang sudah kamu kuasai? 
+                    <span class="font-normal">(jika minat Anda bukan ini, cukup diisi dg strip "-")</span>
                 </label>
                 <input type="text" id="programming_languages" name="programming_languages"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 

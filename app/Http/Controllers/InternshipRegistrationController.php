@@ -54,6 +54,8 @@ class InternshipRegistrationController extends Controller
             'end_date' => 'nullable|string|max:50',
             'internship_info_sources' => 'nullable|string|max:255',
             'internship_info_other' => 'nullable|string|max:255',
+            'cv_ktp_portofolio_pdf' => 'nullable|mimes:pdf|max:4096',
+            'portofolio_visual' => 'nullable|mimes:jpg,jpeg,png,pdf|max:4096',
             'current_activities' => 'nullable|string|max:255',
             'boarding_info' => 'nullable|string|max:50',
             'family_status' => 'required|string|max:50',
@@ -61,7 +63,28 @@ class InternshipRegistrationController extends Controller
             'social_media_instagram' => 'nullable|string|max:255',
         ]);
 
-        InternshipRegistration::create($validated);
+        $data = [];
+
+        // Upload PDF
+        if ($request->hasFile('cv_ktp_portofolio_pdf')) {
+            $pdfFile = $request->file('cv_ktp_portofolio_pdf');
+            $pdfName = time().'_'. $pdfFile->getClientOriginalName();
+            $pdfFile->storeAs('public/uploads', $pdfName);
+            $data['cv_ktp_portofolio_pdf'] = $pdfName;
+        }
+
+        // Upload JPG/PNG
+        if ($request->hasFile('portofolio_visual')) {
+            $imageFile = $request->file('portofolio_visual');
+            $imageName = time().'_'. $imageFile->getClientOriginalName();
+            $imageFile->storeAs('public/uploads', $imageName);
+            $data['portofolio_visual'] = $imageName;
+        }
+
+        // Gabungkan semua data validasi + file
+        $finalData = array_merge($validated, $data);
+
+        InternshipRegistration::create($finalData);
 
         return redirect()->back()->with('success', 'Data berhasil disimpan!');
     }
