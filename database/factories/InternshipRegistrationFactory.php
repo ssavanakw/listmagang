@@ -4,21 +4,26 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\InternshipRegistration>
- */
 class InternshipRegistrationFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
+        $status = $this->faker->randomElement(['new','active','completed','exited','pending']);
+
+        $start = null;
+        $end   = null;
+        if ($status === 'active') {
+            $start = $this->faker->dateTimeBetween('-6 months', 'now')->format('Y-m-d');
+        } elseif (in_array($status, ['completed','exited'], true)) {
+            $startDt = $this->faker->dateTimeBetween('-12 months', '-2 months');
+            $endDt   = $this->faker->dateTimeBetween($startDt, 'now');
+            $start   = $startDt->format('Y-m-d');
+            $end     = $endDt->format('Y-m-d');
+        }
+
         return [
             'fullname' => $this->faker->name(),
-            'born_date' => $this->faker->date(),
+            'born_date' => $this->faker->date('Y-m-d'),
             'student_id' => $this->faker->unique()->numerify('NIM#######'),
             'email' => $this->faker->unique()->safeEmail(),
             'gender' => $this->faker->randomElement(['Male', 'Female']),
@@ -41,12 +46,26 @@ class InternshipRegistrationFactory extends Factory
             'digital_marketing_type' => $this->faker->optional()->word(),
             'digital_marketing_type_other' => $this->faker->optional()->word(),
             'laptop_equipment' => $this->faker->optional()->randomElement(['Yes', 'No']),
-            'owned_tools' => $this->faker->optional()->word(),
+
+            // ⬇⬇ encode ke JSON (kolom kamu bertipe string/varchar)
+            'owned_tools' => $this->faker->boolean(70)
+                ? json_encode($this->faker->randomElements(
+                    ['Laptop','Kamera','Tripod','Mic','Tablet'],
+                    $this->faker->numberBetween(1,3)
+                ))
+                : null,
             'owned_tools_other' => $this->faker->optional()->word(),
-            'start_date' => $this->faker->date(),
-            'end_date' => $this->faker->date(),
-            'internship_info_sources' => $this->faker->sentence(),
+
+            'start_date' => $start,
+            'end_date'   => $end,
+
+            // ⬇⬇ encode ke JSON juga
+            'internship_info_sources' => json_encode($this->faker->randomElements(
+                ['Instagram','Teman','Website','Poster','Kampus'],
+                $this->faker->numberBetween(1,3)
+            )),
             'internship_info_other' => $this->faker->optional()->sentence(),
+
             'cv_ktp_portofolio_pdf' => 'dummy_cv.pdf',
             'portofolio_visual' => 'dummy_portofolio.png',
             'current_activities' => $this->faker->optional()->sentence(),
@@ -54,6 +73,9 @@ class InternshipRegistrationFactory extends Factory
             'family_status' => $this->faker->randomElement(['Single', 'Married']),
             'parent_wa_contact' => $this->faker->phoneNumber(),
             'social_media_instagram' => '@' . $this->faker->userName(),
+
+            // status workflow
+            'internship_status' => $status,
         ];
     }
 }

@@ -4,12 +4,12 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\InternshipRegistration;
-use Illuminate\Support\Str;
 
 class InternshipRegistrationSeeder extends Seeder
 {
     public function run(): void
     {
-        InternshipRegistration::factory()->count(20)->create();
+        // 100 data dengan status acak (ditentukan di Factory)
+        InternshipRegistration::factory()->count(100)->create();
     }
 }
