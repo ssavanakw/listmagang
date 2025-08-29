@@ -73,4 +73,38 @@ class InternController extends Controller
             'pending'
         );
     }
+    public function updateStatus(Request $request, IR $intern)
+    {
+        $validated = $request->validate([
+            'internship_status' => 'required|in:new,active,completed,exited,pending',
+        ]);
+
+        $intern->internship_status = $validated['internship_status'];
+        $intern->save();
+
+        // AJAX -> JSON, non-AJAX -> back
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['ok' => true]);
+        }
+        return back()->with('success', 'Status pemagang diperbarui.');
+    }
+
+    public function bulkUpdateStatus(Request $request)
+    {
+        $validated = $request->validate([
+            'ids'               => 'required|array|min:1',
+            'ids.*'             => 'integer|exists:internship_registrations,id',
+            'internship_status' => 'required|in:new,active,completed,exited,pending',
+        ]);
+
+        $affected = IR::whereIn('id', $validated['ids'])
+            ->update(['internship_status' => $validated['internship_status']]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['ok' => true, 'affected' => $affected]);
+        }
+        return back()->with('success', "Status {$affected} pemagang diperbarui.");
+    }
+
+
 }
