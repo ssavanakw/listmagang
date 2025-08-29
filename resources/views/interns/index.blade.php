@@ -56,7 +56,7 @@
                 </div>
             </form>
 
-            {{-- Pending bar: ditempatkan di kanan bawah search --}}
+            {{-- Pending bar: di kanan bawah search --}}
             <div id="pendingBar"
                  class="hidden rounded-full border border-amber-200 bg-amber-50/95
                         px-3 py-2 text-amber-900 shadow-sm
@@ -89,20 +89,21 @@
 
     {{-- Card --}}
     <div class="rounded-xl bg-white dark:bg-gray-800 shadow ring-1 ring-gray-200 dark:ring-gray-700">
+
         {{-- Table --}}
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left text-gray-700 dark:text-gray-200">
+        <div id="tableWrap" class="overflow-x-auto">
+            <table class="min-w-full w-max text-sm text-left text-gray-700 dark:text-gray-200">
                 <thead class="sticky top-0 z-10 text-xs uppercase tracking-wider
                               bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                     <tr class="divide-x divide-gray-200 dark:divide-gray-600">
                         <th class="px-3 py-3 font-semibold whitespace-nowrap">No</th>
                         @php
+                            // STATUS dipindahkan ke paling belakang
                             $fields = [
                                 'fullname' => 'NAMA LENGKAP',
                                 'born_date' => 'TANGGAL LAHIR',
                                 'student_id' => 'NIM / NIS',
                                 'email' => 'EMAIL',
-                                'internship_status' => 'STATUS',
                                 'gender' => 'GENDER',
                                 'phone_number' => 'TELEPON',
                                 'institution_name' => 'INSTITUSI',
@@ -137,6 +138,7 @@
                                 'cv_ktp_portofolio_pdf' => 'FILE PDF',
                                 'portofolio_visual' => 'FILE VISUAL',
                                 'created_at' => 'DIBUAT',
+                                'internship_status' => 'STATUS', // terakhir
                             ];
                         @endphp
                         @foreach ($fields as $label)
@@ -157,6 +159,7 @@
                             <td class="px-3 py-2 align-top">
                                 @php $val = $r->$field ?? '-'; @endphp
 
+                                {{-- File links --}}
                                 @if (Str::startsWith($field, 'cv_') || Str::startsWith($field, 'portofolio_'))
                                     @if ($r->$field)
                                         <a href="{{ asset('storage/' . $r->$field) }}" target="_blank"
@@ -165,12 +168,14 @@
                                         <span class="text-gray-400">-</span>
                                     @endif
 
+                                {{-- Tanggal --}}
                                 @elseif (in_array($field, ['born_date','start_date','end_date','created_at'], true))
                                     @php $d = $r->$field; $isCarbon = $d instanceof \Carbon\Carbon; @endphp
                                     <span class="whitespace-nowrap">
                                         {{ $isCarbon ? $d->format('d M Y') : ($d ?: '-') }}
                                     </span>
 
+                                {{-- STATUS (editable; simpan setelah konfirmasi) --}}
                                 @elseif ($field === 'internship_status')
                                     @php
                                         $map = [
@@ -189,6 +194,7 @@
                                             {{ $labelStatus }}
                                         </span>
 
+                                        {{-- form untuk ambil action (AJAX) --}}
                                         <form action="{{ route('admin.interns.status.update', $r) }}" class="inline status-form-row">
                                             @csrf
                                             @method('PATCH')
@@ -205,6 +211,7 @@
                                         </form>
                                     </div>
 
+                                {{-- STATUS SAAT INI --}}
                                 @elseif ($field === 'current_status')
                                     @php
                                         $csMap = [
@@ -217,9 +224,11 @@
                                         {{ $val }}
                                     </span>
 
+                                {{-- nowrap --}}
                                 @elseif (in_array($field, ['email','student_id','phone_number','gender','social_media_instagram'], true))
                                     <span class="whitespace-nowrap">{{ $val }}</span>
 
+                                {{-- default --}}
                                 @else
                                     <span class="block max-w-[18rem] truncate" title="{{ is_string($val) ? $val : '' }}">
                                         {{ $val }}
@@ -246,9 +255,20 @@
 
 </div>
 
-{{-- Script: kumpulkan perubahan -> konfirmasi -> simpan semua (AJAX) --}}
+{{-- Script: kumpulkan perubahan -> konfirmasi -> simpan semua (AJAX) + clamp scroll kanan --}}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  // ====== Clamp scroll kanan agar tidak bisa melewati kolom terakhir ======
+  const wrap = document.getElementById('tableWrap');
+  if (wrap) {
+    wrap.scrollLeft = 0;
+    wrap.addEventListener('scroll', () => {
+      const max = wrap.scrollWidth - wrap.clientWidth;
+      if (wrap.scrollLeft > max) wrap.scrollLeft = max;
+      if (wrap.scrollLeft < 0) wrap.scrollLeft = 0;
+    }, { passive: true });
+  }
+
   const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
   const statusMap = {
@@ -259,7 +279,9 @@ document.addEventListener('DOMContentLoaded', () => {
     pending:   {label:'Pending',        cls:'bg-amber-100 text-amber-800 dark:bg-amber-600/20 dark:text-amber-300'},
   };
 
+  // Simpan perubahan sementara: Map<id, {id,name,from,to,url,select,badge}>
   const pending = new Map();
+
   const pendingBar   = document.getElementById('pendingBar');
   const pendingCount = document.getElementById('pendingCount');
   const saveAllBtn   = document.getElementById('saveAll');
@@ -278,6 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sel.classList.toggle('bg-amber-50', active);
   }
 
+  // Buat FormData PATCH (stabil di Laravel)
   async function patchForm(url, fields) {
     const fd = new FormData();
     fd.append('_method', 'PATCH');
@@ -291,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return res;
   }
 
+  // Kumpulkan perubahan ketika select berubah (belum dikirim)
   document.querySelectorAll('.status-select-row').forEach(sel => {
     sel.addEventListener('change', function(){
       const form  = this.closest('form');
@@ -314,19 +338,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Batalkan semua perubahan yang belum disimpan
   discardBtn.addEventListener('click', () => {
     pending.forEach(({select, from}) => {
       select.value = from;
-      select.disabled = false;
+      select.disabled = false; // pastikan aktif lagi
       markSelect(select, false);
     });
     pending.clear();
     updatePendingBar();
   });
 
+  // Simpan semua perubahan (konfirmasi dulu)
   saveAllBtn.addEventListener('click', async () => {
     if (pending.size === 0) return;
 
+    // Ringkas pesan konfirmasi
     const items = Array.from(pending.values())
       .slice(0, 5)
       .map(p => `• ${p.name}: ${statusMap[p.from]?.label || p.from} → ${statusMap[p.to]?.label || p.to}`)
@@ -335,30 +362,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const ok = confirm(`Simpan ${pending.size} perubahan status?\n\n${items}${more}`);
     if (!ok) return;
 
+    // Kunci UI sementara
     saveAllBtn.disabled = true;
 
     let success = 0, failed = 0;
 
+    // Kirim satu per satu (gunakan endpoint per baris)
     for (const p of pending.values()) {
       p.select.disabled = true;
       try {
         const res = await patchForm(p.url, { internship_status: p.to });
         if (!res.ok) throw new Error(await res.text());
+        // update dataset.current & badge
         p.select.dataset.current = p.to;
         if (p.badge) {
           p.badge.className = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ' + (statusMap[p.to]?.cls || '');
           p.badge.textContent = statusMap[p.to]?.label || p.to;
         }
         markSelect(p.select, false);
-        p.select.disabled = false;
+        p.select.disabled = false; // aktifkan kembali setelah sukses
         success++;
       } catch (_) {
+        // tetap aktif untuk diperbaiki
         p.select.disabled = false;
         markSelect(p.select, true);
         failed++;
       }
     }
 
+    // Bersihkan pending untuk yang sukses
     Array.from(pending.keys()).forEach(id => {
       const entry = pending.get(id);
       if (entry && entry.select.dataset.current === entry.to) pending.delete(id);
@@ -370,6 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
     alert(`Selesai.\nBerhasil: ${success}\nGagal: ${failed}${failed ? '\nCoba ulang untuk yang gagal.' : ''}`);
   });
 
+  // Peringatan jika ada perubahan belum disimpan saat mau menutup/refresh
   window.addEventListener('beforeunload', (e) => {
     if (pending.size > 0) {
       e.preventDefault();

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark overflow-x-hidden">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,7 +7,6 @@
     <meta name="author" content="#">
     <meta name="generator" content="Laravel">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
 
     <title>Dashboard - </title>
     @vite(['resources/css/app.css','resources/js/app.js'])
@@ -55,12 +54,13 @@
 @php
     $whiteBg = isset($params['white_bg']) && $params['white_bg'];
 @endphp
-<body class="{{ $whiteBg ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800' }}">
+<body class="{{ $whiteBg ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800' }} overflow-x-hidden">
     <x-navbar-dashboard/>
     <div class="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900">
         <x-sidebar.admin-sidebar/>
-        <div id="main-content" class="relative w-full h-full overflow-y-auto bg-gray-50 lg:ml-64 dark:bg-gray-900">
-            <main>
+        <!-- Penting: min-w-0 & overflow-x-hidden agar konten lebar tidak membuat scrollbar global -->
+        <div id="main-content" class="relative w-full h-full min-w-0 overflow-y-auto overflow-x-hidden bg-gray-50 lg:ml-64 dark:bg-gray-900">
+            <main class="min-w-0">
                 @yield('content')
             </main>
             <x-footer-dashboard/>
