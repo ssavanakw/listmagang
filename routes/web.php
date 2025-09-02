@@ -18,6 +18,8 @@ use App\Http\Controllers\Admin\InternApiController;     // return JSON
 |--------------------------------------------------------------------------
 */
 
+Route::view('/certificate', 'certificate');
+
 // ============ Guest / Internship ============
 Route::get('/', [PublicRegController::class, 'create'])->name('internship.form');
 Route::post('/internship/store', [PublicRegController::class, 'store'])->name('internship.store');
@@ -54,9 +56,13 @@ Route::prefix('admin')->group(function () {
             Route::patch('/{intern}/status', [InternController::class, 'updateStatus'])->name('admin.interns.status.update');
             Route::patch('/bulk/status',     [InternController::class, 'bulkUpdateStatus'])->name('admin.interns.status.bulk');
 
-            // PDF Sertifikat
+            // PDF Sertifikat (DomPDF - cepat, tanpa JS canvas)
             Route::get('/{intern}/certificate', [InternController::class, 'certificate'])
                 ->name('admin.interns.certificate');
+
+            // PDF Sertifikat (Identik - Headless Chrome/Browsershot, render JS/canvas)
+            Route::get('/{intern}/certificate.pdf', [InternController::class, 'certificatePdf'])
+                ->name('admin.interns.certificate.pdf');
         });
 
         // ===== API JSON untuk tabel =====

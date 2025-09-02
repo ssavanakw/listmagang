@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
       credentials: 'same-origin'
     });
     if (!res.ok) {
-      const t = await res.text().catch(()=>'');
+      const t = await res.text().catch(()=> '');
       throw new Error(t || `HTTP ${res.status}`);
     }
     return res;
@@ -495,11 +495,18 @@ document.addEventListener('DOMContentLoaded', () => {
           </td>
           ${SCOPE === 'completed'
             ? `<td class="px-3 py-2 align-top">
-                  <a href="${it.certificate_url}"
-                    class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs
-                            hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
-                    Download
-                  </a>
+                  ${ (it.certificate_pdf_url || it.certificate_url)
+                    ? `
+                      <div class="flex items-center gap-2">
+                        <a href="${it.certificate_pdf_url || it.certificate_url}"
+                           class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                           title="Unduh PDF yang identik (render JS/canvas)">
+                          Download PDF
+                        </a>
+  
+                      </div>
+                    `
+                    : '<span class="text-gray-400">-</span>' }
               </td>`
             : ''
           }
@@ -644,10 +651,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const url = `${API_URL}?${params.toString()}`;
-      const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      const res = await fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin'
+      });
+      if (!res.ok) {
+        const txt = await res.text().catch(()=> '');
+        throw new Error(`HTTP ${res.status} ${res.statusText} ${txt}`);
+      }
       const json = await res.json();
       renderRows(json);
     } catch (e) {
+      console.error('Gagal memuat /admin/interns.json:', e);
       rowsEl.innerHTML = `
         <tr>
           <td colspan="{{ count($fields) + 1 }}" class="px-6 py-6 text-center text-rose-600">

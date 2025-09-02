@@ -64,23 +64,58 @@ class InternApiController extends Controller
     ];
 
     private array $mapInterest = [
-        'project-manager'         => 'Manajer Proyek',
-        'administration'          => 'Administrasi',
-        'hr'                      => 'Sumber Daya Manusia (HR)',
-        'uiux'                    => 'UI/UX',
-        'programmer'              => 'Programmer (Front End / Backend)',
-        'photographer'            => 'Fotografer',
-        'videographer'            => 'Videografer',
-        'graphic-designer'        => 'Desainer Grafis',
-        'social-media-specialist' => 'Spesialis Media Sosial',
-        'content-writer'          => 'Penulis Konten',
-        'content-planner'         => 'Perencana Konten',
-        'marketing-and-sales'     => 'Penjualan & Pemasaran',
-        'public-relation'         => 'Hubungan Masyarakat (Marcomm)',
-        'digital-marketing'       => 'Pemasaran Digital',
-        'tiktok-creator'          => 'Kreator TikTok',
-        'welding'                 => 'Pengelasan',
-        'customer-service'        => 'Layanan Pelanggan',
+    // Slug + alias Indonesia  => English label
+    'project-manager'                  => 'Project Manager',
+    'manajer proyek'                  => 'Project Manager',
+
+    'administration'                  => 'Administration',
+    'administrasi'                    => 'Administration',
+
+    'hr'                               => 'Human Resources (HR)',
+    'sumber daya manusia (hr)'         => 'Human Resources (HR)',
+
+    'uiux'                             => 'UI/UX',
+    'ui/ux'                            => 'UI/UX',
+
+    'programmer'                       => 'Programmer (Front End / Backend)',
+    'programmer (front end / backend)' => 'Programmer (Front End / Backend)',
+
+    'photographer'                     => 'Photographer',
+    'fotografer'                       => 'Photographer',
+
+    'videographer'                     => 'Videographer',
+    'videografer'                      => 'Videographer',
+
+    'graphic-designer'                 => 'Graphic Designer',
+    'desainer grafis'                  => 'Graphic Designer',
+
+    'social-media-specialist'          => 'Social Media Specialist',
+    'spesialis media sosial'           => 'Social Media Specialist',
+
+    'content-writer'                   => 'Content Writer',
+    'penulis konten'                   => 'Content Writer',
+
+    'content-planner'                  => 'Content Planner',
+    'perencana konten'                 => 'Content Planner',
+
+    'marketing-and-sales'              => 'Sales & Marketing',
+    'penjualan & pemasaran'            => 'Sales & Marketing',
+    'penjualan dan pemasaran'          => 'Sales & Marketing',
+
+    'public-relation'                  => 'Public Relations (Marcomm)',
+    'hubungan masyarakat (marcomm)'    => 'Public Relations (Marcomm)',
+
+    'digital-marketing'                => 'Digital Marketing',
+    'pemasaran digital'                => 'Digital Marketing',
+
+    'tiktok-creator'                   => 'TikTok Creator',
+    'kreator tiktok'                   => 'TikTok Creator',
+
+    'welding'                          => 'Welding',
+    'pengelasan'                       => 'Welding',
+
+    'customer-service'                 => 'Customer Service',
+    'layanan pelanggan'                => 'Customer Service',
     ];
 
     // Yes/No umum → Ya/Tidak (INFO KOST & SUDAH BERKELUARGA)
@@ -225,12 +260,17 @@ class InternApiController extends Controller
         // Paginate
         $p = $q->paginate($perPage)->appends($req->query());
 
-        // Map data → ubah slug jadi label ID; start/end date dinormalisasi ke Y-m-d untuk tampilan
+        // Map data → tambah certificate_pdf_url (Browsershot) + aman-kan hanya untuk completed
         $rows = array_map(function (IR $r) {
+            $canCert = $r->internship_status === IR::STATUS_COMPLETED;
+
             return [
                 'id'            => $r->id,
                 'fullname'      => $r->fullname,
-                'born_date'     => $r->born_date, // string apa adanya
+
+                // Biarkan born_date tampil apa adanya (string "YYYY-MM-DD" jika tersimpan begitu)
+                'born_date'     => $this->formatIndoDateOut($r->born_date),
+
                 'student_id'    => preg_replace('/^(NIM|NIS)\s*/i', '', (string) $r->student_id),
                 'email'         => $r->email,
                 'internship_status' => $r->internship_status,
@@ -262,9 +302,9 @@ class InternApiController extends Controller
                 'owned_tools'      => $this->labelizeList($this->mapTools, $r->owned_tools),
                 'owned_tools_other'=> $r->owned_tools_other,
 
-                // >>> Normalisasi tampilan ke Y-m-d meski di DB/ISO lengkap
-                'start_date'       => $r->start_date,
-                'end_date'         => $r->end_date,
+                // 👇 Perbaikan inti: tampilkan MULAI & SELESAI dengan format Indonesia "d F Y"
+                'start_date'       => $this->formatIndoDateOut($r->start_date),
+                'end_date'         => $this->formatIndoDateOut($r->end_date),
 
                 'internship_info_sources' => $r->internship_info_sources,
                 'internship_info_other'   => $r->internship_info_other,
@@ -280,7 +320,9 @@ class InternApiController extends Controller
 
                 'created_at'              => optional($r->created_at)->format('Y-m-d'),
 
-                'certificate_url'         => route('admin.interns.certificate', $r),
+                // URL sertifikat: hanya untuk yang selesai
+                'certificate_url'         => $canCert ? route('admin.interns.certificate', $r) : null,          // DomPDF (ringan)
+                'certificate_pdf_url'     => $canCert ? route('admin.interns.certificate.pdf', $r) : null,      // Headless Chrome (identik)
                 'status_update_url'       => route('admin.interns.status.update', $r),
             ];
         }, $p->items());
@@ -305,8 +347,6 @@ class InternApiController extends Controller
     /**
      * Konversi input tanggal bebas menjadi kandidat 'Y-m-d'.
      * Dukung: YYYY-MM-DD, DD-MM-YYYY, DD/MM/YYYY, YYYYMMDD.
-     * (Dipakai untuk filter query dari user)
-     * @return array<string>
      */
     private function parseDateCandidates(string $s): array
     {
@@ -343,7 +383,7 @@ class InternApiController extends Controller
     }
 
     /**
-     * Normalisasi NILAI DARI DB/API (ISO/Unix/string) ke Y-m-d untuk OUTPUT tampilan.
+     * Normalisasi nilai (ISO/Unix/string) ke Y-m-d.
      * Jika gagal parse, kembalikan string apa adanya.
      */
     private function normalizeYmdOut($v): ?string
@@ -353,6 +393,25 @@ class InternApiController extends Controller
             return Carbon::parse($v)->format('Y-m-d');
         } catch (\Throwable $e) {
             return is_string($v) ? $v : null;
+        }
+    }
+
+    /**
+     * Format tanggal ke Indonesia (d F Y), contoh: "08 Juni 2025".
+     * Jika tidak bisa di-parse, kembalikan string aslinya (apa adanya).
+     */
+    private function formatIndoDateOut($v): ?string
+    {
+        if ($v === null || $v === '') return null;
+        try {
+            $d = Carbon::parse($v);
+            $bulan = [
+                'Januari','Februari','Maret','April','Mei','Juni',
+                'Juli','Agustus','September','Oktober','November','Desember'
+            ];
+            return $d->format('d') . ' ' . $bulan[$d->month - 1] . ' ' . $d->format('Y');
+        } catch (\Throwable $e) {
+            return is_string($v) ? trim($v) : null;
         }
     }
 

@@ -49,74 +49,78 @@ class InternshipRegistration extends Model
     ];
 
     /* ============================================================
-     |  Coercion tanggal yang aman (tidak melempar exception)
+     |  Normalisasi tanggal → string 'Y-m-d' (untuk penyimpanan)
      * ============================================================ */
-    private function tryToCarbon(mixed $value): ?Carbon
+
+    /**
+     * Coba ubah berbagai format tanggal (termasuk "08 Agustus 2022")
+     * menjadi string 'YYYY-MM-DD'. Jika tidak bisa, kembalikan string asli.
+     */
+    private function toYmdString(mixed $value): ?string
     {
-        if ($value === null || $value === '') return null;
+        if ($value === null) return null;
+        $s = trim((string) $value);
+        if ($s === '') return null;
 
-        $value = is_string($value) ? trim($value) : $value;
+        // 1) Format yang sudah benar
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $s)) {
+            return $s;
+        }
 
-        // Coba beberapa format yang umum dipakai form
-        $formats = ['Y-m-d','d-m-Y','d/m/Y','d M Y','d.m.Y','d m Y','m/d/Y','m-d-Y'];
-        foreach ($formats as $f) {
-            try {
-                return Carbon::createFromFormat($f, (string) $value);
-            } catch (\Throwable $e) {
-                // lanjut
+        // 2) DD-MM-YYYY atau DD/MM/YYYY
+        if (preg_match('/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})$/', $s, $m)) {
+            return sprintf('%04d-%02d-%02d', (int)$m[3], (int)$m[2], (int)$m[1]);
+        }
+
+        // 3) "08 Agustus 2022" / "8 agustus 2022"
+        $bulan = [
+            'januari'=>1,'februari'=>2,'maret'=>3,'april'=>4,'mei'=>5,'juni'=>6,
+            'juli'=>7,'agustus'=>8,'september'=>9,'oktober'=>10,'november'=>11,'desember'=>12
+        ];
+        if (preg_match('/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/u', $s, $m)) {
+            $mon = strtolower($m[2]);
+            if (isset($bulan[$mon])) {
+                return sprintf('%04d-%02d-%02d', (int)$m[3], $bulan[$mon], (int)$m[1]);
             }
         }
-        // Terakhir, biarkan Carbon menebak
+
+        // 4) ISO/Datetime → pakai Carbon sebagai fallback
         try {
-            return Carbon::parse((string) $value);
+            return Carbon::parse($s)->format('Y-m-d');
         } catch (\Throwable $e) {
-            return null;
+            // Tidak bisa diparse → biarkan apa adanya
+            return $s;
         }
     }
 
-    /** born_date accessor/mutator aman */
+    /* ============================================================
+     |  Accessor/Mutator: SELALU kembalikan STRING, bukan Carbon
+     * ============================================================ */
+
+    /** born_date: simpan Y-m-d bila bisa, get selalu string apa adanya */
     protected function bornDate(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
-                $c = $this->tryToCarbon($value);
-                // Kembalikan Carbon bila sukses, atau string asli bila gagal
-                return $c ?: $value;
-            },
-            set: function ($value) {
-                $c = $this->tryToCarbon($value);
-                return $c ? $c->format('Y-m-d') : $value;
-            }
+            get: fn ($value) => is_string($value) ? $value : (string) $value,
+            set: fn ($value) => $this->toYmdString($value)
         );
     }
 
-    /** start_date accessor/mutator aman */
+    /** start_date: simpan Y-m-d bila bisa, get selalu string apa adanya */
     protected function startDate(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
-                $c = $this->tryToCarbon($value);
-                return $c ?: $value;
-            },
-            set: function ($value) {
-                $c = $this->tryToCarbon($value);
-                return $c ? $c->format('Y-m-d') : $value;
-            }
+            get: fn ($value) => is_string($value) ? $value : (string) $value,
+            set: fn ($value) => $this->toYmdString($value)
         );
     }
 
-    /** end_date accessor/mutator aman */
+    /** end_date: simpan Y-m-d bila bisa, get selalu string apa adanya */
     protected function endDate(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
-                $c = $this->tryToCarbon($value);
-                return $c ?: $value;
-            },
-            set: function ($value) {
-                $c = $this->tryToCarbon($value);
-                return $c ? $c->format('Y-m-d') : $value;
-            }
+            get: fn ($value) => is_string($value) ? $value : (string) $value,
+            set: fn ($value) => $this->toYmdString($value)
         );
     }
 
@@ -128,7 +132,6 @@ class InternshipRegistration extends Model
         return $query->where('internship_status', $status);
     }
 
-    // Hindari nama "new" (reserved-ish). Pakai isNew.
     public function scopeIsNew($query)     { return $query->status(self::STATUS_NEW); }
     public function scopeActive($query)    { return $query->status(self::STATUS_ACTIVE); }
     public function scopeCompleted($query) { return $query->status(self::STATUS_COMPLETED); }

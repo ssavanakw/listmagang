@@ -204,10 +204,7 @@
             <h3 class="{{ $label }}">Program Magang/PKL yang diminati</h3>
             <ul class="{{ $group }}">
               @foreach ([
-                'Manajer Proyek','Administrasi','Sumber Daya Manusia (HR)','UI/UX',
-                'Programmer (Front End / Backend)','Fotografer','Videografer','Desainer Grafis',
-                'Spesialis Media Sosial','Penulis Konten','Perencana Konten','Penjualan & Pemasaran',
-                'Hubungan Masyarakat (Marcomm)','Pemasaran Digital','Kreator TikTok','Pengelasan','Layanan Pelanggan'
+                      'Project Manager', 'Administration', 'Human Resources (HR)', 'UI/UX', 'Programmer (Front End / Backend)', 'Photographer', 'Videographer', 'Graphic Designer', 'Social Media Specialist', 'Content Writer', 'Content Planner', 'Sales & Marketing', 'Public Relations (Marcomm)', 'Digital Marketing', 'TikTok Creator', 'Welding', 'Customer Service'
               ] as $labelText)
                 <li class="border-b last:border-0 border-zinc-200 dark:border-zinc-800">
                   <label class="{{ $item }}">
