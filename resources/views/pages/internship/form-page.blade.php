@@ -47,7 +47,7 @@
           <!-- NIM/NIS -->
           <div>
             <label for="student_id" class="{{ $label }}">Nomor Induk Mahasiswa / Siswa</label>
-            <input type="text" id="student_id" name="student_id" placeholder="Contoh: 21.11.1234" required class="{{ $input }}" />
+            <input type="text" id="student_id" name="student_id" placeholder="21111234" required class="{{ $input }}" />
           </div>
 
           <!-- Email -->
@@ -78,25 +78,25 @@
           <!-- Telepon -->
           <div>
             <label for="phone_number" class="{{ $label }}">No. HP Aktif (WhatsApp)</label>
-            <input type="text" id="phone_number" name="phone_number" placeholder="08xx xxxx xxxx" required class="{{ $input }}" />
+            <input type="text" id="phone_number" name="phone_number" placeholder="08xxxxxxxxxx" required class="{{ $input }}" />
           </div>
 
           <!-- Institusi -->
           <div>
             <label for="institution_name" class="{{ $label }}">Asal Sekolah/Kampus</label>
-            <input type="text" id="institution_name" name="institution_name" placeholder="Nama institusi" required class="{{ $input }}" />
+            <input type="text" id="institution_name" name="institution_name" placeholder="SMA Negeri 1/Amikom Yogyakarta" required class="{{ $input }}" />
           </div>
 
           <!-- Prodi -->
           <div>
             <label for="study_program" class="{{ $label }}">Program Studi</label>
-            <input type="text" id="study_program" name="study_program" placeholder="Program studi" required class="{{ $input }}" />
+            <input type="text" id="study_program" name="study_program" placeholder="Teknik Informatika" required class="{{ $input }}" />
           </div>
 
           <!-- Fakultas -->
           <div>
             <label for="faculty" class="{{ $label }}">Fakultas</label>
-            <input type="text" id="faculty" name="faculty" placeholder="Fakultas" required class="{{ $input }}" />
+            <input type="text" id="faculty" name="faculty" placeholder="Ilmu Komputer" required class="{{ $input }}" />
           </div>
 
           <!-- Kota -->
@@ -240,7 +240,7 @@
               Jika minat <strong>Desain Grafis</strong> / <strong>UI/UX</strong>, software apa yang dikuasai?
               <span class="{{ $help }}">(Jika bukan, isi “-”)</span>
             </label>
-            <input id="design_software" name="design_software" placeholder="Contoh: Figma, Photoshop" required class="{{ $input }}" />
+            <input id="design_software" name="design_software" placeholder="Figma, Photoshop" required class="{{ $input }}" />
           </div>
 
           <!-- Digital Marketing: materi -->
@@ -249,7 +249,7 @@
               Jika minat <strong>Digital Marketing</strong>, materi apa yang ingin dipraktikkan?
               <span class="{{ $help }}">(Jika bukan, isi “-”)</span>
             </label>
-            <input id="video_software" name="video_software" placeholder="Contoh: Konten organik, Iklan, SEO" required class="{{ $input }}" />
+            <input id="video_software" name="video_software" placeholder="Konten organik, Iklan, SEO" required class="{{ $input }}" />
           </div>
 
           <!-- Bahasa Pemrograman -->
@@ -258,7 +258,7 @@
               Jika minat <strong>Programmer</strong>, bahasa pemrograman yang dikuasai?
               <span class="{{ $help }}">(Jika bukan, isi “-”)</span>
             </label>
-            <input id="programming_languages" name="programming_languages" placeholder="Contoh: PHP, JS, Python" required class="{{ $input }}" />
+            <input id="programming_languages" name="programming_languages" placeholder="PHP, JS, Python" required class="{{ $input }}" />
           </div>
 
           <!-- Tipe Digital Marketing (value Indonesia) -->
@@ -348,9 +348,9 @@
               <span class="{{ $help }}">Tulis lengkap tanggal, bulan, tahun & durasi (contoh: 10 September 2025)</span>
             </label>
             <div class="flex flex-col sm:flex-row items-center gap-4">
-              <input id="start_date" type="text" name="start_date" value="{{ request('start_date') }}" class="{{ $input }}" placeholder="Tanggal mulai (contoh: 10 September 2025)">
+              <input id="start_date" type="text" name="start_date" value="{{ request('start_date') }}" class="{{ $input }}" placeholder="Tanggal mulai (10 September 2025)">
               <span class="text-zinc-700 dark:text-zinc-300">s/d</span>
-              <input id="end_date" type="text" name="end_date" value="{{ request('end_date') }}" class="{{ $input }}" placeholder="Tanggal selesai (contoh: 10 Desember 2025)">
+              <input id="end_date" type="text" name="end_date" value="{{ request('end_date') }}" class="{{ $input }}" placeholder="Tanggal selesai (10 Desember 2025)">
             </div>
           </div>
 
@@ -439,13 +439,13 @@
           <!-- WA Ortu -->
           <div>
             <label for="parent-wa-contact" class="{{ $label }}">No. HP Aktif (WA) Wali / Ortu</label>
-            <input id="parent-wa-contact" name="parent_wa_contact" placeholder="0812 1111 8888 (Bapak Adi Pangestu)" class="{{ $input }}" />
+            <input id="parent-wa-contact" name="parent_wa_contact" placeholder="08xxxxxxxxxx (Bapak Budi)" class="{{ $input }}" />
           </div>
 
           <!-- Instagram -->
           <div>
             <label for="social-media-link" class="{{ $label }}">Sosial Media (Instagram)</label>
-            <input id="social-media-link" name="social_media_instagram" placeholder="username / link profil" class="{{ $input }}" />
+            <input id="social-media-link" name="social_media_instagram" placeholder="cakwlive" class="{{ $input }}" />
           </div>
 
           <!-- Info unpaid -->

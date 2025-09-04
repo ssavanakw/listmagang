@@ -7,9 +7,9 @@ use App\Models\InternshipRegistration as IR;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class InternController extends Controller
 {
@@ -193,26 +193,7 @@ class InternController extends Controller
         return back()->with('success', 'Berkas berhasil diperbarui.');
     }
 
-    /**
-     * (Opsional) DomPDF versi ringan (bukan canvas/JS).
-     */
-    public function certificate(IR $intern)
-    {
-        if ($intern->internship_status !== IR::STATUS_COMPLETED) {
-            abort(403, 'Sertifikat hanya tersedia untuk pemagang yang sudah selesai.');
-        }
-
-        // Ganti 'interns.certificates' dengan view DomPDF kamu jika ada
-        $pdf = Pdf::loadView('interns.certificates', compact('intern'))
-            ->setPaper('a4', 'landscape');
-
-        $safeName = preg_replace('/[^A-Za-z0-9_\- ]+/', '', $intern->fullname);
-        $filename = "Sertifikat_{$safeName}.pdf";
-
-        return $pdf->download($filename);
-    }
-
-    /**
+        /**
      * Spatie Browsershot — render JS/canvas → PDF 1 halaman (full-bleed).
      * GET /admin/interns/{intern}/certificate.pdf
      */
@@ -222,31 +203,70 @@ class InternController extends Controller
             abort(403, 'Sertifikat hanya tersedia untuk pemagang yang sudah selesai.');
         }
 
-        // Render Blade yang berisi canvas
-        $html = view('certificate', compact('intern'))->render();
+        // 1) Payload ke JS (pakai Y-m-d agar fungsi parse di kanvas akurat)
+        $certPayload = [
+            'name'       => (string) $intern->fullname,
+            'role'       => (string) $intern->internship_interest,
+            'start_date' => $intern->start_date ? Carbon::parse($intern->start_date)->format('Y-m-d') : null,
+            'end_date'   => $intern->end_date   ? Carbon::parse($intern->end_date)->format('Y-m-d')   : null,
+            'city'       => (string) $intern->current_city,
+            'issued'     => $intern->end_date   ? Carbon::parse($intern->end_date)->format('Y-m-d')   : null,
+        ];
 
+        // 2) URL aset gambar dari storage:link → /storage/...
+        //    Ubah nama file sesuai yang kamu pakai di storage/app/public/images/
+        $files = [
+            'logo_left'  => 'images/logo_left.png',
+            'logo_right' => 'images/logo_right.png',
+            'sig_left'   => 'images/ttd_hr.png',
+            'sig_right'  => 'images/ttd_owner.png',
+        ];
+
+        $certAssets = [];
+        foreach ($files as $key => $relPath) {
+            $certAssets[$key] = Storage::disk('public')->exists($relPath)
+                ? asset('storage/' . $relPath)   // absolut URL, bisa diakses Chromium
+                : null;                          // biarkan null → fallback teks/vektor di kanvas
+        }
+
+        // 3) Render Blade sertifikat dengan kedua variabel ini
+        //    Di Blade, pastikan ada:
+        //    <script>window.__CERT__=@json($certPayload);</script>
+        //    <script>window.__ASSETS__=@json($certAssets);</script>
+        $html = view('certificate', [
+            'intern'      => $intern,
+            'certPayload' => $certPayload,
+            'certAssets'  => $certAssets,
+        ])->render();
+
+        // 4) Siapkan file keluaran
         $safeName = trim(preg_replace('/[^A-Za-z0-9_\- ]+/', '', (string) $intern->fullname)) ?: 'Pemagang';
         $filename = 'Sertifikat_' . Str::slug($safeName, '_') . '.pdf';
-
         $dir  = storage_path('app/public/certificates');
         if (!is_dir($dir)) { @mkdir($dir, 0775, true); }
         $path = $dir . DIRECTORY_SEPARATOR . $filename;
 
+        // 5) Browsershot
         $bs = Browsershot::html($html)
-            ->showBackground()                         // warna & bg
-            ->margins(0, 0, 0, 0)                      // no margin
-            ->setOption('printBackground', true)       // jaga warna
-            ->setOption('preferCSSPageSize', true)     // IKUTI @page size 1123x794
-            ->emulateMedia('print')                    // gunakan CSS print
-            ->windowSize(1123, 794)                    // viewport pas
-            ->deviceScaleFactor(2)                     // tajam
-            ->waitForFunction('window.__CERT_READY === true') // tunggu canvas selesai
+            ->showBackground()
+            ->margins(0, 0, 0, 0)
+            ->setOption('printBackground', true)
+            ->setOption('preferCSSPageSize', true)
+            ->emulateMedia('print')
+            ->windowSize(1123, 794)
+            ->deviceScaleFactor(2)
+            // Tunggu kanvas selesai (flag dari script: window.__CERT_READY = true)
+            ->waitForFunction('window.__CERT_READY === true')
+            // Opsional: tunggu jaringan idle agar gambar logo/ttd tersedot tuntas
+            ->setOption('waitUntil', 'networkidle0')
+            // Base URL membantu Chromium resolve resource relatif (jika ada)
+            ->setOption('baseURL', config('app.url'))
             ->timeout(120);
 
         if ($chromePath = env('BROWSERSHOT_CHROME_PATH')) {
             $bs->setChromePath($chromePath);
         }
-        // Jika server perlu:
+        // Jika perlu di server:
         // $bs->addChromiumArguments(['--no-sandbox','--disable-setuid-sandbox']);
 
         $bs->savePdf($path);

@@ -64,58 +64,58 @@ class InternApiController extends Controller
     ];
 
     private array $mapInterest = [
-    // Slug + alias Indonesia  => English label
-    'project-manager'                  => 'Project Manager',
-    'manajer proyek'                  => 'Project Manager',
+        // Slug/ID  → Label en/ID (ditampilkan yang kanan)
+        'project-manager'                  => 'Project Manager',
+        'manajer proyek'                   => 'Project Manager',
 
-    'administration'                  => 'Administration',
-    'administrasi'                    => 'Administration',
+        'administration'                   => 'Administration',
+        'administrasi'                     => 'Administration',
 
-    'hr'                               => 'Human Resources (HR)',
-    'sumber daya manusia (hr)'         => 'Human Resources (HR)',
+        'hr'                               => 'Human Resources (HR)',
+        'sumber daya manusia (hr)'         => 'Human Resources (HR)',
 
-    'uiux'                             => 'UI/UX',
-    'ui/ux'                            => 'UI/UX',
+        'uiux'                             => 'UI/UX',
+        'ui/ux'                            => 'UI/UX',
 
-    'programmer'                       => 'Programmer (Front End / Backend)',
-    'programmer (front end / backend)' => 'Programmer (Front End / Backend)',
+        'programmer'                       => 'Programmer (Front End / Backend)',
+        'programmer (front end / backend)' => 'Programmer (Front End / Backend)',
 
-    'photographer'                     => 'Photographer',
-    'fotografer'                       => 'Photographer',
+        'photographer'                     => 'Photographer',
+        'fotografer'                       => 'Photographer',
 
-    'videographer'                     => 'Videographer',
-    'videografer'                      => 'Videographer',
+        'videographer'                     => 'Videographer',
+        'videografer'                      => 'Videographer',
 
-    'graphic-designer'                 => 'Graphic Designer',
-    'desainer grafis'                  => 'Graphic Designer',
+        'graphic-designer'                 => 'Graphic Designer',
+        'desainer grafis'                  => 'Graphic Designer',
 
-    'social-media-specialist'          => 'Social Media Specialist',
-    'spesialis media sosial'           => 'Social Media Specialist',
+        'social-media-specialist'          => 'Social Media Specialist',
+        'spesialis media sosial'           => 'Social Media Specialist',
 
-    'content-writer'                   => 'Content Writer',
-    'penulis konten'                   => 'Content Writer',
+        'content-writer'                   => 'Content Writer',
+        'penulis konten'                   => 'Content Writer',
 
-    'content-planner'                  => 'Content Planner',
-    'perencana konten'                 => 'Content Planner',
+        'content-planner'                  => 'Content Planner',
+        'perencana konten'                 => 'Content Planner',
 
-    'marketing-and-sales'              => 'Sales & Marketing',
-    'penjualan & pemasaran'            => 'Sales & Marketing',
-    'penjualan dan pemasaran'          => 'Sales & Marketing',
+        'marketing-and-sales'              => 'Sales & Marketing',
+        'penjualan & pemasaran'            => 'Sales & Marketing',
+        'penjualan dan pemasaran'          => 'Sales & Marketing',
 
-    'public-relation'                  => 'Public Relations (Marcomm)',
-    'hubungan masyarakat (marcomm)'    => 'Public Relations (Marcomm)',
+        'public-relation'                  => 'Public Relations (Marcomm)',
+        'hubungan masyarakat (marcomm)'    => 'Public Relations (Marcomm)',
 
-    'digital-marketing'                => 'Digital Marketing',
-    'pemasaran digital'                => 'Digital Marketing',
+        'digital-marketing'                => 'Digital Marketing',
+        'pemasaran digital'                => 'Digital Marketing',
 
-    'tiktok-creator'                   => 'TikTok Creator',
-    'kreator tiktok'                   => 'TikTok Creator',
+        'tiktok-creator'                   => 'TikTok Creator',
+        'kreator tiktok'                   => 'TikTok Creator',
 
-    'welding'                          => 'Welding',
-    'pengelasan'                       => 'Welding',
+        'welding'                          => 'Welding',
+        'pengelasan'                       => 'Welding',
 
-    'customer-service'                 => 'Customer Service',
-    'layanan pelanggan'                => 'Customer Service',
+        'customer-service'                 => 'Customer Service',
+        'layanan pelanggan'                => 'Customer Service',
     ];
 
     // Yes/No umum → Ya/Tidak (INFO KOST & SUDAH BERKELUARGA)
@@ -159,9 +159,9 @@ class InternApiController extends Controller
     {
         $scope   = $req->get('scope', 'all');
         $perPage = (int) $req->get('per_page', 15);
-        $perPage = $perPage > 0 ? $perPage : 15;
+        $perPage = $perPage > 0 ? min($perPage, 100) : 15;
 
-        // Kolom yang ikut di-search
+        // Kolom yang ikut di-search (sinkron dengan kolom di Blade)
         $searchable = [
             'fullname','born_date','student_id','email','gender','phone_number',
             'institution_name','study_program','faculty','current_city',
@@ -181,37 +181,46 @@ class InternApiController extends Controller
 
         $q = IR::query();
 
-        // Scope
+        // Scope status
         if ($scope !== 'all') {
             $q->where('internship_status', $scope);
         }
 
-        // ========== GLOBAL SEARCH ==========
+        // ========== GLOBAL SEARCH (semua kolom) ==========
         if ($req->filled('q')) {
-            $raw = trim($req->get('q'));
-            $needle = $raw;
-            $needleLower = Str::lower($raw);
+            $raw    = trim($req->get('q'));
+            $tokens = preg_split('/\s+/', $raw, -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
-            $genderCandidates = $this->normalizeGenderKeywords($needleLower);
+            // Semua token HARUS match (AND antar token), tapi tiap token boleh match di kolom manapun (OR antar kolom)
+            $q->where(function ($outer) use ($tokens, $searchable) {
+                foreach ($tokens as $token) {
+                    $tokLower = Str::lower($token);
+                    $genderCandidates = $this->normalizeGenderKeywords($tokLower);
+                    $dateCandidates   = $this->parseDateCandidates($token);
 
-            $q->where(function ($qq) use ($searchable, $needle, $genderCandidates) {
-                foreach ($searchable as $col) {
-                    if ($col === 'created_at') {
-                        $dates = $this->parseDateCandidates($needle);
-                        foreach ($dates as $d) $qq->orWhereDate('created_at', '=', $d);
-                        $qq->orWhere('created_at', 'like', "%{$needle}%");
-                        continue;
-                    }
-                    if ($col === 'gender' && !empty($genderCandidates)) {
-                        foreach ($genderCandidates as $g) $qq->orWhere('gender', 'like', "%{$g}%");
-                        continue;
-                    }
-                    $qq->orWhere($col, 'like', "%{$needle}%");
+                    $outer->where(function ($inner) use ($searchable, $token, $genderCandidates, $dateCandidates) {
+                        foreach ($searchable as $col) {
+                            if ($col === 'created_at') {
+                                foreach ($dateCandidates as $d) {
+                                    $inner->orWhereDate('created_at', '=', $d);
+                                }
+                                $inner->orWhere('created_at', 'like', "%{$token}%");
+                                continue;
+                            }
+                            if ($col === 'gender' && !empty($genderCandidates)) {
+                                foreach ($genderCandidates as $g) {
+                                    $inner->orWhere('gender', 'like', "%{$g}%");
+                                }
+                                // tetap izinkan like biasa juga:
+                            }
+                            $inner->orWhere($col, 'like', "%{$token}%");
+                        }
+                    });
                 }
             });
         }
 
-        // ========== ADVANCED FILTERS ==========
+        // ========== ADVANCED FILTERS PER KOLOM ==========
         foreach ($searchable as $col) {
             if (!$req->filled($col)) continue;
             $val = trim($req->get($col));
@@ -232,7 +241,7 @@ class InternApiController extends Controller
             $q->where($col, 'like', "%{$val}%");
         }
 
-        // ========== DATE RANGE FILTERS (string Y-m-d → aman leksikografis) ==========
+        // ========== DATE RANGE FILTERS (Y-m-d) ==========
         if ($req->filled('start_date_from')) {
             $from = $this->normalizeYmdInput($req->get('start_date_from'));
             if ($from) $q->where('start_date', '>=', $from);
@@ -254,21 +263,23 @@ class InternApiController extends Controller
             else $q->where('end_date', 'like', '%'.trim($req->get('end_date_to')).'%');
         }
 
-        // Urutkan terbaru
+        // Urut terbaru
         $q->orderByDesc('created_at');
 
         // Paginate
         $p = $q->paginate($perPage)->appends($req->query());
 
         // Map data → tambah certificate_pdf_url (Browsershot) + aman-kan hanya untuk completed
-        $rows = array_map(function (IR $r) {
-            $canCert = $r->internship_status === IR::STATUS_COMPLETED;
+        $statusCompleted = defined(IR::class.'::STATUS_COMPLETED') ? IR::STATUS_COMPLETED : 'completed';
+
+        $rows = array_map(function (IR $r) use ($statusCompleted) {
+            $canCert = ($r->internship_status === $statusCompleted);
 
             return [
                 'id'            => $r->id,
                 'fullname'      => $r->fullname,
 
-                // Biarkan born_date tampil apa adanya (string "YYYY-MM-DD" jika tersimpan begitu)
+                // Tanggal lahir tetap tampil human-readable Indonesia
                 'born_date'     => $this->formatIndoDateOut($r->born_date),
 
                 'student_id'    => preg_replace('/^(NIM|NIS)\s*/i', '', (string) $r->student_id),
@@ -302,7 +313,7 @@ class InternApiController extends Controller
                 'owned_tools'      => $this->labelizeList($this->mapTools, $r->owned_tools),
                 'owned_tools_other'=> $r->owned_tools_other,
 
-                // 👇 Perbaikan inti: tampilkan MULAI & SELESAI dengan format Indonesia "d F Y"
+                // MULAI & SELESAI → format Indonesia "d F Y"
                 'start_date'       => $this->formatIndoDateOut($r->start_date),
                 'end_date'         => $this->formatIndoDateOut($r->end_date),
 
@@ -318,7 +329,8 @@ class InternApiController extends Controller
                 'cv_ktp_portofolio_pdf'   => $r->cv_ktp_portofolio_pdf ? asset('storage/'.$r->cv_ktp_portofolio_pdf) : null,
                 'portofolio_visual'       => $r->portofolio_visual ? asset('storage/'.$r->portofolio_visual) : null,
 
-                'created_at'              => optional($r->created_at)->format('Y-m-d'),
+                // ISO 8601 → aman diparse di JS (new Date(...))
+                'created_at'              => optional($r->created_at)?->toIso8601String(),
 
                 // URL sertifikat: hanya untuk yang selesai
                 'certificate_url'         => $canCert ? route('admin.interns.certificate', $r) : null,          // DomPDF (ringan)
@@ -380,20 +392,6 @@ class InternApiController extends Controller
     {
         $c = $this->parseDateCandidates($s);
         return $c[0] ?? '';
-    }
-
-    /**
-     * Normalisasi nilai (ISO/Unix/string) ke Y-m-d.
-     * Jika gagal parse, kembalikan string apa adanya.
-     */
-    private function normalizeYmdOut($v): ?string
-    {
-        if ($v === null || $v === '') return null;
-        try {
-            return Carbon::parse($v)->format('Y-m-d');
-        } catch (\Throwable $e) {
-            return is_string($v) ? $v : null;
-        }
     }
 
     /**

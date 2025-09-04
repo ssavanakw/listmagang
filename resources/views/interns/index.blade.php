@@ -51,7 +51,7 @@
         </div>
 
         {{-- Kanan: Search + Pending Bar + Toast --}}
-        <div class="mt-1 flex w-full max-w-[420px] flex-col items-end gap-2">
+        <div class="mt-1 flex w-full max-w-[480px] flex-col items-end gap-2">
             <form id="searchForm" class="w-full">
                 <div class="flex items-center gap-2">
                     <input id="q" type="text" value="{{ request('q') }}"

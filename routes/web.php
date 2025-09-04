@@ -18,7 +18,8 @@ use App\Http\Controllers\Admin\InternApiController;     // return JSON
 |--------------------------------------------------------------------------
 */
 
-Route::view('/certificate', 'certificate');
+// Preview sertifikat statis
+Route::view('/dummycertificate', 'dummycertificate')->name('dummycertificate');
 
 // ============ Guest / Internship ============
 Route::get('/', [PublicRegController::class, 'create'])->name('internship.form');
@@ -29,15 +30,17 @@ Route::get('/internship/table', function () {
     return redirect()->route('admin.interns.index');
 })->name('internship.table');
 
-
 // ============ Admin ============
 Route::prefix('admin')->group(function () {
-    // ---- Auth (tanpa middleware)
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('/login', [AuthController::class, 'login'])->name('admin.login.submit');
 
-    // ---- Protected
-    Route::middleware(['auth', 'role:admin'])->group(function () {
+    // ---- Auth (HANYA untuk tamu/guest) + no-cache supaya Back tidak menampilkan login lama
+    Route::middleware(['guest', 'prevent-back'])->group(function () {
+        Route::get('/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
+        Route::post('/login', [AuthController::class, 'login'])->name('admin.login.submit');
+    });
+
+    // ---- Protected (hanya admin yang sudah login) + no-cache supaya Back tidak menampilkan halaman lama
+    Route::middleware(['auth', 'role:admin', 'prevent-back'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
         // Dashboard + default /admin
@@ -60,13 +63,12 @@ Route::prefix('admin')->group(function () {
             Route::get('/{intern}/certificate', [InternController::class, 'certificate'])
                 ->name('admin.interns.certificate');
 
-            // PDF Sertifikat (Identik - Headless Chrome/Browsershot, render JS/canvas)
+            // PDF Sertifikat (Headless Chrome/Browsershot, render JS/canvas)
             Route::get('/{intern}/certificate.pdf', [InternController::class, 'certificatePdf'])
                 ->name('admin.interns.certificate.pdf');
         });
 
         // ===== API JSON untuk tabel =====
-        // dipakai di Blade dengan route('admin.interns.api')
         Route::get('/interns.json', [InternApiController::class, 'index'])->name('admin.interns.api');
     });
 });

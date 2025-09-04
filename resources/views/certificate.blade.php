@@ -6,7 +6,7 @@
 <title>Certificate</title>
 
 <style>
-  /* KUNCI: pakai page size PX 1123x794 (A4 landscape @96DPI) */
+  /* A4 landscape @96DPI = 1123 x 794 px */
   @page { size: 1123px 794px; margin: 0; }
 
   :root{
@@ -20,14 +20,13 @@
   html, body{
     margin:0 !important;
     padding:0 !important;
-    width:1123px;        /* match @page */
-    height:794px;        /* match @page */
+    width:1123px;
+    height:794px;
     background: var(--dark);
     -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
   }
 
-  /* 1 halaman saja – ukurannya HARUS sama dengan @page */
   .page{
     width:1123px;
     height:794px;
@@ -35,14 +34,13 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    background: var(--dark); /* bingkai hijau gelap menyatu ke tepi halaman */
+    background: var(--dark);
     box-sizing:border-box;
   }
 
-  /* Canvas mengisi penuh halaman (tanpa shadow supaya tidak dihitung tinggi ekstra) */
   #certificate{
-    width:1123px;   /* persis */
-    height:794px;   /* persis */
+    width:1123px;
+    height:794px;
     display:block;
     background:#fff;
     box-shadow:none;
@@ -52,29 +50,73 @@
 <body>
 
 <div class="page">
-  <!-- CSS width/height sudah 1123x794; atribut width/height di JS (HiDPI) -->
   <canvas id="certificate"></canvas>
 </div>
 
-{{-- Data dinamis dari server --}}
+{{-- ================== Data dinamis dari server ================== --}}
 @php
+  use Illuminate\Support\Facades\Storage;
+  use Illuminate\Support\Str;
+
   $certPayload = [
       'name'       => optional($intern)->fullname ?? 'Nama Pemagang',
       'role'       => optional($intern)->internship_interest ?? 'Programmer',
       'start_date' => optional($intern)->start_date ?? '',
       'end_date'   => optional($intern)->end_date ?? '',
-      'city'       => optional($intern)->current_city ?? 'Yogyakarta',
+      'city'       => 'Yogyakarta',
       'issued'     => optional($intern)->end_date ?? '',
   ];
+
+  /**
+   * Letakkan file di: storage/app/public/images/...
+   * Setelah `php artisan storage:link`, path publik = /storage/images/...
+   * Nama file yang kamu sebutkan di sini harus SAMA persis (case sensitive di Linux).
+   */
+  $assetFiles = [
+      'logo_left' => 'images/logo_left.png',
+      'logo_right'=> 'images/logo_right.png',
+      'sig_left'  => 'images/ttd_hr.png',
+      'sig_right' => 'images/ttd_owner.png', // kalau belum ada, biarkan null nanti fallback teks
+  ];
+
+  /**
+   * Robust: embed sebagai data URI (base64) agar:
+   * - Tidak kena mixed content (http/https),
+   * - Tidak perlu header CORS,
+   * - Tidak masalah kalau domain/host berubah.
+   */
+  $certAssets = [];
+  foreach ($assetFiles as $k => $rel) {
+      if ($rel && Storage::disk('public')->exists($rel)) {
+          $bytes = Storage::disk('public')->get($rel);
+
+          // Deteksi MIME dari ekstensi sederhana
+          $ext = Str::lower(pathinfo($rel, PATHINFO_EXTENSION));
+          $mime = match ($ext) {
+              'jpg', 'jpeg' => 'image/jpeg',
+              'png'         => 'image/png',
+              'gif'         => 'image/gif',
+              'webp'        => 'image/webp',
+              'svg'         => 'image/svg+xml',
+              default       => 'application/octet-stream',
+          };
+
+          $certAssets[$k] = 'data:' . $mime . ';base64,' . base64_encode($bytes);
+      } else {
+          // null = biar JS fallback ke bentuk vektor/teks
+          $certAssets[$k] = null;
+      }
+  }
 @endphp
-<script>window.__CERT__ = @json($certPayload);</script>
+
+<script>window.__CERT__  = @json($certPayload);</script>
+<script>window.__ASSETS__ = @json($certAssets);</script>
 
 <script>
 (function(){
   const canvas = document.getElementById('certificate');
   const ctx = canvas.getContext('2d');
 
-  // warna dari CSS
   const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   const darkGreen = css('--dark') || '#293936';
   const rustyRed  = css('--accent') || '#BE5640';
@@ -82,8 +124,9 @@
   const greenHL   = css('--greenHL') || '#2EBE54';
   const redHL     = css('--redHL') || '#D62118';
 
-  // data
-  const cert = (window.__CERT__ || {});
+  const cert   = (window.__CERT__ || {});
+  const ASSETS = (window.__ASSETS__ || {});
+
   const NAME  = cert.name || 'Nama Pemagang';
   const ROLE  = cert.role || 'Programmer';
   const CITY  = cert.city || 'Yogyakarta';
@@ -102,26 +145,55 @@
     const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
     return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
   }
-  function monthDiff(aStr,bStr){
-    const a = parseYmd(aStr), b = parseYmd(bStr);
-    if(!a || !b) return null;
-    let m = (b.getFullYear()-a.getFullYear())*12 + (b.getMonth()-a.getMonth());
-    if (b.getDate() < a.getDate()) m -= 1;
-    return m < 0 ? 0 : m;
-  }
-  const MONTHS = monthDiff(SDATE, EDATE);
-  const DURTXT = (MONTHS!==null && MONTHS>0) ? `${MONTHS} bulan` : 'beberapa bulan';
 
-  // Hi-DPI: internal buffer besar, CSS size tetap 1123x794 px
+  // Loader gambar aman (resolve null jika gagal)
+  function loadImage(url){
+    return new Promise((resolve) => {
+      if(!url){ resolve(null); return; }
+      const img = new Image();
+      // NOTE: untuk data: URL / same-origin, tidak perlu crossOrigin
+      img.onload = () => resolve(img);
+      img.onerror = () => {
+        console.error('[CERT] Gagal memuat gambar:', url);
+        resolve(null);
+      };
+      img.src = url;
+    });
+  }
+
+  // Gambar image ke box dengan menjaga aspect ratio (contain)
+  function drawImageContained(img, x, y, w, h){
+    if(!img) return;
+    const ir = img.width / img.height;
+    const br = w / h;
+    let dw = w, dh = h;
+    if (ir > br) { // gambar lebih lebar -> batasi width
+      dh = w / ir;
+    } else {       // gambar lebih tinggi -> batasi height
+      dw = h * ir;
+    }
+    const dx = x + (w - dw)/2;
+    const dy = y + (h - dh)/2;
+    ctx.drawImage(img, dx, dy, dw, dh);
+  }
+
+  // Hi-DPI
   function setupHiDPI(){
     const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const W = 1123, H = 794; // ukuran koordinat “base” yang sama dgn CSS
+    const W = 1123, H = 794;
     canvas.width  = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
-    ctx.setTransform(dpr,0,0,dpr,0,0); // gambar pakai koordinat base
+    ctx.setTransform(dpr,0,0,dpr,0,0);
   }
 
-  function draw(){
+  async function draw(){
+    const [logoLeft, logoRight, sigLeft, sigRight] = await Promise.all([
+      loadImage(ASSETS.logo_left),
+      loadImage(ASSETS.logo_right),
+      loadImage(ASSETS.sig_left),
+      loadImage(ASSETS.sig_right),
+    ]);
+
     const W = 1123, H = 794;
     ctx.clearRect(0,0,W,H);
 
@@ -153,17 +225,49 @@
     ctx.fillRect(marginX+b-4,                       marginY+innerH-b-s+4,              s, s);
     ctx.fillRect(marginX+innerW-b-s+4,              marginY+innerH-b-s+4,              s, s);
 
-    // pita
+    // pita tengah atas
     const pW=100, pH=74, pX=marginX+innerW/2-pW/2, pY=marginY-2;
     ctx.fillStyle = rustyRed; ctx.beginPath();
     ctx.moveTo(pX, pY); ctx.lineTo(pX+pW, pY); ctx.lineTo(pX+pW, pY+pH);
     ctx.lineTo(pX+pW/2, pY+pH-26); ctx.lineTo(pX, pY+pH); ctx.closePath(); ctx.fill();
 
-    // logo kiri
-    ctx.textAlign='left'; ctx.textBaseline='top'; ctx.fillStyle=black; ctx.font='700 32px Arial, Helvetica, sans-serif';
-    const mj1='magangjogja.', mj2='com', logoX=marginX+b+18, logoY=marginY+35;
-    ctx.fillText(mj1, logoX, logoY); const w1=ctx.measureText(mj1).width;
-    ctx.fillStyle=greenHL; ctx.fillText(mj2, logoX+w1, logoY);
+    // ==== LOGO KIRI ATAS ====
+    // area rekomendasi: 180 x 64
+    const logoL_X = marginX + b + 30;
+    const logoL_Y = marginY + 15;
+    const logoL_W = 350;
+    const logoL_H = 90;
+    if (logoLeft) {
+      drawImageContained(logoLeft, logoL_X, logoL_Y, logoL_W, logoL_H);
+    } else {
+      // fallback teks "magangjogja.com"
+      ctx.textAlign='left'; ctx.textBaseline='top'; ctx.fillStyle=black; ctx.font='700 32px Arial, Helvetica, sans-serif';
+      const mj1='magangjogja.', mj2='com';
+      ctx.fillText(mj1, logoL_X, logoL_Y+6);
+      const w1=ctx.measureText(mj1).width;
+      ctx.fillStyle=greenHL; ctx.fillText(mj2, logoL_X+w1, logoL_Y+6);
+    }
+
+    // ==== LOGO KANAN ATAS ====
+    // area rekomendasi: 200 x 80
+    const logoR_W = 300, logoR_H = 120;
+    const logoR_X = marginX + 780;
+    const logoR_Y = marginY + 30;
+    if (logoRight) {
+      drawImageContained(logoRight, logoR_X, logoR_Y, logoR_W, logoR_H);
+    } else {
+      // fallback bentuk vektor "SEVEN INC"
+      const sevenX=logoR_X+40, sevenY=logoR_Y+6;
+      ctx.fillStyle=redHL; ctx.beginPath();
+      ctx.moveTo(sevenX, sevenY); ctx.lineTo(sevenX+30, sevenY); ctx.lineTo(sevenX+20, sevenY+20); ctx.lineTo(sevenX-10, sevenY+20); ctx.closePath(); ctx.fill();
+      ctx.fillStyle=darkGreen; ctx.beginPath();
+      ctx.moveTo(sevenX+30, sevenY); ctx.lineTo(sevenX+74, sevenY); ctx.lineTo(sevenX+52, sevenY+40); ctx.lineTo(sevenX+8, sevenY+40); ctx.closePath(); ctx.fill();
+      ctx.fillStyle=redHL; ctx.beginPath();
+      ctx.moveTo(sevenX+42, sevenY+45); ctx.lineTo(sevenX+72, sevenY+45); ctx.lineTo(sevenX+82, sevenY+25); ctx.lineTo(sevenX+52, sevenY+25); ctx.closePath(); ctx.fill();
+      ctx.textAlign='left'; ctx.textBaseline='top'; ctx.fillStyle=black; ctx.font='italic 800 22px Arial, Helvetica, sans-serif'; ctx.fillText('SEVEN', sevenX+15, sevenY+49);
+      ctx.font='700 14px Arial, Helvetica, sans-serif'; const inc='INC', incX=sevenX+92, incY=sevenY+52; ctx.fillText(inc, incX, incY);
+      const incW=ctx.measureText(inc).width; ctx.fillStyle=redHL; ctx.beginPath(); ctx.arc(incX+incW+8, incY+7, 4, 0, Math.PI*2); ctx.fill();
+    }
 
     // judul + subjudul
     ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.fillStyle=darkGreen;
@@ -186,12 +290,19 @@
     const paraTop=lineY+22, CX=marginX+innerW/2;
     const startTxt = SDATE ? formatIndoDate(SDATE) : '??';
     const endTxt   = EDATE ? formatIndoDate(EDATE) : '??';
-    const DURTXT   = (function(){ const m = (function(aStr,bStr){ const a=parseYmd(aStr), b=parseYmd(bStr); if(!a||!b) return null; let m=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth()); if(b.getDate()<a.getDate()) m-=1; return m<0?0:m; })(SDATE,EDATE); return (m!==null && m>0) ? `${m} bulan` : 'beberapa bulan'; })();
 
-    ctx.fillText(`Telah menyelesaikan magang bidang ${ROLE}`, CX, paraTop);
-    ctx.fillText(`di Seven Inc. selama ${DURTXT} yaitu`, CX, paraTop+30);
-    ctx.fillText(`mulai dari ${startTxt} sampai dengan ${endTxt}`, CX, paraTop+60);
-    ctx.fillText(`${CITY}, ${endTxt}`, CX, paraTop+110);
+    // lama magang
+    (function(){
+      const a=parseYmd(SDATE), b=parseYmd(EDATE);
+      let m=null;
+      if(a&&b){ m=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth()); if(b.getDate()<a.getDate()) m-=1; if(m<0) m=0; }
+      const DURTXT = (m!==null && m>0) ? `${m} bulan` : 'beberapa bulan';
+      ctx.textAlign='center';
+      ctx.fillText(`Telah menyelesaikan magang bidang ${ROLE}`, CX, paraTop);
+      ctx.fillText(`di Seven Inc. selama ${DURTXT} yaitu`, CX, paraTop+30);
+      ctx.fillText(`mulai dari ${startTxt} sampai dengan ${endTxt}`, CX, paraTop+60);
+      ctx.fillText(`${CITY}, ${endTxt}`, CX, paraTop+110);
+    })();
 
     // strip kiri/kanan
     ctx.strokeStyle=darkGreen; ctx.lineWidth=5;
@@ -201,34 +312,52 @@
     const rightXStart=marginX+innerW-b-stripInset-tripleLen;
     for(let i=0;i<3;i++){ const y=startY+i*tripleGap; ctx.beginPath(); ctx.moveTo(rightXStart,y); ctx.lineTo(rightXStart+tripleLen,y); ctx.stroke(); }
 
-    // ttd
+    // area tanda tangan
     ctx.font='400 18px "Times New Roman", Times, serif';
-    const sigBaseY=marginY+innerH-170, sigLineW=165;
+    const sigBaseY=marginY+innerH-170, sigLineW=220, sigImgH=140;
+
+    // kiri (HR)
     const leftLineX=marginX+b+50, leftCenterX=leftLineX+sigLineW/2;
     ctx.textAlign='center'; ctx.fillStyle=black;
     ctx.fillText('HR Department', leftCenterX, sigBaseY);
+    drawImageContained(sigLeft, leftLineX, sigBaseY-5, sigLineW, sigImgH);
     ctx.strokeStyle=black; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(leftLineX, sigBaseY+96); ctx.lineTo(leftLineX+sigLineW, sigBaseY+96); ctx.stroke();
     ctx.fillText('Ari Setia Husbana', leftCenterX, sigBaseY+106);
 
-    const rightLineXEnd=marginX+innerW-b-50, rightLineXStart=rightLineXEnd-sigLineW, rightCenterX=(rightLineXStart+rightLineXEnd)/2;
-    ctx.fillText('Owner Seven Inc.', rightCenterX, sigBaseY);
-    ctx.beginPath(); ctx.moveTo(rightLineXStart, sigBaseY+96); ctx.lineTo(rightLineXEnd, sigBaseY+96); ctx.stroke();
-    ctx.fillText('Rekario Danny', rightCenterX, sigBaseY+106);
+    // kanan (Owner) – ukuran khusus untuk ttd_owner
+    const rightLineXEnd   = marginX + innerW - b - 50;
+    const rightLineXStart = rightLineXEnd - sigLineW;
+    const rightCenterX    = (rightLineXStart + rightLineXEnd) / 2;
 
-    // logo kanan atas
-    const sevenX=marginX+innerW-b-140, sevenY=marginY+36;
-    ctx.fillStyle=redHL; ctx.beginPath(); ctx.moveTo(sevenX, sevenY); ctx.lineTo(sevenX+30, sevenY); ctx.lineTo(sevenX+20, sevenY+20); ctx.lineTo(sevenX-10, sevenY+20); ctx.closePath(); ctx.fill();
-    ctx.fillStyle=darkGreen; ctx.beginPath(); ctx.moveTo(sevenX+30, sevenY); ctx.lineTo(sevenX+74, sevenY); ctx.lineTo(sevenX+52, sevenY+40); ctx.lineTo(sevenX+8, sevenY+40); ctx.closePath(); ctx.fill();
-    ctx.fillStyle=redHL; ctx.beginPath(); ctx.moveTo(sevenX+42, sevenY+45); ctx.lineTo(sevenX+72, sevenY+45); ctx.lineTo(sevenX+82, sevenY+25); ctx.lineTo(sevenX+52, sevenY+25); ctx.closePath(); ctx.fill();
-    ctx.textAlign='left'; ctx.textBaseline='top'; ctx.fillStyle=black; ctx.font='italic 800 22px Arial, Helvetica, sans-serif'; ctx.fillText('SEVEN', sevenX+15, sevenY+49);
-    ctx.font='700 14px Arial, Helvetica, sans-serif'; const inc='INC', incX=sevenX+92, incY=sevenY+52; ctx.fillText(inc, incX, incY);
-    const incW=ctx.measureText(inc).width; ctx.fillStyle=redHL; ctx.beginPath(); ctx.arc(incX+incW+8, incY+7, 4, 0, Math.PI*2); ctx.fill();
+    ctx.fillText('Owner Seven Inc.', rightCenterX, sigBaseY);
+
+    // >>> Atur skala di sini: >1 lebih besar, <1 lebih kecil
+    const ownerScale = 1.4;          // contoh: 1.25 = 125% (lebih besar). 0.85 = 85% (lebih kecil)
+    const ownerW = sigLineW * ownerScale;
+    const ownerH = sigImgH * ownerScale;
+
+    // Posisikan gambar supaya tetap center di atas garis
+    const ownerX = rightCenterX - ownerW / 2;
+
+    // Gambar tanda tangan kanan
+    drawImageContained(sigRight, ownerX, sigBaseY - 20, ownerW, ownerH);
+
+    // Garis tanda tangan & nama (OPS A: panjang garis tetap seperti semula)
+    ctx.beginPath();
+    ctx.moveTo(rightLineXStart, sigBaseY + 96);
+    ctx.lineTo(rightLineXEnd,   sigBaseY + 96);
+    ctx.stroke();
+
+    ctx.fillText('Rekario Danny', rightCenterX, sigBaseY + 106);
+
   }
 
-  document.fonts.ready.then(()=>{
-    setupHiDPI();
-    draw();
-    window.__CERT_READY = true; // untuk Browsershot wait
+  // Pastikan font & layout siap, lalu gambar
+  window.addEventListener('load', () => {
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(()=>{
+      setupHiDPI();
+      draw().then(()=>{ window.__CERT_READY = true; });
+    });
   });
 })();
 </script>
