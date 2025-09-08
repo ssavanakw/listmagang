@@ -67,24 +67,14 @@
       'issued'     => optional($intern)->end_date ?? '',
   ];
 
-  /**
-   * Letakkan file di: storage/app/public/images/...
-   * Setelah `php artisan storage:link`, path publik = /storage/images/...
-   * Nama file yang kamu sebutkan di sini harus SAMA persis (case sensitive di Linux).
-   */
   $assetFiles = [
       'logo_left' => 'images/logo_left.png',
       'logo_right'=> 'images/logo_right.png',
       'sig_left'  => 'images/ttd_hr.png',
-      'sig_right' => 'images/ttd_owner.png', // kalau belum ada, biarkan null nanti fallback teks
+      'sig_right' => 'images/ttd_owner.png',
   ];
 
-  /**
-   * Robust: embed sebagai data URI (base64) agar:
-   * - Tidak kena mixed content (http/https),
-   * - Tidak perlu header CORS,
-   * - Tidak masalah kalau domain/host berubah.
-   */
+
   $certAssets = [];
   foreach ($assetFiles as $k => $rel) {
       if ($rel && Storage::disk('public')->exists($rel)) {
