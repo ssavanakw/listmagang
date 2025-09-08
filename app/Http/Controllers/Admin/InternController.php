@@ -14,6 +14,31 @@ use Carbon\Carbon;
 class InternController extends Controller
 {
     /**
+     * Baca file dari storage:public lalu ubah jadi data URI (base64).
+     * Return null bila file tidak ada.
+     */
+    private function dataUriPublic(string $relPath): ?string
+    {
+        if (!Storage::disk('public')->exists($relPath)) {
+            return null;
+        }
+
+        $bytes = Storage::disk('public')->get($relPath);
+        $ext   = strtolower(pathinfo($relPath, PATHINFO_EXTENSION));
+
+        $mime = match ($ext) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png'         => 'image/png',
+            'gif'         => 'image/gif',
+            'webp'        => 'image/webp',
+            'svg'         => 'image/svg+xml',
+            default       => 'application/octet-stream',
+        };
+
+        return 'data:' . $mime . ';base64,' . base64_encode($bytes);
+    }
+
+    /**
      * Simpan file memakai nama asli; bila bentrok, beri (n).
      */
     private function storeWithOriginalName($file, string $directory = 'uploads'): string
@@ -233,7 +258,7 @@ class InternController extends Controller
         //    Di Blade, pastikan ada:
         //    <script>window.__CERT__=@json($certPayload);</script>
         //    <script>window.__ASSETS__=@json($certAssets);</script>
-        $html = view('certificate', [
+        $html = view('certificates/certmagangjogjacom', [
             'intern'      => $intern,
             'certPayload' => $certPayload,
             'certAssets'  => $certAssets,
@@ -273,4 +298,153 @@ class InternController extends Controller
 
         return response()->download($path)->deleteFileAfterSend(true);
     }
+    /**
+     * PREVIEW HTML — certareakerjacom (opsional)
+     */
+    public function certificateAreaKerjaCom(IR $intern)
+    {
+        if ($intern->internship_status !== IR::STATUS_COMPLETED) {
+            abort(403, 'Sertifikat hanya tersedia untuk pemagang yang sudah selesai.');
+        }
+
+        Carbon::setLocale('id');
+        $start = $intern->start_date ? Carbon::parse($intern->start_date) : null;
+        $end   = $intern->end_date   ? Carbon::parse($intern->end_date)   : null;
+
+        $startDate = $start ? $start->translatedFormat('j F Y') : '';
+        $endDate   = $end   ? $end->translatedFormat('j F Y')   : '';
+
+        $durationText = 'beberapa bulan';
+        if ($start && $end) {
+            $months = round($start->diffInDays($end) / 30, 1);
+            $durationText = str_replace('.', ',', (string)$months) . ' bulan';
+        }
+
+        // >>> embed aset jadi data URI supaya 100% ter-render
+        $bg     = $this->dataUriPublic('images/bg_areakerja.png');
+        $logo   = $this->dataUriPublic('images/logo_areakerja.png');
+        $ttdHr  = $this->dataUriPublic('images/ttd_hr.png');
+        $ttdDir = $this->dataUriPublic('images/ttd_direktur.png');
+
+        return view('certificates.certareakerjacom', [
+            'title'        => 'SERTIFIKAT',
+            'recipient'    => (string) $intern->fullname,
+            'deptText'     => (string) $intern->internship_interest,
+            'durationText' => $durationText,
+            'startDate'    => $startDate,
+            'endDate'      => $endDate,
+
+            'hrRole'       => 'HR Departement',
+            'hrName'       => 'Ari Setia Husbana',
+            'dirRole'      => 'Direktur',
+            'dirName'      => 'Pipit Damayanti',
+
+            'bg'     => $bg,
+            'logo'   => $logo,
+            'ttdHr'  => $ttdHr,
+            'ttdDir' => $ttdDir,
+        ]);
+    }
+
+    /**
+     * PDF DOWNLOAD — certareakerjacom
+     */
+    public function certificateAreaKerjaComPdf(IR $intern)
+    {
+        if ($intern->internship_status !== IR::STATUS_COMPLETED) {
+            abort(403, 'Sertifikat hanya tersedia untuk pemagang yang sudah selesai.');
+        }
+
+        @set_time_limit(180);
+        @ini_set('max_execution_time', '180');
+
+        Carbon::setLocale('id');
+        $start = $intern->start_date ? Carbon::parse($intern->start_date) : null;
+        $end   = $intern->end_date   ? Carbon::parse($intern->end_date)   : null;
+
+        $startDate = $start ? $start->translatedFormat('j F Y') : '';
+        $endDate   = $end   ? $end->translatedFormat('j F Y')   : '';
+
+        $durationText = 'beberapa bulan';
+        if ($start && $end) {
+            $months = round($start->diffInDays($end) / 30, 1);
+            $durationText = str_replace('.', ',', (string)$months) . ' bulan';
+        }
+
+        // >>> data URI (base64)
+        $bg     = $this->dataUriPublic('images/bg_areakerja.png');
+        $logo   = $this->dataUriPublic('images/logo_areakerja.png');
+        $ttdHr  = $this->dataUriPublic('images/ttd_hr.png');
+        $ttdDir = $this->dataUriPublic('images/ttd_direktur.png');
+
+        $html = view('certificates.certareakerjacom', [
+            'title'        => 'SERTIFIKAT',
+            'recipient'    => (string) $intern->fullname,
+            'deptText'     => (string) $intern->internship_interest,
+            'durationText' => $durationText,
+            'startDate'    => $startDate,
+            'endDate'      => $endDate,
+
+            'hrRole'       => 'HR Departement',
+            'hrName'       => 'Ari Setia Husbana',
+            'dirRole'      => 'Direktur',
+            'dirName'      => 'Pipit Damayanti',
+
+            'bg'     => $bg,
+            'logo'   => $logo,
+            'ttdHr'  => $ttdHr,
+            'ttdDir' => $ttdDir,
+        ])->render();
+
+        // Fallback: set flag siap render (tanpa nunggu Google Fonts)
+        $html .= <<<HTML
+    <script>
+    (function(){
+    function imagesReady(){
+        var imgs=[].slice.call(document.images||[]);
+        if(!imgs.length) return Promise.resolve();
+        return Promise.all(imgs.map(function(i){
+        if(i.complete) return Promise.resolve();
+        return new Promise(function(r){
+            i.addEventListener('load', r, {once:true});
+            i.addEventListener('error', r, {once:true});
+        });
+        }));
+    }
+    var timer=setTimeout(function(){window.__CERT_READY=true;}, 800);
+    imagesReady().then(function(){ clearTimeout(timer); window.__CERT_READY=true; });
+    })();
+    </script>
+    HTML;
+
+        $safeName = trim(preg_replace('/[^A-Za-z0-9_\- ]+/', '', (string) $intern->fullname)) ?: 'Pemagang';
+        $filename = 'Sertifikat_AreaKerja_' . Str::slug($safeName, '_') . '.pdf';
+        $dir  = storage_path('app/public/certificates');
+        if (!is_dir($dir)) { @mkdir($dir, 0775, true); }
+        $path = $dir . DIRECTORY_SEPARATOR . $filename;
+
+        $bs = Browsershot::html($html)
+            ->showBackground()
+            ->margins(0, 0, 0, 0)
+            ->setOption('printBackground', true)
+            ->setOption('preferCSSPageSize', true)
+            ->emulateMedia('print')
+            ->windowSize(1123, 794)
+            ->deviceScaleFactor(2)
+            ->waitForFunction('document.readyState === "complete" || window.__CERT_READY === true')
+            ->setOption('waitUntil', 'domcontentloaded')
+            ->setOption('baseURL', config('app.url'))
+            ->timeout(180);
+
+        if ($chromePath = env('BROWSERSHOT_CHROME_PATH')) {
+            $bs->setChromePath($chromePath);
+        }
+        // $bs->addChromiumArguments(['--no-sandbox','--disable-setuid-sandbox']); // bila perlu (Linux)
+
+        $bs->savePdf($path);
+
+        return response()->download($path, $filename, ['Content-Type' => 'application/pdf'])
+            ->deleteFileAfterSend(true);
+    }
+
 }

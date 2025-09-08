@@ -15,6 +15,19 @@
         ];
         if ($route && isset($mapRouteScope[$route])) $scope = $mapRouteScope[$route];
     }
+
+    /**
+     * ===============================
+     * TEMPLATE ROUTE CERTAREAKERJACOM
+     * ===============================
+     * Ganti 'admin.interns.certificate.areakerjacom' & key parameter 'intern'
+     * sesuai definisi route milikmu. Contoh:
+     * Route::get('/admin/interns/{intern}/certificate/areakerjacom', ...)->name('admin.interns.certificate.areakerjacom');
+     */
+    $certAreaKerjaComRouteTmpl = route(
+        'admin.interns.certificate.areakerjacom',
+        ['intern' => '__ID__']
+    );
 @endphp
 
 @section('content')
@@ -493,22 +506,46 @@ document.addEventListener('DOMContentLoaded', () => {
           <td class="px-3 py-2 align-top">
             ${buildStatusCell(it)}
           </td>
-          ${SCOPE === 'completed'
-            ? `<td class="px-3 py-2 align-top">
-                  ${ (it.certificate_pdf_url || it.certificate_url)
-                    ? `
-                      <div class="flex items-center gap-2">
-                        <a href="${it.certificate_pdf_url || it.certificate_url}"
-                           class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                           title="Unduh PDF yang identik (render JS/canvas)">
-                          Download PDF
-                        </a>
-  
-                      </div>
-                    `
-                    : '<span class="text-gray-400">-</span>' }
-              </td>`
-            : ''
+
+          ${
+            SCOPE === 'completed'
+              ? `
+                <td class="px-3 py-2 align-top">
+                  ${
+                    (it.certificate_pdf_url || it.certificate_url || true)
+                      ? `
+                        <div class="flex items-center gap-2">
+                          <!-- Tombol existing: Download PDF -->
+                          ${
+                            (it.certificate_pdf_url || it.certificate_url)
+                              ? `<a href="${it.certificate_pdf_url || it.certificate_url}"
+                                    class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                    title="Unduh PDF yang identik (render JS/canvas)" target="_blank" rel="noopener">
+                                    Download PDF
+                                 </a>`
+                              : ''
+                          }
+
+                          <!-- Tombol baru: Download via view certareakerjacom -->
+                          ${
+                            (() => {
+                              const tmpl = @json($certAreaKerjaComRouteTmpl);
+                              const url2 = it.certificate_areakerjacom_url || (tmpl ? tmpl.replace('__ID__', it.id) : '');
+                              if (!url2) return '';
+                              return `<a href="${url2}"
+                                          class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                          title="Unduh versi certareakerjacom" target="_blank" rel="noopener">
+                                          Download (certareakerjacom)
+                                      </a>`;
+                            })()
+                          }
+                        </div>
+                      `
+                      : '<span class="text-gray-400">-</span>'
+                  }
+                </td>
+              `
+              : ''
           }
         </tr>
       `;
