@@ -57,27 +57,6 @@
 
         {{-- Kanan: Search + Pending Bar + Toast --}}
         <div class="mt-1 flex w-full max-w-[480px] flex-col items-end gap-2">
-            <form id="searchForm" class="w-full">
-                <div class="flex items-center gap-2">
-                    <input id="q" type="text" value="{{ request('q') }}"
-                           placeholder="Cari nama, email, NIM/NIS, HP, institusi, prodi, kota, gender…"
-                           class="w-full px-3 py-2 rounded-lg border
-                                  border-gray-300 dark:border-gray-700
-                                  bg-white dark:bg-gray-800
-                                  text-sm text-gray-900 dark:text-gray-100
-                                  placeholder-gray-500 dark:placeholder-gray-400
-                                  caret-emerald-500
-                                  focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-                    <button class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm hover:bg-emerald-700">
-                        Cari
-                    </button>
-                    <button id="resetFilters" type="button"
-                            class="px-3 py-2 rounded-lg border text-sm dark:border-gray-700">
-                      Reset
-                    </button>
-                </div>
-            </form>
-
             {{-- Pending bar --}}
             <div id="pendingBar"
                  class="hidden rounded-full border border-amber-200 bg-amber-50/95
@@ -668,9 +647,6 @@ document.addEventListener('DOMContentLoaded', () => {
       per_page: String(perPage),
     });
 
-    const q = (qInput?.value || '').trim();
-    if (q) params.set('q', q);
-
     rowsEl.innerHTML = `
       <tr>
         <td colspan="{{ count($fields) + 1 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
@@ -700,18 +676,6 @@ document.addEventListener('DOMContentLoaded', () => {
         </tr>`;
     }
   }
-
-  // Search submit -> reload page 1
-  searchForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    loadPage(1);
-  });
-
-  // Reset
-  document.getElementById('resetFilters')?.addEventListener('click', () => {
-    qInput.value = '';
-    loadPage(1);
-  });
 
   // initial
   loadPage(Number(new URLSearchParams(location.search).get('page') || 1));
