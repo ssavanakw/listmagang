@@ -88,7 +88,7 @@
 
         {{-- Table --}}
         <div id="tableWrap" class="overflow-x-auto">
-            <table class="min-w-full w-max text-sm text-left text-gray-700 dark:text-gray-200">
+            <table id="tabel-pemagang" class="min-w-full w-max text-sm text-left text-gray-700 dark:text-gray-200">
                 <thead class="sticky top-0 z-10 text-xs uppercase tracking-wider
                               bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
 
@@ -138,6 +138,14 @@
                         if (($scope ?? '') === 'completed') {
                             $fields['certificate'] = 'SERTIFIKAT';
                         }
+
+                        // tipe input per kolom
+                        $dateFields = ['born_date','start_date','end_date','created_at'];
+                        $selectFields = [
+                            'gender','internship_type','internship_arrangement',
+                            'current_status','english_book_ability','laptop_equipment',
+                            'family_status','internship_status'
+                        ];
                     @endphp
 
                     {{-- Row: Header Judul Kolom --}}
@@ -147,7 +155,35 @@
                             <th class="px-3 py-3 font-semibold whitespace-nowrap">{{ $label }}</th>
                         @endforeach
                     </tr>
+
+                    {{-- Row: Advanced Search (dibuat statis di Blade agar SEO/SSR oke) --}}
+                    <tr class="divide-x divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800">
+                        {{-- kolom "No" tanpa filter --}}
+                        <th class="px-2 py-2"></th>
+
+                        @foreach ($fields as $key => $label)
+                            <th class="px-2 py-2">
+                                @if (in_array($key, $dateFields))
+                                    <input type="text" placeholder="Cari…"
+                                          data-col="{{ $loop->index + 1 }}"
+                                          class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>
+                                @elseif(in_array($key, $selectFields))
+
+                                    <select data-col="{{ $loop->index + 1 }}"
+                                            class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs">
+                                        <option value="">Semua</option>
+                                        {{-- opsi akan diisi otomatis dari data oleh JS --}}
+                                    </select>
+                                @else
+                                    <input type="text" placeholder="Cari…"
+                                          data-col="{{ $loop->index + 1 }}"
+                                          class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>
+                                @endif
+                            </th>
+                        @endforeach
+                    </tr>
                 </thead>
+
 
                 <tbody id="rows" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <tr>
@@ -173,6 +209,7 @@ function debounce(fn, ms=400) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+
   // ====== Clamp scroll kanan hanya di tabel ======
   const wrap = document.getElementById('tableWrap');
   if (wrap) {
@@ -201,6 +238,182 @@ document.addEventListener('DOMContentLoaded', () => {
     exited:    {label:'Keluar',         cls:'bg-rose-100 text-rose-800 dark:bg-rose-600/20 dark:text-rose-300'},
     pending:   {label:'Pending',        cls:'bg-amber-100 text-amber-800 dark:bg-amber-600/20 dark:text-amber-300'},
   };
+
+  // ====== Advanced Column Search ======
+  const columnFilter = {}; // state { [colIndex]: {kind, q|min|max} }
+  const TABLE_ID = 'tabel-pemagang';   // <table id="tabel-pemagang">
+  const WRAP_ID  = 'tableWrap';        // <div id="tableWrap">
+
+  // mapping kolom → tipe input (index kolom berbasis tabel saat render, 'No' = 0)
+  const dateCols   = new Set(['born_date','start_date','end_date','created_at']);
+  const selectCols = new Set([
+    'gender','internship_type','internship_arrangement',
+    'current_status','english_book_ability','laptop_equipment',
+    'family_status','internship_status'
+  ]);
+
+  // urutan kolom sesuai Blade $fields (tetap sinkron!)
+  const fieldOrder = [
+    'fullname','born_date','student_id','email','gender','phone_number','institution_name','study_program',
+    'faculty','current_city','internship_reason','internship_type','internship_arrangement','current_status',
+    'english_book_ability','supervisor_contact','internship_interest','internship_interest_other','design_software',
+    'video_software','programming_languages','digital_marketing_type','digital_marketing_type_other','laptop_equipment',
+    'owned_tools','owned_tools_other','start_date','end_date','internship_info_sources','internship_info_other',
+    'current_activities','boarding_info','family_status','parent_wa_contact','social_media_instagram','cv_ktp_portofolio_pdf',
+    'portofolio_visual','created_at','internship_status'
+    // jika scope === 'completed': tambahkan 'certificate' di Blade; kolom itu default tanpa filter
+  ];
+
+  // buat baris input filter tepat di bawah header
+  function buildAdvancedSearchRow(){
+    const table = document.getElementById('tableWrap');
+    if(!table) return;
+    const thead = table.querySelector('thead');
+    const headRows = thead?.querySelectorAll('tr');
+    if(!thead || !headRows?.length) return;
+
+    // jika sudah ada, jangan duplikasi
+    if(thead.querySelector('tr[data-filter-row]')) return;
+
+    const headerCols = headRows[0].children.length; // termasuk kolom "No"
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-filter-row','');
+    tr.className = 'divide-x divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800';
+
+    for(let i=0;i<headerCols;i++){
+      const th = document.createElement('th');
+      th.className = 'px-2 py-2';
+
+      if(i===0){ // kolom No: kosong
+        tr.appendChild(th);
+        continue;
+      }
+
+      const fieldKey = fieldOrder[i-1]; // offset karena kolom No
+      if(!fieldKey){ tr.appendChild(th); continue; }
+
+      if (dateCols.has(fieldKey)) {
+        th.innerHTML = `
+          <input type="text" placeholder="Cari…"
+                data-col="${i}"
+                class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>`;
+        columnFilter[i] = { kind:'text', q:'' };   // <— bukan 'date-range' lagi
+      }
+
+      else if(selectCols.has(fieldKey)){
+        th.innerHTML = `
+          <select data-col="${i}"
+                  class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs">
+            <option value="">Semua</option>
+          </select>`;
+        columnFilter[i] = { kind:'select', q:'' };
+      } 
+      else {
+        th.innerHTML = `
+          <input type="text" placeholder="Cari…"
+                data-col="${i}"
+                class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>`;
+        columnFilter[i] = { kind:'text', q:'' };
+      }
+      tr.appendChild(th);
+    }
+    thead.appendChild(tr);
+
+    bindFilterInputs();
+    hydrateSelectOptions();     // isi opsi dropdown berdasar data halaman aktif
+  }
+
+  // ====== ISI OPSI <select> DARI NILAI PADA TABEL ======
+  function hydrateSelectOptions() {
+    const table = document.getElementById(TABLE_ID);
+    const tbody = table?.tBodies?.[0];
+    if (!tbody) return;
+
+    const rows = [...tbody.rows]; // pakai semua baris yang sedang dirender
+
+    table.querySelectorAll('thead select[data-col]').forEach(sel => {
+      const keep = sel.value; // simpan pilihan user
+
+      // hapus opsi lama (kecuali "Semua")
+      sel.querySelectorAll('option:not(:first-child)').forEach(o => o.remove());
+
+      const col = +sel.dataset.col;
+      const vals = new Set(
+        rows
+          .map(r => (r.cells[col]?.textContent || '').trim())
+          .filter(Boolean)
+      );
+
+      [...vals].sort((a, b) => a.localeCompare(b)).forEach(v => {
+        const o = document.createElement('option');
+        o.value = v;
+        o.textContent = v;
+        sel.appendChild(o);
+      });
+
+      // kembalikan pilihan sebelumnya bila masih valid
+      if (keep && [...sel.options].some(o => o.value === keep)) sel.value = keep;
+    });
+  }
+
+
+  function rowMatchByFilters(tr) {
+    const tds = [...tr.cells];
+    for (const key in columnFilter) {
+      const i = +key;
+      const cfg = columnFilter[key];
+      const raw = (tds[i]?.textContent || '').trim();
+
+      if (cfg.kind === 'text') {
+        if (cfg.q && !raw.toLowerCase().includes(cfg.q.toLowerCase())) return false;
+      } else if (cfg.kind === 'select') {
+        if (cfg.q && raw !== cfg.q) return false;
+      }
+    }
+    return true;
+  }
+
+  // ====== TERAPKAN FILTER KE TABEL ======
+  const applyColumnFilters = (() => {
+    const run = () => {
+      const table = document.getElementById(TABLE_ID);
+      const tbody = table?.tBodies?.[0];
+      if (!tbody) return;
+
+      [...tbody.rows].forEach(tr => {
+        tr.style.display = rowMatchByFilters(tr) ? '' : 'none';
+      });
+    };
+    return debounce(run, 120);
+  })();
+
+  function bindFilterInputs() {
+    const table = document.getElementById(TABLE_ID);
+    if (!table) return;
+
+    // input teks per kolom (termasuk kolom tanggal yang sekarang string)
+    table.querySelectorAll('thead input[data-col]').forEach(inp => {
+      const col = +inp.dataset.col;
+      if (!columnFilter[col]) columnFilter[col] = { kind: 'text', q: '' };
+      inp.addEventListener('input', e => {
+        columnFilter[col].q = e.target.value;
+        applyColumnFilters();
+      });
+    });
+
+    // select per kolom
+    table.querySelectorAll('thead select[data-col]').forEach(sel => {
+      const col = +sel.dataset.col;
+      if (!columnFilter[col]) columnFilter[col] = { kind: 'select', q: '' };
+      sel.addEventListener('change', e => {
+        columnFilter[col].q = e.target.value;
+        applyColumnFilters();
+      });
+    });
+  }
+
+
+
 
   // ====== Localized label maps (ID) ======
   const interestMapID = {
@@ -402,292 +615,299 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     rowsEl.innerHTML = data.map((it, idx) => {
-      return `
-        <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100
-                   dark:odd:bg-gray-800 dark:even:bg-gray-800/60 dark:hover:bg-gray-700/60">
-          <td class="px-3 py-2 text-gray-600 dark:text-gray-300">${offset + idx + 1}</td>
+        // ==== (ISI KOLOM TETAP, PERSIS seperti punyamu) ====
+        return `
+          <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100
+                    dark:odd:bg-gray-800 dark:even:bg-gray-800/60 dark:hover:bg-gray-700/60">
+            <td class="px-3 py-2 text-gray-600 dark:text-gray-300">${offset + idx + 1}</td>
 
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.fullname)}">${fmtStr(it.fullname)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.born_date)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.student_id)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.email)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${labelize(genderMapID, it.gender)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.phone_number)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.institution_name)}">${fmtStr(it.institution_name)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.study_program)}">${fmtStr(it.study_program)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.faculty)}">${fmtStr(it.faculty)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.current_city)}">${fmtStr(it.current_city)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_reason)}">${fmtStr(it.internship_reason)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(typeMapID, it.internship_type)}">${labelize(typeMapID, it.internship_type)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(arrangementMapID, it.internship_arrangement)}">${labelize(arrangementMapID, it.internship_arrangement)}</span></td>
-          <td class="px-3 py-2 align-top">
-            <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium ${it.current_status==='Fresh Graduate'
-              ? 'bg-slate-100 text-slate-800 dark:bg-slate-600/20 dark:text-slate-300'
-              : (it.current_status==='Student'
-                ? 'bg-sky-100 text-sky-800 dark:bg-sky-600/20 dark:text-sky-300'
-                : 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200')}">
-              ${labelize(statusNowMapID, it.current_status)}
-            </span>
-          </td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.english_book_ability)}">${fmtStr(it.english_book_ability)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.supervisor_contact)}">${fmtStr(it.supervisor_contact)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.fullname)}">${fmtStr(it.fullname)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.born_date)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.student_id)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.email)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${labelize(genderMapID, it.gender)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.phone_number)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.institution_name)}">${fmtStr(it.institution_name)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.study_program)}">${fmtStr(it.study_program)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.faculty)}">${fmtStr(it.faculty)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.current_city)}">${fmtStr(it.current_city)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_reason)}">${fmtStr(it.internship_reason)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(typeMapID, it.internship_type)}">${labelize(typeMapID, it.internship_type)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(arrangementMapID, it.internship_arrangement)}">${labelize(arrangementMapID, it.internship_arrangement)}</span></td>
+            <td class="px-3 py-2 align-top">
+              <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium ${it.current_status==='Fresh Graduate'
+                ? 'bg-slate-100 text-slate-800 dark:bg-slate-600/20 dark:text-slate-300'
+                : (it.current_status==='Student'
+                  ? 'bg-sky-100 text-sky-800 dark:bg-sky-600/20 dark:text-sky-300'
+                  : 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200')}">
+                ${labelize(statusNowMapID, it.current_status)}
+              </span>
+            </td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.english_book_ability)}">${fmtStr(it.english_book_ability)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.supervisor_contact)}">${fmtStr(it.supervisor_contact)}</span></td>
 
-          <td class="px-3 py-2 align-top">
-            <span class="block max-w-[18rem] truncate" title="${interestLabelID(it.internship_interest)}">
-              ${interestLabelID(it.internship_interest)}
-            </span>
-          </td>
+            <td class="px-3 py-2 align-top">
+              <span class="block max-w-[18rem] truncate" title="${interestLabelID(it.internship_interest)}">
+                ${interestLabelID(it.internship_interest)}
+              </span>
+            </td>
 
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_interest_other)}">${fmtStr(it.internship_interest_other)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.design_software)}">${fmtStr(it.design_software)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.video_software)}">${fmtStr(it.video_software)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.programming_languages)}">${fmtStr(it.programming_languages)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.digital_marketing_type)}">${fmtStr(it.digital_marketing_type)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.digital_marketing_type_other)}">${fmtStr(it.digital_marketing_type_other)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_interest_other)}">${fmtStr(it.internship_interest_other)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.design_software)}">${fmtStr(it.design_software)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.video_software)}">${fmtStr(it.video_software)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.programming_languages)}">${fmtStr(it.programming_languages)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.digital_marketing_type)}">${fmtStr(it.digital_marketing_type)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.digital_marketing_type_other)}">${fmtStr(it.digital_marketing_type_other)}</span></td>
 
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(yesNoMapID, it.laptop_equipment)}">${labelize(yesNoMapID, it.laptop_equipment)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.owned_tools)}">${fmtStr(it.owned_tools)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.owned_tools_other)}">${fmtStr(it.owned_tools_other)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(yesNoMapID, it.laptop_equipment)}">${labelize(yesNoMapID, it.laptop_equipment)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.owned_tools)}">${fmtStr(it.owned_tools)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.owned_tools_other)}">${fmtStr(it.owned_tools_other)}</span></td>
 
-          <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.start_date)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.end_date)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.start_date)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.end_date)}</span></td>
 
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_info_sources)}">${fmtStr(it.internship_info_sources)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_info_other)}">${fmtStr(it.internship_info_other)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.current_activities)}">${fmtStr(it.current_activities)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_info_sources)}">${fmtStr(it.internship_info_sources)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_info_other)}">${fmtStr(it.internship_info_other)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.current_activities)}">${fmtStr(it.current_activities)}</span></td>
 
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.boarding_info)}">${fmtStr(it.boarding_info)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.family_status)}">${fmtStr(it.family_status)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.parent_wa_contact)}</span></td>
-          <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.social_media_instagram)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.boarding_info)}">${fmtStr(it.boarding_info)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.family_status)}">${fmtStr(it.family_status)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.parent_wa_contact)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.social_media_instagram)}</span></td>
 
-          <td class="px-3 py-2 align-top">${
-            it.cv_ktp_portofolio_pdf
-              ? `<a href="${it.cv_ktp_portofolio_pdf}" target="_blank" class="text-emerald-600 hover:text-emerald-700 underline">Lihat</a>`
-              : '<span class="text-gray-400">-</span>'}
-          </td>
-          <td class="px-3 py-2 align-top">${
-            it.portofolio_visual
-              ? `<a href="${it.portofolio_visual}" target="_blank" class="text-emerald-600 hover:text-emerald-700 underline">Lihat</a>`
-              : '<span class="text-gray-400">-</span>'}
-          </td>
+            <td class="px-3 py-2 align-top">${
+              it.cv_ktp_portofolio_pdf
+                ? `<a href="${it.cv_ktp_portofolio_pdf}" target="_blank" class="text-emerald-600 hover:text-emerald-700 underline">Lihat</a>`
+                : '<span class="text-gray-400">-</span>'}
+            </td>
+            <td class="px-3 py-2 align-top">${
+              it.portofolio_visual
+                ? `<a href="${it.portofolio_visual}" target="_blank" class="text-emerald-600 hover:text-emerald-700 underline">Lihat</a>`
+                : '<span class="text-gray-400">-</span>'}
+            </td>
 
-          <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtDate(it.created_at)}</span></td>
+            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtDate(it.created_at)}</span></td>
 
-          <td class="px-3 py-2 align-top">
-            ${buildStatusCell(it)}
-          </td>
+            <td class="px-3 py-2 align-top">
+              ${buildStatusCell(it)}
+            </td>
 
-          ${
-            SCOPE === 'completed'
-              ? `
-                <td class="px-3 py-2 align-top">
-                  ${
-                    (it.certificate_pdf_url || it.certificate_url || true)
-                      ? `
-                        <div class="flex items-center gap-2">
-                          <!-- Tombol existing: Download via view certmagangjogjacom-->
-                          ${
-                            (it.certificate_pdf_url || it.certificate_url)
-                              ? `<a href="${it.certificate_pdf_url || it.certificate_url}"
-                                    class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                                    title="Unduh PDF yang identik (render JS/canvas)" target="_blank" rel="noopener">
-                                    Magangjogja.com
-                                 </a>`
-                              : ''
-                          }
+            ${
+              SCOPE === 'completed'
+                ? `
+                  <td class="px-3 py-2 align-top">
+                    ${
+                      (it.certificate_pdf_url || it.certificate_url || true)
+                        ? `
+                          <div class="flex items-center gap-2">
+                            ${ (it.certificate_pdf_url || it.certificate_url)
+                                ? `<a href="${it.certificate_pdf_url || it.certificate_url}"
+                                      class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                      title="Unduh PDF yang identik (render JS/canvas)" target="_blank" rel="noopener">
+                                      Magangjogja.com
+                                  </a>`
+                                : ''
+                              }
+                            ${(() => {
+                                const tmpl = @json($certAreaKerjaComRouteTmpl);
+                                const url2 = it.certificate_areakerjacom_url || (tmpl ? tmpl.replace('__ID__', it.id) : '');
+                                if (!url2) return '';
+                                return `<a href="${url2}"
+                                            class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                            title="Unduh versi certareakerjacom" target="_blank" rel="noopener">
+                                            AreaKerja.com
+                                        </a>`;
+                              })()
+                            }
+                          </div>
+                        `
+                        : '<span class="text-gray-400">-</span>'
+                    }
+                  </td>
+                `
+                : ''
+            }
+          </tr>
+        `;
+      }).join('');
 
-                          <!-- Tombol baru: Download via view certareakerjacom -->
-                          ${
-                            (() => {
-                              const tmpl = @json($certAreaKerjaComRouteTmpl);
-                              const url2 = it.certificate_areakerjacom_url || (tmpl ? tmpl.replace('__ID__', it.id) : '');
-                              if (!url2) return '';
-                              return `<a href="${url2}"
-                                          class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                                          title="Unduh versi certareakerjacom" target="_blank" rel="noopener">
-                                          AreaKerja.com
-                                      </a>`;
-                            })()
-                          }
-                        </div>
-                      `
-                      : '<span class="text-gray-400">-</span>'
-                  }
-                </td>
-              `
-              : ''
-          }
-        </tr>
-      `;
-    }).join('');
-
-    bindStatusListeners();
-    buildPager(meta);
-  }
-
-  function buildPager(meta){
-    const { current_page, last_page } = meta;
-    const prev = current_page > 1 ? current_page - 1 : null;
-    const next = current_page < last_page ? current_page + 1 : null;
-
-    pagerEl.innerHTML = `
-      <div class="flex items-center justify-between">
-        <div class="text-sm text-gray-600 dark:text-gray-300">
-          Halaman <strong>${current_page}</strong> dari <strong>${last_page}</strong>
-        </div>
-        <div class="flex gap-2">
-          <button ${!prev?'disabled':''} data-goto="${prev||''}"
-            class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Sebelumnya</button>
-          <button ${!next?'disabled':''} data-goto="${next||''}"
-            class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Berikutnya</button>
-        </div>
-      </div>
-    `;
-
-    pagerEl.querySelectorAll('button[data-goto]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const p = Number(btn.dataset.goto);
-        if (p) loadPage(p);
-      });
-    });
-  }
-
-  // ========== AKSI: BATALKAN ==========
-  discardBtn?.addEventListener('click', () => {
-    if (pending.size === 0) return;
-    for (const {select, from} of pending.values()) {
-      select.value = from;
-      // tetap biarkan dataset.current tidak berubah; commit UI saja
-      markSelect(select, false);
-    }
-    pending.clear();
-    updatePendingBar();
-    pushToast('Semua perubahan dibatalkan.', 'success');
-  });
-
-  // Helper: batasi paralel request agar tidak membebani server
-  async function runWithConcurrency(tasks, limit=4){
-    const results = [];
-    let i = 0;
-    const workers = Array.from({length: Math.min(limit, tasks.length)}, async () => {
-      while (i < tasks.length) {
-        const cur = i++;
-        try {
-          results[cur] = await tasks[cur]();
-        } catch (e) {
-          results[cur] = e;
-        }
+        bindStatusListeners();
+        buildPager(meta);
+        hydrateSelectOptions();
+        applyColumnFilters();
       }
-    });
-    await Promise.all(workers);
-    return results;
-  }
 
-  // ========== AKSI: SIMPAN ==========
-  saveAllBtn?.addEventListener('click', async () => {
-    if (pending.size === 0) return;
+      function buildPager(meta){
+        const { current_page, last_page } = meta;
+        const prev = current_page > 1 ? current_page - 1 : null;
+        const next = current_page < last_page ? current_page + 1 : null;
 
-    const items = Array.from(pending.values());
-    saveAllBtn.disabled = true;
-    discardBtn.disabled = true;
+        pagerEl.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600 dark:text-gray-300">
+              Halaman <strong>${current_page}</strong> dari <strong>${last_page}</strong>
+            </div>
+            <div class="flex gap-2">
+              <button ${!prev?'disabled':''} data-goto="${prev||''}"
+                class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Sebelumnya</button>
+              <button ${!next?'disabled':''} data-goto="${next||''}"
+                class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Berikutnya</button>
+            </div>
+          </div>
+        `;
 
-    const tasks = items.map(item => async () => {
-      // jika endpoint-mu memakai field berbeda, ganti di sini:
-      await patchForm(item.url, { internship_status: item.to });
-      return item;
-    });
-
-    try {
-      const results = await runWithConcurrency(tasks, 4);
-
-      let ok = 0, fail = 0;
-      const failed = [];
-
-      results.forEach((res, idx) => {
-        if (res instanceof Error) {
-          fail++;
-          failed.push({item: items[idx], err: res});
-          return;
-        }
-        ok++;
-
-        const it = res; // item yang berhasil
-        it.select.dataset.current = it.to; // commit state baru
-        markSelect(it.select, false);
-        applyBadge(it.badge, it.to);
-
-        pending.delete(it.id);
-      });
-
-      updatePendingBar();
-
-      if (ok)  pushToast(`${ok} perubahan disimpan.`, 'success');
-      if (fail){
-        failed.forEach(({item}) => { // tetap pending
-          item.select.value = item.to;
-          markSelect(item.select, true);
+        pagerEl.querySelectorAll('button[data-goto]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const p = Number(btn.dataset.goto);
+            if (p) loadPage(p);
+          });
         });
-        pushToast(`${fail} perubahan gagal disimpan. Coba lagi.`, 'error');
       }
-    } catch (e) {
-      pushToast('Gagal menyimpan perubahan.', 'error');
-    } finally {
-      saveAllBtn.disabled = pending.size === 0;
-      discardBtn.disabled = false;
-    }
-  });
 
-  // ===== Loader API
-  async function loadPage(page=1){
-    const perPage = 15;
-    const params = new URLSearchParams({
-      scope: SCOPE,
-      page: String(page),
-      per_page: String(perPage),
+      // ========== AKSI: BATALKAN ==========
+      discardBtn?.addEventListener('click', () => {
+        if (pending.size === 0) return;
+        for (const {select, from} of pending.values()) {
+          select.value = from;
+          // tetap biarkan dataset.current tidak berubah; commit UI saja
+          markSelect(select, false);
+        }
+        pending.clear();
+        updatePendingBar();
+        pushToast('Semua perubahan dibatalkan.', 'success');
+      });
+
+      // Helper: batasi paralel request agar tidak membebani server
+      async function runWithConcurrency(tasks, limit=4){
+        const results = [];
+        let i = 0;
+        const workers = Array.from({length: Math.min(limit, tasks.length)}, async () => {
+          while (i < tasks.length) {
+            const cur = i++;
+            try {
+              results[cur] = await tasks[cur]();
+            } catch (e) {
+              results[cur] = e;
+            }
+          }
+        });
+        await Promise.all(workers);
+        return results;
+      }
+
+      // ========== AKSI: SIMPAN ==========
+      saveAllBtn?.addEventListener('click', async () => {
+        if (pending.size === 0) return;
+
+        const items = Array.from(pending.values());
+        saveAllBtn.disabled = true;
+        discardBtn.disabled = true;
+
+        const tasks = items.map(item => async () => {
+          // jika endpoint-mu memakai field berbeda, ganti di sini:
+          await patchForm(item.url, { internship_status: item.to });
+          return item;
+        });
+
+        try {
+          const results = await runWithConcurrency(tasks, 4);
+
+          let ok = 0, fail = 0;
+          const failed = [];
+
+          results.forEach((res, idx) => {
+            if (res instanceof Error) {
+              fail++;
+              failed.push({item: items[idx], err: res});
+              return;
+            }
+            ok++;
+
+            const it = res; // item yang berhasil
+            it.select.dataset.current = it.to; // commit state baru
+            markSelect(it.select, false);
+            applyBadge(it.badge, it.to);
+
+            pending.delete(it.id);
+          });
+
+          updatePendingBar();
+
+          if (ok)  pushToast(`${ok} perubahan disimpan.`, 'success');
+          if (fail){
+            failed.forEach(({item}) => { // tetap pending
+              item.select.value = item.to;
+              markSelect(item.select, true);
+            });
+            pushToast(`${fail} perubahan gagal disimpan. Coba lagi.`, 'error');
+          }
+        } catch (e) {
+          pushToast('Gagal menyimpan perubahan.', 'error');
+        } finally {
+          saveAllBtn.disabled = pending.size === 0;
+          discardBtn.disabled = false;
+        }
+      });
+
+      // ===== Loader API
+      async function loadPage(page = 1, perPage = 15, searchQuery = '') {
+          const params = new URLSearchParams({
+              scope: SCOPE,
+              page: String(page),
+              per_page: searchQuery ? '1000' : String(perPage),  // Jika ada pencarian, tampilkan semua data
+              search: searchQuery // Menambahkan parameter pencarian
+          });
+
+          rowsEl.innerHTML = `
+              <tr>
+                  <td colspan="{{ count($fields) + 1 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
+                      Memuat data…
+                  </td>
+              </tr>`;
+
+          try {
+              const url = `${API_URL}?${params.toString()}`;
+              const res = await fetch(url, {
+                  headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                  credentials: 'same-origin'
+              });
+              if (!res.ok) {
+                  const txt = await res.text().catch(() => '');
+                  throw new Error(`HTTP ${res.status} ${res.statusText} ${txt}`);
+              }
+              const json = await res.json();
+              renderRows(json);
+
+              // Hapus pagination jika pencarian aktif
+              if (searchQuery) {
+                  pagerEl.innerHTML = ''; // Hilangkan pagination saat pencarian aktif
+              } 
+          } catch (e) {
+              console.error('Error loading page data:', e);
+              rowsEl.innerHTML = `
+                  <tr>
+                      <td colspan="{{ count($fields) + 1 }}" class="px-6 py-6 text-center text-rose-600">
+                          Gagal memuat data.
+                      </td>
+                  </tr>`;
+          }
+      }
+
+
+
+      bindFilterInputs();
+      // initial
+      loadPage(Number(new URLSearchParams(location.search).get('page') || 1));
+
+      // warning unload jika masih ada pending
+      window.addEventListener('beforeunload', (e) => {
+        if (pending.size > 0) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      });
     });
 
-    rowsEl.innerHTML = `
-      <tr>
-        <td colspan="{{ count($fields) + 1 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
-          Memuat data…
-        </td>
-      </tr>`;
-
-    try {
-      const url = `${API_URL}?${params.toString()}`;
-      const res = await fetch(url, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        credentials: 'same-origin'
-      });
-      if (!res.ok) {
-        const txt = await res.text().catch(()=> '');
-        throw new Error(`HTTP ${res.status} ${res.statusText} ${txt}`);
-      }
-      const json = await res.json();
-      renderRows(json);
-    } catch (e) {
-      console.error('Gagal memuat /admin/interns.json:', e);
-      rowsEl.innerHTML = `
-        <tr>
-          <td colspan="{{ count($fields) + 1 }}" class="px-6 py-6 text-center text-rose-600">
-            Gagal memuat data.
-          </td>
-        </tr>`;
-    }
-  }
-
-  // initial
-  loadPage(Number(new URLSearchParams(location.search).get('page') || 1));
-
-  // warning unload jika masih ada pending
-  window.addEventListener('beforeunload', (e) => {
-    if (pending.size > 0) {
-      e.preventDefault();
-      e.returnValue = '';
-    }
-  });
-});
 </script>
 
 @endsection

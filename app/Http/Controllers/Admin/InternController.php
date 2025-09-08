@@ -69,16 +69,21 @@ class InternController extends Controller
      */
     private function table(Request $request, $query, string $title, string $scope)
     {
-        $query->when($request->filled('q'), function ($q) use ($request) {
+        // Jika ada pencarian, hanya ambil data tanpa pagination
+        if ($request->filled('q')) {
             $s = trim($request->get('q'));
-            $q->where(function ($qq) use ($s) {
+            $query->where(function ($qq) use ($s) {
                 $qq->where('fullname', 'like', "%{$s}%")
-                   ->orWhere('email', 'like', "%{$s}%")
-                   ->orWhere('student_id', 'like', "%{$s}%");
+                ->orWhere('email', 'like', "%{$s}%")
+                ->orWhere('student_id', 'like', "%{$s}%");
             });
-        });
 
-        $interns = $query->paginate(15)->withQueryString();
+            // Ambil semua data yang sesuai dengan pencarian
+            $interns = $query->get();
+        } else {
+            // Jika tidak ada pencarian, gunakan pagination
+            $interns = $query->paginate(1000)->withQueryString();
+        }
 
         return view('interns.index', [
             'interns' => $interns,

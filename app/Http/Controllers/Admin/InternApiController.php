@@ -191,7 +191,6 @@ class InternApiController extends Controller
             $raw    = trim($req->get('q'));
             $tokens = preg_split('/\s+/', $raw, -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
-            // Semua token HARUS match (AND antar token), tapi tiap token boleh match di kolom manapun (OR antar kolom)
             $q->where(function ($outer) use ($tokens, $searchable) {
                 foreach ($tokens as $token) {
                     $tokLower = Str::lower($token);
@@ -211,7 +210,7 @@ class InternApiController extends Controller
                                 foreach ($genderCandidates as $g) {
                                     $inner->orWhere('gender', 'like', "%{$g}%");
                                 }
-                                // tetap izinkan like biasa juga:
+                                continue;
                             }
                             $inner->orWhere($col, 'like', "%{$token}%");
                         }
@@ -266,8 +265,15 @@ class InternApiController extends Controller
         // Urut terbaru
         $q->orderByDesc('created_at');
 
-        // Paginate
-        $p = $q->paginate($perPage)->appends($req->query());
+        // Cek apakah pencarian aktif
+        $isSearching = $req->filled('q');
+
+        // Jika ada pencarian, ambil semua data (tanpa pagination), jika tidak, gunakan pagination
+        if ($isSearching) {
+            $interns = $q->get();
+        } else {
+            $interns = $q->paginate($perPage)->appends($req->query());
+        }
 
         // Map data → tambah certificate_pdf_url (Browsershot) + aman-kan hanya untuk completed
         $statusCompleted = defined(IR::class.'::STATUS_COMPLETED') ? IR::STATUS_COMPLETED : 'completed';
@@ -278,14 +284,10 @@ class InternApiController extends Controller
             return [
                 'id'            => $r->id,
                 'fullname'      => $r->fullname,
-
-                // Tanggal lahir tetap tampil human-readable Indonesia
                 'born_date'     => $this->formatIndoDateOut($r->born_date),
-
                 'student_id'    => preg_replace('/^(NIM|NIS)\s*/i', '', (string) $r->student_id),
                 'email'         => $r->email,
                 'internship_status' => $r->internship_status,
-
                 'gender'        => $this->labelize($this->mapGender, $r->gender),
                 'phone_number'  => $r->phone_number,
                 'institution_name' => $r->institution_name,
@@ -293,68 +295,57 @@ class InternApiController extends Controller
                 'faculty'       => $r->faculty,
                 'current_city'  => $r->current_city,
                 'internship_reason' => $r->internship_reason,
-
-                'internship_type'         => $this->labelize($this->mapType, $r->internship_type),
-                'internship_arrangement'  => $this->labelize($this->mapArrangement, $r->internship_arrangement),
-                'current_status'          => $this->labelize($this->mapCurrentStatus, $r->current_status),
-
+                'internship_type' => $this->labelize($this->mapType, $r->internship_type),
+                'internship_arrangement' => $this->labelize($this->mapArrangement, $r->internship_arrangement),
+                'current_status' => $this->labelize($this->mapCurrentStatus, $r->current_status),
                 'english_book_ability' => $r->english_book_ability,
-                'supervisor_contact'   => $r->supervisor_contact,
-                'internship_interest'  => $this->labelize($this->mapInterest, $r->internship_interest),
+                'supervisor_contact' => $r->supervisor_contact,
+                'internship_interest' => $this->labelize($this->mapInterest, $r->internship_interest),
                 'internship_interest_other' => $r->internship_interest_other,
-
                 'design_software' => $r->design_software,
-                'video_software'  => $r->video_software,
+                'video_software' => $r->video_software,
                 'programming_languages' => $r->programming_languages,
                 'digital_marketing_type' => $r->digital_marketing_type,
                 'digital_marketing_type_other' => $r->digital_marketing_type_other,
-
                 'laptop_equipment' => $this->labelize($this->mapLaptop, $r->laptop_equipment),
-                'owned_tools'      => $this->labelizeList($this->mapTools, $r->owned_tools),
-                'owned_tools_other'=> $r->owned_tools_other,
-
-                // MULAI & SELESAI → format Indonesia "d F Y"
-                'start_date'       => $this->formatIndoDateOut($r->start_date),
-                'end_date'         => $this->formatIndoDateOut($r->end_date),
-
+                'owned_tools' => $this->labelizeList($this->mapTools, $r->owned_tools),
+                'owned_tools_other' => $r->owned_tools_other,
+                'start_date' => $this->formatIndoDateOut($r->start_date),
+                'end_date' => $this->formatIndoDateOut($r->end_date),
                 'internship_info_sources' => $r->internship_info_sources,
-                'internship_info_other'   => $r->internship_info_other,
-                'current_activities'      => $r->current_activities,
-
-                'boarding_info'           => $this->labelize($this->mapYesNo, $r->boarding_info),
-                'family_status'           => $this->labelize($this->mapYesNo, $r->family_status),
-
-                'parent_wa_contact'       => $r->parent_wa_contact,
-                'social_media_instagram'  => $r->social_media_instagram,
-                'cv_ktp_portofolio_pdf'   => $r->cv_ktp_portofolio_pdf ? asset('storage/'.$r->cv_ktp_portofolio_pdf) : null,
-                'portofolio_visual'       => $r->portofolio_visual ? asset('storage/'.$r->portofolio_visual) : null,
-
-                // ISO 8601 → aman diparse di JS (new Date(...))
-                'created_at'              => optional($r->created_at)?->toIso8601String(),
-
-                // URL sertifikat: hanya untuk yang selesai
-                'certificate_url'         => $canCert ? route('admin.interns.certificate', $r) : null,          // DomPDF (ringan)
-                'certificate_pdf_url'     => $canCert ? route('admin.interns.certificate.pdf', $r) : null,      // Headless Chrome (identik)
-                'status_update_url'       => route('admin.interns.status.update', $r),
+                'internship_info_other' => $r->internship_info_other,
+                'current_activities' => $r->current_activities,
+                'boarding_info' => $this->labelize($this->mapYesNo, $r->boarding_info),
+                'family_status' => $this->labelize($this->mapYesNo, $r->family_status),
+                'parent_wa_contact' => $r->parent_wa_contact,
+                'social_media_instagram' => $r->social_media_instagram,
+                'cv_ktp_portofolio_pdf' => $r->cv_ktp_portofolio_pdf ? asset('storage/'.$r->cv_ktp_portofolio_pdf) : null,
+                'portofolio_visual' => $r->portofolio_visual ? asset('storage/'.$r->portofolio_visual) : null,
+                'created_at' => optional($r->created_at)?->toIso8601String(),
+                'certificate_url' => $canCert ? route('admin.interns.certificate', $r) : null,
+                'certificate_pdf_url' => $canCert ? route('admin.interns.certificate.pdf', $r) : null,
+                'status_update_url' => route('admin.interns.status.update', $r),
             ];
-        }, $p->items());
+        }, $interns->items());
 
         return response()->json([
             'data' => $rows,
             'meta' => [
-                'current_page' => $p->currentPage(),
-                'per_page'     => $p->perPage(),
-                'total'        => $p->total(),
-                'last_page'    => $p->lastPage(),
+                'current_page' => $interns->currentPage(),
+                'per_page'     => $interns->perPage(),
+                'total'        => $interns->total(),
+                'last_page'    => $interns->lastPage(),
             ],
             'links' => [
-                'first' => $p->url(1),
-                'prev'  => $p->previousPageUrl(),
-                'next'  => $p->nextPageUrl(),
-                'last'  => $p->url($p->lastPage()),
+                'first' => $interns->url(1),
+                'prev'  => $interns->previousPageUrl(),
+                'next'  => $interns->nextPageUrl(),
+                'last'  => $interns->url($interns->lastPage()),
             ],
         ]);
     }
+
+
 
     /**
      * Konversi input tanggal bebas menjadi kandidat 'Y-m-d'.
