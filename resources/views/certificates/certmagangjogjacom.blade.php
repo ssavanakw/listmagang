@@ -1,9 +1,15 @@
+@php
+
+  $pdfBaseName = 'magangjogja-' . \Illuminate\Support\Str::slug(optional($intern)->fullname ?? 'nama-pemagang', '-');
+@endphp
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Certificate</title>
+<title>{{ $pdfBaseName }}</title>
 
 <style>
   /* A4 landscape @96DPI = 1123 x 794 px */

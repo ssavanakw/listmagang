@@ -16,14 +16,6 @@
         if ($route && isset($mapRouteScope[$route])) $scope = $mapRouteScope[$route];
     }
 
-    /**
-     * ===============================
-     * TEMPLATE ROUTE CERTAREAKERJACOM
-     * ===============================
-     * Ganti 'admin.interns.certificate.areakerjacom' & key parameter 'intern'
-     * sesuai definisi route milikmu. Contoh:
-     * Route::get('/admin/interns/{intern}/certificate/areakerjacom', ...)->name('admin.interns.certificate.areakerjacom');
-     */
     $certAreaKerjaComRouteTmpl = route(
         'admin.interns.certificate.areakerjacom',
         ['intern' => '__ID__']
@@ -515,13 +507,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     (it.certificate_pdf_url || it.certificate_url || true)
                       ? `
                         <div class="flex items-center gap-2">
-                          <!-- Tombol existing: Download PDF -->
+                          <!-- Tombol existing: Download via view certmagangjogjacom-->
                           ${
                             (it.certificate_pdf_url || it.certificate_url)
                               ? `<a href="${it.certificate_pdf_url || it.certificate_url}"
                                     class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                                     title="Unduh PDF yang identik (render JS/canvas)" target="_blank" rel="noopener">
-                                    Download PDF
+                                    Magangjogja.com
                                  </a>`
                               : ''
                           }
@@ -535,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
                               return `<a href="${url2}"
                                           class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                                           title="Unduh versi certareakerjacom" target="_blank" rel="noopener">
-                                          Download (certareakerjacom)
+                                          AreaKerja.com
                                       </a>`;
                             })()
                           }

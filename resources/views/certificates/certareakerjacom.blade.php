@@ -118,6 +118,7 @@
   // Mode viewer latar
   $mode = request()->query('mode', 'edit');
   $viewerBg = $mode === 'clean' ? '#ffffff' : '#f3f4f6';
+  $pdfBaseName = 'areakerja-'.Str::slug($recipient ?? 'nama-pemagang','-');
 @endphp
 
 <!DOCTYPE html>
@@ -126,7 +127,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="light">
-  <title>{{ $title }} - {{ $company }}</title>
+  <title>{{ $pdfBaseName }}</title>
 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="image" href="{{ $bg }}">
