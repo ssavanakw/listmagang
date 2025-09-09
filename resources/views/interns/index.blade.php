@@ -849,7 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       // ===== Loader API
-      async function loadPage(page = 1, perPage = 15, searchQuery = '') {
+      async function loadPage(page = 1, perPage = 1000, searchQuery = '') {
           const params = new URLSearchParams({
               scope: SCOPE,
               page: String(page),

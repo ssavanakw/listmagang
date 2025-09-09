@@ -158,8 +158,8 @@ class InternApiController extends Controller
     public function index(Request $req)
     {
         $scope   = $req->get('scope', 'all');
-        $perPage = (int) $req->get('per_page', 15);
-        $perPage = $perPage > 0 ? min($perPage, 100) : 15;
+        $perPage = (int) $req->get('per_page', 1000);
+        $perPage = $perPage > 0 ? min($perPage, 1000) : 1000;
 
         // Kolom yang ikut di-search (sinkron dengan kolom di Blade)
         $searchable = [

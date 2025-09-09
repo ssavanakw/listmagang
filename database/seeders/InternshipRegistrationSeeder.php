@@ -95,7 +95,7 @@ class InternshipRegistrationSeeder extends Seeder
             $end = Carbon::createFromFormat('Y-m-d',$start)->addMonths($durMonths)->format('Y-m-d');
 
             // ID mahasiswa/siswa
-            $studentId = sprintf('%02d.%02d.%04d', mt_rand(18,25), mt_rand(1,14), mt_rand(1000,9999));
+            $studentId = sprintf('%02d%02d%04d', mt_rand(18,25), mt_rand(1,14), mt_rand(1000,9999));
 
             // Email & IG
             $userSlug = Str::slug($fullname, '.');
