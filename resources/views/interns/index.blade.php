@@ -184,7 +184,6 @@
                     </tr>
                 </thead>
 
-
                 <tbody id="rows" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <tr>
                         <td colspan="{{ count($fields) + 1 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
