@@ -6,53 +6,77 @@
     <!-- Header -->
     <div class="mb-6 flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard Admin</h1>
-            <p class="text-gray-600 dark:text-gray-400">Ringkasan aktivitas dan statistik pemagang.</p>
+            <h1 class="text-2xl font-bold text-gray-900 ">Dashboard Admin</h1>
+            <p class="text-gray-600 ">Ringkasan aktivitas dan statistik pemagang.</p>
         </div>
 
         <!-- Quick Nav -->
         <div class="flex gap-2">
             <a href="{{ route('admin.interns.index') }}"
-               class="px-3 py-2 rounded-lg text-sm bg-gray-200 dark:bg-gray-700 dark:text-gray-100">Semua</a>
+               class="px-3 py-2 rounded-lg text-sm bg-gray-200 ">Semua</a>
             <a href="{{ route('admin.interns.active') }}"
-               class="px-3 py-2 rounded-lg text-sm bg-gray-200 dark:bg-gray-700 dark:text-gray-100">Aktif</a>
+               class="px-3 py-2 rounded-lg text-sm bg-gray-200 ">Aktif</a>
             <a href="{{ route('admin.interns.completed') }}"
-               class="px-3 py-2 rounded-lg text-sm bg-gray-200 dark:bg-gray-700 dark:text-gray-100">Selesai</a>
+               class="px-3 py-2 rounded-lg text-sm bg-gray-200 ">Selesai</a>
             <a href="{{ route('admin.interns.exited') }}"
-               class="px-3 py-2 rounded-lg text-sm bg-gray-200 dark:bg-gray-700 dark:text-gray-100">Keluar</a>
+               class="px-3 py-2 rounded-lg text-sm bg-gray-200 ">Keluar</a>
             <a href="{{ route('admin.interns.pending') }}"
-               class="px-3 py-2 rounded-lg text-sm bg-gray-200 dark:bg-gray-700 dark:text-gray-100">Pending</a>
+               class="px-3 py-2 rounded-lg text-sm bg-gray-200 ">Pending</a>
         </div>
     </div>
 
     <!-- Statistik Cards -->
     <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-5">
-        <div class="rounded-lg shadow bg-white dark:bg-gray-800 p-4">
-            <p class="mb-1 text-sm text-gray-500 dark:text-gray-400">Pendaftar Baru</p>
-            <p class="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">{{ $counts['new'] ?? 0 }}</p>
+        <!-- Pendaftar Baru -->
+        <div class="rounded-lg shadow-lg bg-emerald-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-emerald-900 duration-300">
+            <div class="flex justify-between items-center">
+                <p class="mb-2 text-sm font-medium text-gray-100">Pendaftar Baru</p>
+                <i class="fas fa-user-plus text-gray-100 text-2xl"></i>
+            </div>
+            <p class="text-4xl font-bold text-gray-100">{{ $counts['new'] ?? 0 }}</p>
         </div>
-        <div class="rounded-lg shadow bg-white dark:bg-gray-800 p-4">
-            <p class="mb-1 text-sm text-gray-500 dark:text-gray-400">Pemagang Aktif</p>
-            <p class="text-2xl font-semibold text-blue-600 dark:text-blue-400">{{ $counts['active'] ?? 0 }}</p>
+
+        <!-- Pemagang Aktif -->
+        <div class="rounded-lg shadow-lg bg-blue-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-blue-900 duration-300">
+            <div class="flex justify-between items-center">
+                <p class="mb-2 text-sm font-medium text-gray-100">Pemagang Aktif</p>
+                <i class="fas fa-users text-gray-100 text-2xl"></i>
+            </div>
+            <p class="text-4xl font-bold text-gray-100">{{ $counts['active'] ?? 0 }}</p>
         </div>
-        <div class="rounded-lg shadow bg-white dark:bg-gray-800 p-4">
-            <p class="mb-1 text-sm text-gray-500 dark:text-gray-400">Selesai</p>
-            <p class="text-2xl font-semibold text-indigo-600 dark:text-indigo-400">{{ $counts['completed'] ?? 0 }}</p>
+
+        <!-- Selesai -->
+        <div class="rounded-lg shadow-lg bg-indigo-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-indigo-900 duration-300">
+            <div class="flex justify-between items-center">
+                <p class="mb-2 text-sm font-medium text-gray-100">Selesai</p>
+                <i class="fas fa-check-circle text-gray-100 text-2xl"></i>
+            </div>
+            <p class="text-4xl font-bold text-gray-100">{{ $counts['completed'] ?? 0 }}</p>
         </div>
-        <div class="rounded-lg shadow bg-white dark:bg-gray-800 p-4">
-            <p class="mb-1 text-sm text-gray-500 dark:text-gray-400">Keluar</p>
-            <p class="text-2xl font-semibold text-rose-600 dark:text-rose-400">{{ $counts['exited'] ?? 0 }}</p>
+
+        <!-- Keluar -->
+        <div class="rounded-lg shadow-lg bg-rose-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-rose-900 duration-300">
+            <div class="flex justify-between items-center">
+                <p class="mb-2 text-sm font-medium text-gray-100">Keluar</p>
+                <i class="fas fa-sign-out-alt text-gray-100 text-2xl"></i>
+            </div>
+            <p class="text-4xl font-bold text-gray-100">{{ $counts['exited'] ?? 0 }}</p>
         </div>
-        <div class="rounded-lg shadow bg-white dark:bg-gray-800 p-4">
-            <p class="mb-1 text-sm text-gray-500 dark:text-gray-400">Pending</p>
-            <p class="text-2xl font-semibold text-amber-600 dark:text-amber-400">{{ $counts['pending'] ?? 0 }}</p>
+
+        <!-- Pending -->
+        <div class="rounded-lg shadow-lg bg-amber-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-amber-900 duration-300">
+            <div class="flex justify-between items-center">
+                <p class="mb-2 text-sm font-medium text-gray-100">Pending</p>
+                <i class="fas fa-clock text-gray-100 text-2xl"></i>
+            </div>
+            <p class="text-4xl font-bold text-gray-100">{{ $counts['pending'] ?? 0 }}</p>
         </div>
     </div>
 
     <!-- Chart: 1 Line Chart Total Pendaftar / Bulan -->
     <div class="grid grid-cols-1 gap-6 mb-8">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">
                 Tren Total Pendaftar (6 Bulan)
             </h2>
             <canvas id="chartApplicants" height="160"></canvas>
