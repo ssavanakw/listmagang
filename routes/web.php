@@ -81,6 +81,10 @@ Route::prefix('admin')->group(function () {
 
             Route::patch('/bulk/status', [InternController::class, 'bulkUpdateStatus'])
                 ->name('admin.interns.status.bulk');
+            
+            Route::patch('/{intern}', [InternController::class, 'update'])
+                ->name('admin.interns.update');
+
 
             // ===== Sertifikat default (yang sudah ada)
             Route::get('/{intern}/certificate', [InternController::class, 'certificate'])

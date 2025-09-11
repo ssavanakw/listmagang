@@ -145,6 +145,25 @@ class InternController extends Controller
     /**
      * PATCH /admin/interns/{intern}/status
      */
+    public function update(Request $request, $id)
+    {
+        $intern = IR::findOrFail($id);
+        $validatedData = $request->validate([
+            'fullname' => 'required|string|max:255',
+            'email'    => 'required|email|max:255',
+            'phone_number' => 'nullable|string|max:20',  // Pastikan validasi sesuai dengan input yang diterima
+        ]);
+        $intern->update($validatedData);
+        return response()->json($intern, 200);
+    }
+
+    public function destroy($id)
+    {
+        $intern = IR::findOrFail($id);
+        $intern->delete();
+        return response()->json(['message' => 'Data berhasil dihapus'], 200);
+    }
+
     public function updateStatus(Request $request, IR $intern)
     {
         $validated = $request->validate([

@@ -3,7 +3,7 @@
 @php
     use Illuminate\Support\Str;
 
-    // fallback scope kalau belum dikirim controller (infer dari route)
+
     if (!isset($scope)) {
         $scope = 'all';
         $route = request()->route()?->getName();
@@ -22,7 +22,51 @@
     );
 @endphp
 
+
+
+
 @section('content')
+@push('modals')
+<!-- Modal konten -->
+<div id="appModal" class="fixed inset-0 z-[100] hidden">
+  <!-- backdrop + klik untuk close -->
+  <div class="absolute inset-0 bg-black/50" data-modal-close></div>
+
+  <!-- posisi dialog -->
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div id="appModalDialog"
+         class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3 border-b dark:border-gray-700">
+        <h3 id="appModalTitle" class="font-semibold text-gray-800 dark:text-gray-100">Modal</h3>
+        <button type="button"
+                class="px-2 py-1 text-gray-500 hover:text-gray-700 dark:text-gray-300"
+                data-modal-close>&times;</button>
+      </div>
+      <div id="appModalBody" class="p-4 max-h-[75vh] overflow-auto"></div>
+    </div>
+  </div>
+</div>
+<!-- Modal konfirmasi -->
+<div id="confirmModal" class="fixed inset-0 z-[110] hidden">
+  <div class="absolute inset-0 bg-black/50" data-confirm-close></div>
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden">
+      <div class="px-5 py-4 border-b dark:border-gray-700">
+        <h3 class="font-semibold text-gray-800 dark:text-gray-100">Konfirmasi</h3>
+      </div>
+      <div id="confirmBody" class="px-5 py-4 text-gray-700 dark:text-gray-200">
+        Yakin ingin menghapus data ini?
+      </div>
+      <div class="px-5 py-3 border-t dark:border-gray-700 flex justify-end gap-2">
+        <button class="px-3 py-1.5 rounded-lg border" data-confirm-close>Batal</button>
+        <button id="confirmYes" class="px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700">Ya, Hapus</button>
+      </div>
+    </div>
+  </div>
+</div>
+@endpush
+
+
 <div class="px-4 pt-6">
 
     {{-- Header + Tabs --}}
@@ -89,8 +133,7 @@
         {{-- Table --}}
         <div id="tableWrap" class="overflow-x-auto">
             <table id="tabel-pemagang" class="min-w-full w-max text-sm text-left text-gray-700 dark:text-gray-200">
-                <thead class="sticky top-0 z-10 text-xs uppercase tracking-wider
-                              bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                <thead class="sticky text-xs uppercase tracking-wider bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
 
                     @php
                         // daftar kolom
@@ -154,6 +197,7 @@
                         @foreach ($fields as $label)
                             <th class="px-3 py-3 font-semibold whitespace-nowrap">{{ $label }}</th>
                         @endforeach
+                        <th class="px-3 py-3 font-semibold whitespace-nowrap">AKSI</th>
                     </tr>
 
                     {{-- Row: Advanced Search (dibuat statis di Blade agar SEO/SSR oke) --}}
@@ -168,7 +212,6 @@
                                           data-col="{{ $loop->index + 1 }}"
                                           class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>
                                 @elseif(in_array($key, $selectFields))
-
                                     <select data-col="{{ $loop->index + 1 }}"
                                             class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs">
                                         <option value="">Semua</option>
@@ -181,12 +224,15 @@
                                 @endif
                             </th>
                         @endforeach
+
+                        {{-- kolom "AKSI" juga tanpa filter --}}
+                        <th class="px-2 py-2"></th>
                     </tr>
                 </thead>
 
                 <tbody id="rows" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <tr>
-                        <td colspan="{{ count($fields) + 1 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
+                        <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
                             Memuat data…
                         </td>
                     </tr>
@@ -197,11 +243,16 @@
         {{-- Pagination placeholder (dibangun via JS) --}}
         <div id="pager" class="px-6 py-4"></div>
     </div>
-
 </div>
 
-{{-- Script: fetch API -> render tabel + fitur edit status (pending, konfirmasi, toast) --}}
+
+
+
+
 <script>
+// letakkan di paling atas script utama, sebelum fungsi2 lain
+window.rowData = window.rowData || new Map();
+
 // Debounce helper (kalau nanti butuh)
 function debounce(fn, ms=400) {
   let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
@@ -220,6 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   }
 
+  const ADMIN_INTERNS_BASE = @json(url('/admin/interns'));
   const API_URL = @json(route('admin.interns.api'));
   const SCOPE   = @json($scope ?? 'all');
   const csrf    = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -239,11 +291,10 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ====== Advanced Column Search ======
-  const columnFilter = {}; // state { [colIndex]: {kind, q|min|max} }
-  const TABLE_ID = 'tabel-pemagang';   // <table id="tabel-pemagang">
-  const WRAP_ID  = 'tableWrap';        // <div id="tableWrap">
+  const columnFilter = {}; 
+  const TABLE_ID = 'tabel-pemagang';   
+  const WRAP_ID  = 'tableWrap';        
 
-  // mapping kolom → tipe input (index kolom berbasis tabel saat render, 'No' = 0)
   const dateCols   = new Set(['born_date','start_date','end_date','created_at']);
   const selectCols = new Set([
     'gender','internship_type','internship_arrangement',
@@ -260,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'owned_tools','owned_tools_other','start_date','end_date','internship_info_sources','internship_info_other',
     'current_activities','boarding_info','family_status','parent_wa_contact','social_media_instagram','cv_ktp_portofolio_pdf',
     'portofolio_visual','created_at','internship_status'
-    // jika scope === 'completed': tambahkan 'certificate' di Blade; kolom itu default tanpa filter
+
   ];
 
   // buat baris input filter tepat di bawah header
@@ -319,16 +370,29 @@ document.addEventListener('DOMContentLoaded', () => {
     thead.appendChild(tr);
 
     bindFilterInputs();
-    hydrateSelectOptions();     // isi opsi dropdown berdasar data halaman aktif
+    hydrateSelectOptions();    
   }
+  function getFilterTextFromCell(cell) {
+    if (!cell) return '';
 
-  // ====== ISI OPSI <select> DARI NILAI PADA TABEL ======
+    // Prioritas: pakai elemen penanda bila ada (badge status, dsb.)
+    const marker = cell.querySelector('[data-filter-value], [id^="badge-"], .filter-value');
+    if (marker) return (marker.textContent || '').trim();
+
+    // Fallback: clone lalu buang elemen interaktif
+    const clone = cell.cloneNode(true);
+    clone.querySelectorAll('select, option, form, button, input, textarea').forEach(n => n.remove());
+
+    return (clone.textContent || '')
+      .trim()
+      .replace(/\s+/g, ' '); // normalisasi spasi
+  }
   function hydrateSelectOptions() {
     const table = document.getElementById(TABLE_ID);
     const tbody = table?.tBodies?.[0];
     if (!tbody) return;
 
-    const rows = [...tbody.rows]; // pakai semua baris yang sedang dirender
+    const rows = [...tbody.rows]; // semua baris yang sedang dirender
 
     table.querySelectorAll('thead select[data-col]').forEach(sel => {
       const keep = sel.value; // simpan pilihan user
@@ -338,12 +402,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const col = +sel.dataset.col;
       const vals = new Set(
-        rows
-          .map(r => (r.cells[col]?.textContent || '').trim())
-          .filter(Boolean)
+        rows.map(r => getFilterTextFromCell(r.cells[col]))
+            .filter(v => v && v !== '-' ) // kosong & placeholder di-skip
       );
 
-      [...vals].sort((a, b) => a.localeCompare(b)).forEach(v => {
+      [...vals].sort((a, b) => a.localeCompare(b, 'id')).forEach(v => {
         const o = document.createElement('option');
         o.value = v;
         o.textContent = v;
@@ -356,12 +419,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
+
   function rowMatchByFilters(tr) {
     const tds = [...tr.cells];
     for (const key in columnFilter) {
       const i = +key;
       const cfg = columnFilter[key];
-      const raw = (tds[i]?.textContent || '').trim();
+      const raw = getFilterTextFromCell(tds[i]);
 
       if (cfg.kind === 'text') {
         if (cfg.q && !raw.toLowerCase().includes(cfg.q.toLowerCase())) return false;
@@ -548,6 +612,24 @@ document.addEventListener('DOMContentLoaded', () => {
     return res;
   }
 
+  function buildActionCell(it) {
+    return `
+      <div class="flex gap-2">
+        <button type="button" class="px-2 py-1 text-xs rounded bg-blue-500 text-white hover:bg-blue-600 js-detail"
+                data-id="${it.id}">
+          Detail
+        </button>
+        <button type="button" class="px-2 py-1 text-xs rounded bg-amber-600 text-white hover:bg-amber-700 js-edit"
+                data-id="${it.id}">
+          Edit
+        </button>
+        <button type="button" class="px-2 py-1 text-xs rounded bg-red-500 text-white hover:bg-red-600 js-delete"
+                data-id="${it.id}">
+          Hapus
+        </button>
+      </div>`;
+  }
+
   function buildStatusCell(item){
     const cur = item.internship_status || 'new';
     const badge = statusMap[cur] || {label: cur, cls:'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200'};
@@ -605,7 +687,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!data || data.length === 0) {
       rowsEl.innerHTML = `
         <tr>
-          <td colspan="{{ count($fields) + 1 }}" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+          <td colspan="{{ count($fields) + 2 }}" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
             Belum ada data.
           </td>
         </tr>`;
@@ -614,9 +696,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     rowsEl.innerHTML = data.map((it, idx) => {
+        window.rowData.set(it.id, it);
         // ==== (ISI KOLOM TETAP, PERSIS seperti punyamu) ====
         return `
-          <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100
+          <tr data-row-id="${it.id}"
+          class="odd:bg-white even:bg-gray-50 hover:bg-gray-100
                     dark:odd:bg-gray-800 dark:even:bg-gray-800/60 dark:hover:bg-gray-700/60">
             <td class="px-3 py-2 text-gray-600 dark:text-gray-300">${offset + idx + 1}</td>
 
@@ -726,6 +810,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 `
                 : ''
             }
+                
+            <td class="px-3 py-2 align-top">
+              ${buildActionCell(it)}
+            </td>
           </tr>
         `;
       }).join('');
@@ -850,63 +938,266 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // ===== Loader API
       async function loadPage(page = 1, perPage = 1000, searchQuery = '') {
-          const params = new URLSearchParams({
-              scope: SCOPE,
-              page: String(page),
-              per_page: searchQuery ? '1000' : String(perPage),  // Jika ada pencarian, tampilkan semua data
-              search: searchQuery // Menambahkan parameter pencarian
+        const params = new URLSearchParams({
+          scope: SCOPE,
+          page: String(page),
+          per_page: searchQuery ? '1000' : String(perPage),
+          search: searchQuery
+        });
+
+        rowsEl.innerHTML = `
+          <tr>
+            <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
+              Memuat data…
+            </td>
+          </tr>`;
+
+        try {
+          const url = `${API_URL}?${params.toString()}`;
+          const res = await fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
           });
-
-          rowsEl.innerHTML = `
-              <tr>
-                  <td colspan="{{ count($fields) + 1 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
-                      Memuat data…
-                  </td>
-              </tr>`;
-
-          try {
-              const url = `${API_URL}?${params.toString()}`;
-              const res = await fetch(url, {
-                  headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                  credentials: 'same-origin'
-              });
-              if (!res.ok) {
-                  const txt = await res.text().catch(() => '');
-                  throw new Error(`HTTP ${res.status} ${res.statusText} ${txt}`);
-              }
-              const json = await res.json();
-              renderRows(json);
-
-              // Hapus pagination jika pencarian aktif
-              if (searchQuery) {
-                  pagerEl.innerHTML = ''; // Hilangkan pagination saat pencarian aktif
-              } 
-          } catch (e) {
-              console.error('Error loading page data:', e);
-              rowsEl.innerHTML = `
-                  <tr>
-                      <td colspan="{{ count($fields) + 1 }}" class="px-6 py-6 text-center text-rose-600">
-                          Gagal memuat data.
-                      </td>
-                  </tr>`;
+          if (!res.ok) {
+            const txt = await res.text().catch(() => '');
+            throw new Error(`HTTP ${res.status} ${res.statusText} ${txt}`);
           }
-      }
+          const json = await res.json();
+          renderRows(json);
 
+          // simpan halaman aktif
+          window.__CURRENT_PAGE = page;
 
+          // saat searching, sembunyikan pagination
+          if (searchQuery) pagerEl.innerHTML = '';
+        } catch (e) {
+          console.error('Error loading page data:', e);
+          rowsEl.innerHTML = `
+            <tr>
+              <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-rose-600">
+                Gagal memuat data.
+              </td>
+            </tr>`;
+        }
+      } // <<< AKHIR fungsi loadPage
 
+      // ====== EKSPOR HELPER (agar tombol Edit/Hapus bisa refresh tabel)
+      window.__CURRENT_PAGE = 1;
+      window.reloadInterns  = (p) => {
+        const page = p || window.__CURRENT_PAGE || 1;
+        loadPage(page);
+      }; // <<< JANGAN LUPA TUTUP
+
+      // ====== INIT
       bindFilterInputs();
-      // initial
       loadPage(Number(new URLSearchParams(location.search).get('page') || 1));
 
-      // warning unload jika masih ada pending
+      // Peringatan unload jika masih ada pending
       window.addEventListener('beforeunload', (e) => {
         if (pending.size > 0) {
           e.preventDefault();
           e.returnValue = '';
         }
       });
-    });
-
+    }); // <<< penutup DOMContentLoaded
 </script>
-
 @endsection
+
+
+@push('scripts')
+<script>
+  // gunakan Map dari script utama
+  const rowData = window.rowData || new Map();
+  const ADMIN_INTERNS_BASE = @json(url('/admin/interns'));
+  const csrf  = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+  // ===== Util Modal =====
+  const $ = (id) => document.getElementById(id);
+  function openModal(titleStr, html, opts = {}) {
+    const appModal  = $('appModal');
+    const appDialog = $('appModalDialog');
+    const appTitle  = $('appModalTitle');
+    const appBody   = $('appModalBody');
+    if (!appModal || !appTitle || !appBody) return console.error('Modal tidak ditemukan');
+
+    const size = opts.size || 'md'; // md|lg|xl
+    if (appDialog) {
+      appDialog.classList.remove('max-w-md','max-w-lg','max-w-xl','max-w-2xl','max-w-3xl','max-w-4xl');
+      appDialog.classList.add(size === 'md' ? 'max-w-2xl' : size === 'lg' ? 'max-w-3xl' : 'max-w-4xl');
+    }
+    appTitle.textContent = titleStr;
+    appBody.innerHTML = html;
+    appModal.classList.remove('hidden');
+  }
+  function closeModal() {
+    $('appModal')?.classList.add('hidden');
+    const body = $('appModalBody'); if (body) body.innerHTML = '';
+  }
+  $('appModal')?.addEventListener('click', (e) => {
+    if (e.target.hasAttribute('data-modal-close')) closeModal();
+  });
+
+  // ===== Confirm Modal =====
+  let confirmCb = null;
+  function openConfirm(message, onYes){
+    $('confirmBody').innerHTML = message || 'Yakin?';
+    confirmCb = onYes;
+    $('confirmModal')?.classList.remove('hidden');
+  }
+  function closeConfirm(){ $('confirmModal')?.classList.add('hidden'); confirmCb = null; }
+  $('confirmModal')?.addEventListener('click', e => {
+    if (e.target.hasAttribute('data-confirm-close')) closeConfirm();
+  });
+  $('confirmYes')?.addEventListener('click', async () => {
+    try { if (confirmCb) await confirmCb(); } finally { closeConfirm(); }
+  });
+
+  // ===== Helpers =====
+  const h = (s) => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+  function renderDetailHTML(it){
+    const rows = [
+      ['Nama Lengkap', it.fullname],
+      ['Email', it.email],
+      ['No. WA', it.phone_number],
+      ['Institusi', it.institution_name],
+      ['Prodi / Fakultas', [it.study_program, it.faculty].filter(Boolean).join(' / ')],
+      ['Domisili', it.current_city],
+      ['Tipe / Skema', [it.internship_arrangement, it.internship_type].filter(Boolean).join(' · ')],
+      ['Tanggal', [it.start_date, it.end_date].filter(Boolean).join(' s/d ')],
+      ['Status', it.internship_status],
+      ['Alasan Magang', it.internship_reason],
+      ['Minat', it.internship_interest],
+    ];
+    return `
+      <div class="space-y-4">
+        <div class="max-h-[70vh] overflow-auto">
+          <table class="w-full border dark:border-gray-700 rounded-lg overflow-hidden">
+            ${rows.map(([k,v]) => `
+              <tr class="border-b last:border-0 dark:border-gray-700">
+                <td class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 w-44">${h(k)}</td>
+                <td class="px-3 py-2 text-sm text-gray-800 dark:text-gray-100 break-words whitespace-normal">${h(v)}</td>
+              </tr>`).join('')}
+          </table>
+        </div>
+      </div>`;
+  }
+
+  // ===== Edit form (modal, bukan iframe) =====
+  function openEditForm(it){
+    const html = `
+      <form id="editForm" data-id="${it.id}" class="space-y-3">
+        <div class="grid md:grid-cols-2 gap-3">
+          <label class="block">
+            <span class="text-xs text-gray-500">Nama Lengkap</span>
+            <input name="fullname" value="${h(it.fullname)}"
+              class="mt-1 w-full rounded border px-3 py-2 dark:bg-gray-800" />
+          </label>
+          <label class="block">
+            <span class="text-xs text-gray-500">Email</span>
+            <input name="email" type="email" value="${h(it.email || '')}"
+              class="mt-1 w-full rounded border px-3 py-2 dark:bg-gray-800" />
+          </label>
+          <label class="block">
+            <span class="text-xs text-gray-500">Telepon</span>
+            <input name="phone_number" value="${h(it.phone_number || '')}"
+              class="mt-1 w-full rounded border px-3 py-2 dark:bg-gray-800" />
+          </label>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" class="px-3 py-1.5 rounded-lg border" id="btnCancelEdit">Batal</button>
+          <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Simpan</button>
+        </div>
+      </form>`;
+    openModal('Edit Pemagang', html, { size: 'md' });
+
+    $('btnCancelEdit')?.addEventListener('click', closeModal);
+
+    $('editForm')?.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const form = ev.currentTarget;
+      const id   = Number(form.dataset.id);
+      const fd   = new FormData(form);
+      fd.append('_method', 'PATCH');
+      try {
+        const res = await fetch(`${ADMIN_INTERNS_BASE}/${id}`, {
+          method: 'POST', 
+          body: fd,
+          headers: { 
+            'X-CSRF-TOKEN': csrf,
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          credentials: 'same-origin'
+        });
+        if (!res.ok) throw new Error(await res.text().catch(() => 'Gagal menyimpan'));
+        closeModal();
+        window.reloadInterns?.(); 
+        pushToast('Data berhasil disimpan.', 'success');
+      } catch (err) {
+        console.error(err);
+        pushToast('Gagal menyimpan data.', 'error');
+      }
+    });
+  }
+
+  // ===== Delete =====
+  async function deleteIntern(id) {
+    const fd = new FormData();
+    fd.append('_method', 'DELETE'); 
+    const res = await fetch(`${ADMIN_INTERNS_BASE}/${id}`, {
+      method: 'POST', 
+      body: fd,
+      headers: { 
+        'X-CSRF-TOKEN': csrf,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      credentials: 'same-origin'
+    });
+    if (!res.ok) throw new Error(await res.text().catch(() => 'Gagal menghapus'));
+  }
+
+
+  // ===== Event delegation untuk tombol di kolom AKSI =====
+  document.addEventListener('click', async (e) => {
+    // DETAIL
+    const dBtn = e.target.closest('.js-detail');
+    if (dBtn){
+      e.preventDefault();
+      const id = Number(dBtn.dataset.id);
+      const it = rowData.get(id);
+      if (it) openModal('Detail Pemagang', renderDetailHTML(it), { size: 'md' });
+      return;
+    }
+
+    // EDIT
+    const eBtn = e.target.closest('.js-edit');
+    if (eBtn){
+      e.preventDefault();
+      const id = Number(eBtn.dataset.id);
+      const it = rowData.get(id);
+      if (it) openEditForm(it);   // <— bukan iframe
+      return;
+    }
+
+    // HAPUS
+    const hBtn = e.target.closest('.js-delete');
+      if (hBtn) {
+        e.preventDefault();
+        const id = Number(hBtn.dataset.id);
+        openConfirm('Yakin ingin menghapus data ini?', async () => {
+          try {
+            await deleteIntern(id);
+            document.querySelector(`tr[data-row-id="${id}"]`)?.remove();
+            window.reloadInterns?.();
+            pushToast('Data berhasil dihapus.', 'success');
+          } catch (err) {
+            console.error(err);
+            pushToast('Gagal menghapus data.', 'error');
+          }
+        });
+      return;
+    }
+  });
+</script>
+@endpush
+
