@@ -1084,46 +1084,155 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ===== Edit form (modal, bukan iframe) =====
-  function openEditForm(it){
+  function openEditForm(it) {
     const html = `
-      <form id="editForm" data-id="${it.id}" class="space-y-3">
-        <div class="grid md:grid-cols-2 gap-3">
-          <label class="block">
-            <span class="text-xs text-gray-500">Nama Lengkap</span>
-            <input name="fullname" value="${h(it.fullname)}"
-              class="mt-1 w-full rounded border px-3 py-2 dark:bg-gray-800" />
-          </label>
-          <label class="block">
-            <span class="text-xs text-gray-500">Email</span>
-            <input name="email" type="email" value="${h(it.email || '')}"
-              class="mt-1 w-full rounded border px-3 py-2 dark:bg-gray-800" />
-          </label>
-          <label class="block">
-            <span class="text-xs text-gray-500">Telepon</span>
-            <input name="phone_number" value="${h(it.phone_number || '')}"
-              class="mt-1 w-full rounded border px-3 py-2 dark:bg-gray-800" />
-          </label>
+      <form id="editForm" data-id="${it.id}" class="space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Nama Lengkap -->
+          <div class="form-group">
+            <label for="fullname" class="text-gray-700 font-medium">Nama Lengkap</label>
+            <input name="fullname" value="${h(it.fullname)}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
+          </div>
+
+          <!-- Tanggal Lahir -->
+          <div class="form-group">
+            <label for="born_date" class="text-gray-700 font-medium">Tanggal Lahir</label>
+            <input name="born_date" type="text" value="${h(it.born_date)}" placeholder="dd/mm/yyyy"
+              class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
+          </div>
+
+          <!-- NIM / NIS -->
+          <div class="form-group">
+            <label for="student_id" class="text-gray-700 font-medium">NIM / NIS</label>
+            <input name="student_id" value="${h(it.student_id)}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label for="email" class="text-gray-700 font-medium">Email</label>
+            <input name="email" type="email" value="${h(it.email || '')}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
+          </div>
+
+          <!-- Telepon -->
+          <div class="form-group">
+            <label for="phone_number" class="text-gray-700 font-medium">Telepon</label>
+            <input name="phone_number" value="${h(it.phone_number || '')}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
+          </div>
+
+          <!-- Institusi -->
+          <div class="form-group">
+            <label for="institution_name" class="text-gray-700 font-medium">Institusi</label>
+            <input name="institution_name" value="${h(it.institution_name || '')}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
+          </div>
+
+          <!-- Prodi -->
+          <div class="form-group">
+            <label for="study_program" class="text-gray-700 font-medium">Prodi</label>
+            <input name="study_program" value="${h(it.study_program || '')}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
+          </div>
+
+          <!-- Fakultas -->
+          <div class="form-group">
+            <label for="faculty" class="text-gray-700 font-medium">Fakultas</label>
+            <input name="faculty" value="${h(it.faculty || '')}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
+          </div>
+
+          <!-- Kota -->
+          <div class="form-group">
+            <label for="current_city" class="text-gray-700 font-medium">Kota</label>
+            <input name="current_city" value="${h(it.current_city || '')}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
+          </div>
+
+          <!-- Alasan Magang -->
+          <div class="form-group">
+            <label for="internship_reason" class="text-gray-700 font-medium">Alasan Magang</label>
+            <textarea name="internship_reason" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm">${h(it.internship_reason || '')}</textarea>
+          </div>
+
+          <!-- Tipe Magang -->
+          <div class="form-group">
+            <label for="internship_type" class="text-gray-700 font-medium">Tipe Magang</label>
+            <select name="internship_type" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm">
+              <option value="remote" ${it.internship_type === 'remote' ? 'selected' : ''}>WFH</option>
+              <option value="onsite" ${it.internship_type === 'onsite' ? 'selected' : ''}>WFO</option>
+            </select>
+          </div>
+
+          <!-- Mulai -->
+          <div class="form-group">
+            <label for="start_date" class="text-gray-700 font-medium">Mulai</label>
+            <input name="start_date" type="text" value="${h(it.start_date)}" placeholder="dd/mm/yyyy"
+              class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
+          </div>
+
+          <!-- Selesai -->
+          <div class="form-group">
+            <label for="end_date" class="text-gray-700 font-medium">Selesai</label>
+            <input name="end_date" type="text" value="${h(it.end_date)}" placeholder="dd/mm/yyyy"
+              class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
+          </div>
         </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" class="px-3 py-1.5 rounded-lg border" id="btnCancelEdit">Batal</button>
-          <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Simpan</button>
+
+        <div class="flex justify-end gap-2 pt-4">
+          <button type="button" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:text-white hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="btnCancelEdit">Batal</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Simpan</button>
         </div>
-      </form>`;
+      </form>
+
+
+      `;
+
+    // Open modal
     openModal('Edit Pemagang', html, { size: 'md' });
 
+    // Handle cancel button click
     $('btnCancelEdit')?.addEventListener('click', closeModal);
 
+    // Handle form submit
     $('editForm')?.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const form = ev.currentTarget;
-      const id   = Number(form.dataset.id);
-      const fd   = new FormData(form);
+      const id = Number(form.dataset.id);
+      const fd = new FormData(form);
+
+      // Cek dan konversi format tanggal mulai (start_date) dan selesai (end_date)
+      const dateFormat = (dateString) => {
+        const [day, month, year] = dateString.split(' ');
+        const monthMapping = {
+          Januari: '01', Februari: '02', Maret: '03', April: '04', Mei: '05', Juni: '06', Juli: '07', Agustus: '08', September: '09', Oktober: '10', November: '11', Desember: '12'
+        };
+        return `${year}-${monthMapping[month]}-${day}`;
+      };
+
+      const startDateInput = form.querySelector('input[name="start_date"]');
+      const endDateInput = form.querySelector('input[name="end_date"]');
+
+      if (startDateInput && startDateInput.value) {
+        const startDateFormatted = dateFormat(startDateInput.value);
+        fd.set('start_date', startDateFormatted);
+      }
+
+      if (endDateInput && endDateInput.value) {
+        const endDateFormatted = dateFormat(endDateInput.value);
+        fd.set('end_date', endDateFormatted);
+      }
+
+      // Cek jika born_date kosong, kirimkan nilai yang lama jika tidak ada perubahan
+      const bornDateInput = form.querySelector('input[name="born_date"]');
+      if (bornDateInput && bornDateInput.value === '') {
+        fd.set('born_date', it.born_date);  // Mengirimkan nilai lama
+      } else if (bornDateInput && bornDateInput.value) {
+        // Jika born_date diubah, format menjadi YYYY-MM-DD
+        const bornDateFormatted = dateFormat(bornDateInput.value);
+        fd.set('born_date', bornDateFormatted);
+      }
+
       fd.append('_method', 'PATCH');
       try {
         const res = await fetch(`${ADMIN_INTERNS_BASE}/${id}`, {
-          method: 'POST', 
+          method: 'POST',
           body: fd,
-          headers: { 
+          headers: {
             'X-CSRF-TOKEN': csrf,
             'X-Requested-With': 'XMLHttpRequest'
           },
@@ -1131,7 +1240,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (!res.ok) throw new Error(await res.text().catch(() => 'Gagal menyimpan'));
         closeModal();
-        window.reloadInterns?.(); 
+        window.reloadInterns?.();
         pushToast('Data berhasil disimpan.', 'success');
       } catch (err) {
         console.error(err);
@@ -1139,6 +1248,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
 
   // ===== Delete =====
   async function deleteIntern(id) {

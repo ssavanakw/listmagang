@@ -75,14 +75,16 @@
 
     <!-- Chart: 1 Line Chart Total Pendaftar / Bulan -->
     <div class="grid grid-cols-1 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">
-                Tren Total Pendaftar (6 Bulan)
-            </h2>
-            <canvas id="chartApplicants" height="160"></canvas>
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+          Tren Total Pendaftar (6 Bulan)
+        </h2>
+        <!-- KUNCI TINGGI DI KONTENER -->
+        <div class="relative h-64">
+          <canvas id="chartApplicants" class="w-full h-full"></canvas>
         </div>
+      </div>
     </div>
-
 </div>
 @endsection
 
@@ -90,12 +92,20 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 (() => {
-  const ctx = document.getElementById('chartApplicants');
-  if (!ctx) return;
+  const el = document.getElementById('chartApplicants');
+  if (!el) return;
 
-  // Data dari controller (labels & total)
-  const labels = @json($chart['labels'] ?? []);
-  const totals = @json($chart['total']  ?? []);
+  // Data dari controller
+  const labelsRaw = @json($chart['labels'] ?? []);
+  const totalsRaw = @json($chart['total']  ?? []);
+
+  // Jaga-jaga: pastikan panjang sama & konversi ke number
+  const len = Math.min(labelsRaw.length, totalsRaw.length);
+  const labels = labelsRaw.slice(0, len);
+  const totals = totalsRaw.slice(0, len).map(v => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null; // biar null, bukan 0
+  });
 
   function getColors() {
     const dark = document.documentElement.classList.contains('dark');
@@ -107,12 +117,18 @@
     };
   }
 
+  function getSuggestedMax(values) {
+    const valid = values.filter(v => Number.isFinite(v));
+    const max = valid.length ? Math.max(...valid) : 10;
+    return max <= 0 ? 10 : Math.ceil(max * 1.2);
+  }
+
   let chart;
   function render() {
     const c = getColors();
     if (chart) chart.destroy();
 
-    chart = new Chart(ctx, {
+    chart = new Chart(el, {
       type: 'line',
       data: {
         labels,
@@ -126,15 +142,22 @@
           fill: true,
           pointRadius: 3,
           pointHoverRadius: 5,
+          spanGaps: true, // lewati gap, jangan turun ke bawah
         }]
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false,
+        maintainAspectRatio: false, // biar ikut h-64
+        animation: { duration: 500 },
         plugins: { legend: { labels: { color: c.axis } } },
         scales: {
           x: { ticks: { color: c.axis }, grid: { color: c.grid } },
-          y: { ticks: { color: c.axis }, grid: { color: c.grid } },
+          y: {
+            min: 0,                      // KUNCI DARI 0
+            suggestedMax: getSuggestedMax(totals),
+            ticks: { color: c.axis, precision: 0, beginAtZero: true },
+            grid: { color: c.grid }
+          },
         }
       }
     });
@@ -143,8 +166,10 @@
   render();
 
   // Re-render saat theme (dark/light) berubah
-  new MutationObserver(render)
-    .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  const obs = new MutationObserver((muts) => {
+    if (muts.some(m => m.attributeName === 'class')) render();
+  });
+  obs.observe(document.documentElement, { attributes: true });
 })();
 </script>
 @endpush

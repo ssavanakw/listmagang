@@ -147,15 +147,35 @@ class InternController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // Menemukan data berdasarkan ID yang diberikan
         $intern = IR::findOrFail($id);
+
+        // Validasi data yang diterima
         $validatedData = $request->validate([
             'fullname' => 'required|string|max:255',
-            'email'    => 'required|email|max:255',
-            'phone_number' => 'nullable|string|max:20',  // Pastikan validasi sesuai dengan input yang diterima
+            'born_date' => 'nullable|string|regex:/\d{4}-\d{2}-\d{2}/', // Validasi format yyyy-mm-dd
+            'student_id' => 'required|string|max:50',
+            'email' => 'required|email|max:255',
+            'phone_number' => 'nullable|string|max:20',
+            'institution_name' => 'nullable|string|max:255',
+            'study_program' => 'nullable|string|max:255',
+            'faculty' => 'nullable|string|max:255',
+            'current_city' => 'nullable|string|max:255',
+            'internship_reason' => 'nullable|string|max:255',
+            'internship_type' => 'nullable|string|max:50',
+            'start_date' => 'nullable|string|regex:/\d{4}-\d{2}-\d{2}/', // Validasi format yyyy-mm-dd
+            'end_date' => 'nullable|string|regex:/\d{4}-\d{2}-\d{2}/', // Validasi format yyyy-mm-dd
         ]);
+
+        // Memperbarui data yang sudah divalidasi
         $intern->update($validatedData);
+
+        // Mengembalikan response berupa data yang telah diperbarui
         return response()->json($intern, 200);
     }
+
+
+
 
     public function destroy($id)
     {

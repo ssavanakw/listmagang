@@ -68,7 +68,7 @@ class InternshipRegistrationController extends Controller
     {
         $validated = $request->validate([
             'fullname'                    => 'required|string|max:255',
-            'born_date'                   => 'required|string|max:255',  // disimpan sebagai string
+            'born_date'                   => 'required|string|max:255',
             'student_id'                  => 'required|string|max:50',
             'email'                       => 'required|string|max:255',
             'gender'                      => 'required|string|max:50',
