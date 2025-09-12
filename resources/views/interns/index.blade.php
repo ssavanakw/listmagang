@@ -3,7 +3,6 @@
 @php
     use Illuminate\Support\Str;
 
-
     if (!isset($scope)) {
         $scope = 'all';
         $route = request()->route()?->getName();
@@ -13,7 +12,9 @@
             'admin.interns.exited'    => 'exited',
             'admin.interns.pending'   => 'pending',
         ];
-        if ($route && isset($mapRouteScope[$route])) $scope = $mapRouteScope[$route];
+        if ($route && isset($mapRouteScope[$route])) {
+            $scope = $mapRouteScope[$route];
+        }
     }
 
     $certAreaKerjaComRouteTmpl = route(
@@ -22,48 +23,46 @@
     );
 @endphp
 
-
-
-
 @section('content')
 @push('modals')
-<!-- Modal konten -->
-<div id="appModal" class="fixed inset-0 z-[100] hidden">
-  <!-- backdrop + klik untuk close -->
-  <div class="absolute inset-0 bg-black/50" data-modal-close></div>
+    <div id="appModal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/50" data-modal-close></div>
 
-  <!-- posisi dialog -->
-  <div class="absolute inset-0 flex items-center justify-center p-4">
-    <div id="appModalDialog"
-         class="w-full max-w-4xl bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden">
-      <div class="flex items-center justify-between px-4 py-3 border-b dark:border-gray-700">
-        <h3 id="appModalTitle" class="font-semibold text-gray-800 dark:text-gray-100">Modal</h3>
-        <button type="button"
-                class="px-2 py-1 text-gray-500 hover:text-gray-700 dark:text-gray-300"
-                data-modal-close>&times;</button>
-      </div>
-      <div id="appModalBody" class="p-4 max-h-[75vh] overflow-auto"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div id="appModalDialog"
+                 class="w-full max-w-4xl rounded-xl bg-white shadow-xl overflow-hidden
+                        dark:bg-gray-800">
+                <div class="flex items-center justify-between border-b px-4 py-3
+                            dark:border-gray-700">
+                    <h3 id="appModalTitle" class="font-semibold text-gray-800 dark:text-gray-100">Modal</h3>
+                    <button type="button"
+                            class="px-2 py-1 text-gray-500 hover:text-gray-700 dark:text-gray-300"
+                            data-modal-close>&times;</button>
+                </div>
+                <div id="appModalBody" class="max-h-[75vh] overflow-auto p-4"></div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-<!-- Modal konfirmasi -->
-<div id="confirmModal" class="fixed inset-0 z-[110] hidden">
-  <div class="absolute inset-0 bg-black/50" data-confirm-close></div>
-  <div class="absolute inset-0 flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden">
-      <div class="px-5 py-4 border-b dark:border-gray-700">
-        <h3 class="font-semibold text-gray-800 dark:text-gray-100">Konfirmasi</h3>
-      </div>
-      <div id="confirmBody" class="px-5 py-4 text-gray-700 dark:text-gray-200">
-        Yakin ingin menghapus data ini?
-      </div>
-      <div class="px-5 py-3 border-t dark:border-gray-700 flex justify-end gap-2">
-        <button class="px-3 py-1.5 rounded-lg border" data-confirm-close>Batal</button>
-        <button id="confirmYes" class="px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700">Ya, Hapus</button>
-      </div>
+    <div id="confirmModal" class="fixed inset-0 z-[110] hidden">
+        <div class="absolute inset-0 bg-black/50" data-confirm-close></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="w-full max-w-md rounded-xl bg-white shadow-xl overflow-hidden
+                        dark:bg-gray-800">
+                <div class="border-b px-5 py-4 dark:border-gray-700">
+                    <h3 class="font-semibold text-gray-800 dark:text-gray-100">Konfirmasi</h3>
+                </div>
+                <div id="confirmBody" class="px-5 py-4 text-gray-700 dark:text-gray-200">
+                    Yakin ingin menghapus data ini?
+                </div>
+                <div class="flex justify-end gap-2 border-t px-5 py-3 dark:border-gray-700">
+                    <button class="rounded-lg border px-3 py-1.5" data-confirm-close>Batal</button>
+                    <button id="confirmYes" class="rounded-lg bg-red-600 px-3 py-1.5 text-white hover:bg-red-700">
+                        Ya, Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 @endpush
 
 
@@ -75,25 +74,25 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $title ?? 'Semua Pemagang' }}</h1>
             <p class="text-gray-600 dark:text-gray-400">Daftar pemagang berdasarkan filter.</p>
 
-            <div class="mt-4 flex gap-2 flex-wrap">
+            <div class="mt-4 flex flex-wrap gap-2">
                 <a href="{{ route('admin.interns.index') }}"
-                   class="px-3 py-2 rounded-lg text-sm {{ ($scope ?? '')==='all' ? 'bg-emerald-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-gray-100' }}">
+                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'all' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Semua
                 </a>
                 <a href="{{ route('admin.interns.active') }}"
-                   class="px-3 py-2 rounded-lg text-sm {{ ($scope ?? '')==='active' ? 'bg-emerald-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-gray-100' }}">
+                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'active' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Aktif
                 </a>
                 <a href="{{ route('admin.interns.completed') }}"
-                   class="px-3 py-2 rounded-lg text-sm {{ ($scope ?? '')==='completed' ? 'bg-emerald-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-gray-100' }}">
+                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'completed' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Selesai
                 </a>
                 <a href="{{ route('admin.interns.exited') }}"
-                   class="px-3 py-2 rounded-lg text-sm {{ ($scope ?? '')==='exited' ? 'bg-emerald-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-gray-100' }}">
+                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'exited' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Keluar
                 </a>
                 <a href="{{ route('admin.interns.pending') }}"
-                   class="px-3 py-2 rounded-lg text-sm {{ ($scope ?? '')==='pending' ? 'bg-emerald-600 text-white' : 'bg-gray-200 dark:bg-gray-700 dark:text-gray-100' }}">
+                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'pending' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Pending
                 </a>
             </div>
@@ -103,105 +102,108 @@
         <div class="mt-1 flex w-full max-w-[480px] flex-col items-end gap-2">
             {{-- Pending bar --}}
             <div id="pendingBar"
-                 class="hidden rounded-full border border-amber-200 bg-amber-50/95
-                        px-3 py-2 text-amber-900 shadow-sm
-                        dark:bg-amber-900/40 dark:border-amber-700 dark:text-amber-200">
+                 class="hidden rounded-full border border-amber-200 bg-amber-50/95 px-3 py-2
+                        text-amber-900 shadow-sm
+                        dark:border-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
                 <div class="flex items-center gap-2">
                     <span class="text-[12px]/none">
                         <strong id="pendingCount">0</strong> perubahan belum disimpan
                     </span>
                     <button id="discardAll"
-                            class="rounded-full border border-amber-300 px-2 py-1 text-[12px] text-amber-800 hover:bg-amber-100
+                            class="rounded-full border border-amber-300 px-2 py-1 text-[12px]
+                                   text-amber-800 hover:bg-amber-100
                                    dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/60">
                         Batalkan
                     </button>
                     <button id="saveAll" disabled
-                            class="rounded-full bg-emerald-600 px-3 py-1 text-[12px] text-white hover:bg-emerald-700 disabled:opacity-50">
+                            class="rounded-full bg-emerald-600 px-3 py-1 text-[12px]
+                                   text-white hover:bg-emerald-700 disabled:opacity-50">
                         Simpan
                     </button>
                 </div>
             </div>
 
             {{-- Toast stack --}}
-            <div id="toastStack" class="w-full flex flex-col items-end gap-2"></div>
+            <div id="toastStack" class="flex w-full flex-col items-end gap-2"></div>
         </div>
     </div>
 
     {{-- Card --}}
-    <div class="rounded-xl bg-white dark:bg-gray-800 shadow ring-1 ring-gray-200 dark:ring-gray-700">
+    <div class="rounded-xl bg-white shadow ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
 
         {{-- Table --}}
         <div id="tableWrap" class="overflow-x-auto">
-            <table id="tabel-pemagang" class="min-w-full w-max text-sm text-left text-gray-700 dark:text-gray-200">
-                <thead class="sticky text-xs uppercase tracking-wider bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+            <table id="tabel-pemagang" class="w-max min-w-full text-left text-sm text-gray-700 dark:text-gray-200">
+                <thead class="sticky bg-gray-50 text-xs uppercase tracking-wider text-gray-600
+                              dark:bg-gray-700 dark:text-gray-300">
 
                     @php
                         // daftar kolom
                         $fields = [
-                            'fullname' => 'NAMA LENGKAP',
-                            'born_date' => 'TANGGAL LAHIR',
-                            'student_id' => 'NIM / NIS',
-                            'email' => 'EMAIL',
-                            'gender' => 'GENDER',
-                            'phone_number' => 'TELEPON',
-                            'institution_name' => 'INSTITUSI',
-                            'study_program' => 'PRODI',
-                            'faculty' => 'FAKULTAS',
-                            'current_city' => 'KOTA',
-                            'internship_reason' => 'ALASAN MAGANG',
-                            'internship_type' => 'JENIS MAGANG',
-                            'internship_arrangement' => 'TIPE MAGANG',
-                            'current_status' => 'STATUS SAAT INI',
-                            'english_book_ability' => 'BACA B.INGGRIS',
-                            'supervisor_contact' => 'KONTAK PEMBIMBING',
-                            'internship_interest' => 'BIDANG MINAT',
-                            'internship_interest_other' => 'MINAT LAIN',
-                            'design_software' => 'SOFTWARE DESAIN',
-                            'video_software' => 'SOFTWARE VIDEO',
-                            'programming_languages' => 'BAHASA PEMROGRAMAN',
-                            'digital_marketing_type' => 'DIGITAL MARKETING',
+                            'fullname'                   => 'NAMA LENGKAP',
+                            'born_date'                  => 'TANGGAL LAHIR',
+                            'student_id'                 => 'NIM / NIS',
+                            'email'                      => 'EMAIL',
+                            'gender'                     => 'GENDER',
+                            'phone_number'               => 'TELEPON',
+                            'institution_name'           => 'INSTITUSI',
+                            'study_program'              => 'PRODI',
+                            'faculty'                    => 'FAKULTAS',
+                            'current_city'               => 'KOTA',
+                            'internship_reason'          => 'ALASAN MAGANG',
+                            'internship_type'            => 'JENIS MAGANG',
+                            'internship_arrangement'     => 'TIPE MAGANG',
+                            'current_status'             => 'STATUS SAAT INI',
+                            'english_book_ability'       => 'BACA B.INGGRIS',
+                            'supervisor_contact'         => 'KONTAK PEMBIMBING',
+                            'internship_interest'        => 'BIDANG MINAT',
+                            'internship_interest_other'  => 'MINAT LAIN',
+                            'design_software'            => 'SOFTWARE DESAIN',
+                            'video_software'             => 'SOFTWARE VIDEO',
+                            'programming_languages'      => 'BAHASA PEMROGRAMAN',
+                            'digital_marketing_type'     => 'DIGITAL MARKETING',
                             'digital_marketing_type_other' => 'MARKETING LAIN',
-                            'laptop_equipment' => 'PUNYA LAPTOP',
-                            'owned_tools' => 'ALAT DIMILIKI',
-                            'owned_tools_other' => 'ALAT LAIN',
-                            'start_date' => 'MULAI',
-                            'end_date' => 'SELESAI',
-                            'internship_info_sources' => 'SUMBER INFO',
-                            'internship_info_other' => 'INFO LAIN',
-                            'current_activities' => 'AKTIVITAS SAAT INI',
-                            'boarding_info' => 'INFO KOST',
-                            'family_status' => 'SUDAH BERKELUARGA',
-                            'parent_wa_contact' => 'KONTAK ORANG TUA',
-                            'social_media_instagram' => 'INSTAGRAM',
-                            'cv_ktp_portofolio_pdf' => 'FILE PDF',
-                            'portofolio_visual' => 'FILE VISUAL',
-                            'created_at' => 'DIBUAT',
-                            'internship_status' => 'STATUS',
+                            'laptop_equipment'           => 'PUNYA LAPTOP',
+                            'owned_tools'                => 'ALAT DIMILIKI',
+                            'owned_tools_other'          => 'ALAT LAIN',
+                            'start_date'                 => 'MULAI',
+                            'end_date'                   => 'SELESAI',
+                            'internship_info_sources'    => 'SUMBER INFO',
+                            'internship_info_other'      => 'INFO LAIN',
+                            'current_activities'         => 'AKTIVITAS SAAT INI',
+                            'boarding_info'              => 'INFO KOST',
+                            'family_status'              => 'SUDAH BERKELUARGA',
+                            'parent_wa_contact'          => 'KONTAK ORANG TUA',
+                            'social_media_instagram'     => 'INSTAGRAM',
+                            'cv_ktp_portofolio_pdf'      => 'FILE PDF',
+                            'portofolio_visual'          => 'FILE VISUAL',
+                            'created_at'                 => 'DIBUAT',
+                            'internship_status'          => 'STATUS',
                         ];
                         if (($scope ?? '') === 'completed') {
                             $fields['certificate'] = 'SERTIFIKAT';
                         }
 
                         // tipe input per kolom
-                        $dateFields = ['born_date','start_date','end_date','created_at'];
+                        $dateFields = ['born_date', 'start_date', 'end_date', 'created_at'];
                         $selectFields = [
-                            'gender','internship_type','internship_arrangement',
-                            'current_status','english_book_ability','laptop_equipment',
-                            'family_status','internship_status'
+                            'gender', 'internship_type', 'internship_arrangement',
+                            'current_status', 'english_book_ability', 'laptop_equipment',
+                            'family_status', 'internship_status'
                         ];
                     @endphp
 
                     {{-- Row: Header Judul Kolom --}}
                     <tr class="divide-x divide-gray-200 dark:divide-gray-600">
-                        <th class="px-3 py-3 font-semibold whitespace-nowrap">No</th>
+                        <th class="whitespace-nowrap px-3 py-3 font-semibold">No</th>
                         @foreach ($fields as $label)
-                            <th class="px-3 py-3 font-semibold whitespace-nowrap">{{ $label }}</th>
+                            <th class="whitespace-nowrap px-3 py-3 font-semibold">{{ $label }}</th>
                         @endforeach
-                        <th class="px-3 py-3 font-semibold whitespace-nowrap">AKSI</th>
+                        <th class="whitespace-nowrap px-3 py-3 font-semibold">AKSI</th>
                     </tr>
 
                     {{-- Row: Advanced Search (dibuat statis di Blade agar SEO/SSR oke) --}}
-                    <tr class="divide-x divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800">
+                    <tr class="divide-x divide-gray-200 bg-white dark:divide-gray-600 dark:bg-gray-800">
                         {{-- kolom "No" tanpa filter --}}
                         <th class="px-2 py-2"></th>
 
@@ -209,18 +211,21 @@
                             <th class="px-2 py-2">
                                 @if (in_array($key, $dateFields))
                                     <input type="text" placeholder="Cari…"
-                                          data-col="{{ $loop->index + 1 }}"
-                                          class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>
+                                           data-col="{{ $loop->index + 1 }}"
+                                           class="w-full rounded-md border-gray-300 text-xs
+                                                  dark:bg-gray-700"/>
                                 @elseif(in_array($key, $selectFields))
                                     <select data-col="{{ $loop->index + 1 }}"
-                                            class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs">
+                                            class="w-full rounded-md border-gray-300 text-xs
+                                                   dark:bg-gray-700">
                                         <option value="">Semua</option>
                                         {{-- opsi akan diisi otomatis dari data oleh JS --}}
                                     </select>
                                 @else
                                     <input type="text" placeholder="Cari…"
-                                          data-col="{{ $loop->index + 1 }}"
-                                          class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>
+                                           data-col="{{ $loop->index + 1 }}"
+                                           class="w-full rounded-md border-gray-300 text-xs
+                                                  dark:bg-gray-700"/>
                                 @endif
                             </th>
                         @endforeach
@@ -230,7 +235,7 @@
                     </tr>
                 </thead>
 
-                <tbody id="rows" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody id="rows" class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                     <tr>
                         <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
                             Memuat data…
@@ -247,8 +252,6 @@
 
 
 
-
-
 <script>
 // letakkan di paling atas script utama, sebelum fungsi2 lain
 window.rowData = window.rowData || new Map();
@@ -260,1054 +263,1168 @@ function debounce(fn, ms=400) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // ====== Clamp scroll kanan hanya di tabel ======
-  const wrap = document.getElementById('tableWrap');
-  if (wrap) {
-    wrap.scrollLeft = 0;
-    wrap.addEventListener('scroll', () => {
-      const max = wrap.scrollWidth - wrap.clientWidth;
-      if (wrap.scrollLeft > max) wrap.scrollLeft = max;
-      if (wrap.scrollLeft < 0) wrap.scrollLeft = 0;
-    }, { passive: true });
-  }
-
-  const ADMIN_INTERNS_BASE = @json(url('/admin/interns'));
-  const API_URL = @json(route('admin.interns.api'));
-  const SCOPE   = @json($scope ?? 'all');
-  const csrf    = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-
-  const rowsEl  = document.getElementById('rows');
-  const pagerEl = document.getElementById('pager');
-  const searchForm = document.getElementById('searchForm');
-  const qInput  = document.getElementById('q');
-
-  // ====== Status map (badge + label) ======
-  const statusMap = {
-    new:       {label:'Pendaftar Baru', cls:'bg-teal-100 text-teal-800 dark:bg-teal-600/20 dark:text-teal-300'},
-    active:    {label:'Aktif',          cls:'bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-300'},
-    completed: {label:'Selesai',        cls:'bg-indigo-100 text-indigo-800 dark:bg-indigo-600/20 dark:text-indigo-300'},
-    exited:    {label:'Keluar',         cls:'bg-rose-100 text-rose-800 dark:bg-rose-600/20 dark:text-rose-300'},
-    pending:   {label:'Pending',        cls:'bg-amber-100 text-amber-800 dark:bg-amber-600/20 dark:text-amber-300'},
-  };
-
-  // ====== Advanced Column Search ======
-  const columnFilter = {}; 
-  const TABLE_ID = 'tabel-pemagang';   
-  const WRAP_ID  = 'tableWrap';        
-
-  const dateCols   = new Set(['born_date','start_date','end_date','created_at']);
-  const selectCols = new Set([
-    'gender','internship_type','internship_arrangement',
-    'current_status','english_book_ability','laptop_equipment',
-    'family_status','internship_status'
-  ]);
-
-  // urutan kolom sesuai Blade $fields (tetap sinkron!)
-  const fieldOrder = [
-    'fullname','born_date','student_id','email','gender','phone_number','institution_name','study_program',
-    'faculty','current_city','internship_reason','internship_type','internship_arrangement','current_status',
-    'english_book_ability','supervisor_contact','internship_interest','internship_interest_other','design_software',
-    'video_software','programming_languages','digital_marketing_type','digital_marketing_type_other','laptop_equipment',
-    'owned_tools','owned_tools_other','start_date','end_date','internship_info_sources','internship_info_other',
-    'current_activities','boarding_info','family_status','parent_wa_contact','social_media_instagram','cv_ktp_portofolio_pdf',
-    'portofolio_visual','created_at','internship_status'
-
-  ];
-
-  // buat baris input filter tepat di bawah header
-  function buildAdvancedSearchRow(){
-    const table = document.getElementById('tableWrap');
-    if(!table) return;
-    const thead = table.querySelector('thead');
-    const headRows = thead?.querySelectorAll('tr');
-    if(!thead || !headRows?.length) return;
-
-    // jika sudah ada, jangan duplikasi
-    if(thead.querySelector('tr[data-filter-row]')) return;
-
-    const headerCols = headRows[0].children.length; // termasuk kolom "No"
-    const tr = document.createElement('tr');
-    tr.setAttribute('data-filter-row','');
-    tr.className = 'divide-x divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800';
-
-    for(let i=0;i<headerCols;i++){
-      const th = document.createElement('th');
-      th.className = 'px-2 py-2';
-
-      if(i===0){ // kolom No: kosong
-        tr.appendChild(th);
-        continue;
-      }
-
-      const fieldKey = fieldOrder[i-1]; // offset karena kolom No
-      if(!fieldKey){ tr.appendChild(th); continue; }
-
-      if (dateCols.has(fieldKey)) {
-        th.innerHTML = `
-          <input type="text" placeholder="Cari…"
-                data-col="${i}"
-                class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>`;
-        columnFilter[i] = { kind:'text', q:'' };   // <— bukan 'date-range' lagi
-      }
-
-      else if(selectCols.has(fieldKey)){
-        th.innerHTML = `
-          <select data-col="${i}"
-                  class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs">
-            <option value="">Semua</option>
-          </select>`;
-        columnFilter[i] = { kind:'select', q:'' };
-      } 
-      else {
-        th.innerHTML = `
-          <input type="text" placeholder="Cari…"
-                data-col="${i}"
-                class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>`;
-        columnFilter[i] = { kind:'text', q:'' };
-      }
-      tr.appendChild(th);
-    }
-    thead.appendChild(tr);
-
-    bindFilterInputs();
-    hydrateSelectOptions();    
-  }
-  function getFilterTextFromCell(cell) {
-    if (!cell) return '';
-
-    // Prioritas: pakai elemen penanda bila ada (badge status, dsb.)
-    const marker = cell.querySelector('[data-filter-value], [id^="badge-"], .filter-value');
-    if (marker) return (marker.textContent || '').trim();
-
-    // Fallback: clone lalu buang elemen interaktif
-    const clone = cell.cloneNode(true);
-    clone.querySelectorAll('select, option, form, button, input, textarea').forEach(n => n.remove());
-
-    return (clone.textContent || '')
-      .trim()
-      .replace(/\s+/g, ' '); // normalisasi spasi
-  }
-  function hydrateSelectOptions() {
-    const table = document.getElementById(TABLE_ID);
-    const tbody = table?.tBodies?.[0];
-    if (!tbody) return;
-
-    const rows = [...tbody.rows]; // semua baris yang sedang dirender
-
-    table.querySelectorAll('thead select[data-col]').forEach(sel => {
-      const keep = sel.value; // simpan pilihan user
-
-      // hapus opsi lama (kecuali "Semua")
-      sel.querySelectorAll('option:not(:first-child)').forEach(o => o.remove());
-
-      const col = +sel.dataset.col;
-      const vals = new Set(
-        rows.map(r => getFilterTextFromCell(r.cells[col]))
-            .filter(v => v && v !== '-' ) // kosong & placeholder di-skip
-      );
-
-      [...vals].sort((a, b) => a.localeCompare(b, 'id')).forEach(v => {
-        const o = document.createElement('option');
-        o.value = v;
-        o.textContent = v;
-        sel.appendChild(o);
-      });
-
-      // kembalikan pilihan sebelumnya bila masih valid
-      if (keep && [...sel.options].some(o => o.value === keep)) sel.value = keep;
-    });
-  }
-
-
-
-  function rowMatchByFilters(tr) {
-    const tds = [...tr.cells];
-    for (const key in columnFilter) {
-      const i = +key;
-      const cfg = columnFilter[key];
-      const raw = getFilterTextFromCell(tds[i]);
-
-      if (cfg.kind === 'text') {
-        if (cfg.q && !raw.toLowerCase().includes(cfg.q.toLowerCase())) return false;
-      } else if (cfg.kind === 'select') {
-        if (cfg.q && raw !== cfg.q) return false;
-      }
-    }
-    return true;
-  }
-
-  // ====== TERAPKAN FILTER KE TABEL ======
-  const applyColumnFilters = (() => {
-    const run = () => {
-      const table = document.getElementById(TABLE_ID);
-      const tbody = table?.tBodies?.[0];
-      if (!tbody) return;
-
-      [...tbody.rows].forEach(tr => {
-        tr.style.display = rowMatchByFilters(tr) ? '' : 'none';
-      });
-    };
-    return debounce(run, 120);
-  })();
-
-  function bindFilterInputs() {
-    const table = document.getElementById(TABLE_ID);
-    if (!table) return;
-
-    // input teks per kolom (termasuk kolom tanggal yang sekarang string)
-    table.querySelectorAll('thead input[data-col]').forEach(inp => {
-      const col = +inp.dataset.col;
-      if (!columnFilter[col]) columnFilter[col] = { kind: 'text', q: '' };
-      inp.addEventListener('input', e => {
-        columnFilter[col].q = e.target.value;
-        applyColumnFilters();
-      });
-    });
-
-    // select per kolom
-    table.querySelectorAll('thead select[data-col]').forEach(sel => {
-      const col = +sel.dataset.col;
-      if (!columnFilter[col]) columnFilter[col] = { kind: 'select', q: '' };
-      sel.addEventListener('change', e => {
-        columnFilter[col].q = e.target.value;
-        applyColumnFilters();
-      });
-    });
-  }
-
-
-
-
-  // ====== Localized label maps (ID) ======
-  const interestMapID = {
-    'project-manager': 'Manajer Proyek',
-    'administration': 'Administrasi',
-    'hr': 'Sumber Daya Manusia (HR)',
-    'uiux': 'UI/UX',
-    'programmer': 'Programmer (Front End / Backend)',
-    'photographer': 'Fotografer',
-    'videographer': 'Videografer',
-    'graphic-designer': 'Desainer Grafis',
-    'social-media-specialist': 'Spesialis Media Sosial',
-    'content-writer': 'Penulis Konten',
-    'content-planner': 'Perencana Konten',
-    'marketing-and-sales': 'Penjualan & Pemasaran',
-    'public-relation': 'Hubungan Masyarakat (Marcomm)',
-    'digital-marketing': 'Pemasaran Digital',
-    'tiktok-creator': 'Kreator TikTok',
-    'welding': 'Pengelasan',
-    'customer-service': 'Layanan Pelanggan',
-  };
-
-  const genderMapID = {
-    'male':'Laki-laki','laki-laki':'Laki-laki','pria':'Laki-laki','m':'Laki-laki',
-    'female':'Perempuan','perempuan':'Perempuan','wanita':'Perempuan','f':'Perempuan'
-  };
-
-  const statusNowMapID = {
-    'Fresh Graduate':'Lulusan Baru',
-    'Student':'Mahasiswa/Pelajar',
-    'Employee':'Karyawan',
-    'Unemployed':'Tidak Bekerja',
-  };
-
-  const arrangementMapID = { // TIPE MAGANG (cara kerja)
-    'onsite':'Onsite', 'hybrid':'Hibrida', 'remote':'Remote'
-  };
-
-  const typeMapID = { // JENIS MAGANG (skema)
-    'campus':'Magang Kampus', 'mandiri':'Magang Mandiri', 'pkl':'PKL',
-    'kampus-merdeka':'Kampus Merdeka', 'mbkm':'Kampus Merdeka'
-  };
-
-  const yesNoMapID = {
-    'yes':'Ya','y':'Ya','true':'Ya','1':'Ya','ya':'Ya',
-    'no':'Tidak','n':'Tidak','false':'Tidak','0':'Tidak','tidak':'Tidak'
-  };
-
-  // ====== Helpers ======
-  const fmtStr = (s) => (s && String(s).trim() !== '' ? String(s) : '-');
-
-  // labelizer generik dengan fallback string polos
-  const labelize = (map, val) => {
-    if (val == null) return '-';
-    const key = String(val).toLowerCase();
-    for (const k in map) {
-      if (k.toLowerCase() === key) return map[k];
-    }
-    return String(val); // fallback tampilkan apa adanya
-  };
-
-  function interestLabelID(slug) {
-    if (!slug) return '-';
-    const key = String(slug).toLowerCase();
-    return interestMapID[key] ?? String(slug).replace(/-/g,' ').replace(/\b\w/g, c => c.toUpperCase());
-  }
-
-  // created_at dari server → tetap format tanggal
-  const fmtDate = (s) => {
-    if (!s) return '-';
-    const d = new Date(s);
-    if (isNaN(d)) return String(s);
-    return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
-  };
-
-  // ====== Toast helpers ======
-  const toastStack = document.getElementById('toastStack');
-  function pushToast(message, type='success') {
-    const base = 'flex items-center gap-2 rounded-lg border px-3 py-2 text-sm shadow-sm';
-    const theme = type === 'success'
-      ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-700 dark:text-emerald-200'
-      : 'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-900/20 dark:border-rose-700 dark:text-rose-200';
-    const el = document.createElement('div');
-    el.className = `${base} ${theme}`;
-    el.innerHTML = `<span>${message}</span>
-                    <button class="ml-2 rounded px-2 py-1 text-xs opacity-70 hover:opacity-100">Tutup</button>`;
-    el.querySelector('button').addEventListener('click', () => el.remove());
-    toastStack.appendChild(el);
-    setTimeout(() => el.remove(), 4000);
-  }
-
-  // ====== Pending bar state ======
-  const pendingBar   = document.getElementById('pendingBar');
-  const pendingCount = document.getElementById('pendingCount');
-  const saveAllBtn   = document.getElementById('saveAll');
-  const discardBtn   = document.getElementById('discardAll');
-  const pending = new Map(); // key: id, value: {id,name,from,to,url,select,badge}
-
-  function updatePendingBar(){
-    const n = pending.size;
-    pendingCount.textContent = n;
-    pendingBar.classList.toggle('hidden', n === 0);
-    saveAllBtn.disabled = n === 0;
-  }
-
-  function markSelect(sel, active) {
-    sel.classList.toggle('ring-2', active);
-    sel.classList.toggle('ring-amber-400', active);
-    sel.classList.toggle('bg-amber-50', active);
-  }
-
-  // ubah tampilan badge status setelah sukses
-  function applyBadge(badgeEl, newVal){
-    const m = statusMap[newVal] || {label:newVal, cls:'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200'};
-    badgeEl.className = `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${m.cls}`;
-    badgeEl.textContent = m.label;
-  }
-
-  async function patchForm(url, fields) {
-    const fd = new FormData();
-    fd.append('_method', 'PATCH');
-    for (const [k, v] of Object.entries(fields)) fd.append(k, v);
-    const res = await fetch(url, {
-      method: 'POST',
-      body: fd,
-      headers: { 'X-CSRF-TOKEN': csrf, 'X-Requested-With':'XMLHttpRequest' },
-      credentials: 'same-origin'
-    });
-    if (!res.ok) {
-      const t = await res.text().catch(()=> '');
-      throw new Error(t || `HTTP ${res.status}`);
-    }
-    return res;
-  }
-
-  function buildActionCell(it) {
-    return `
-      <div class="flex gap-2">
-        <button type="button" class="px-2 py-1 text-xs rounded bg-blue-500 text-white hover:bg-blue-600 js-detail"
-                data-id="${it.id}">
-          Detail
-        </button>
-        <button type="button" class="px-2 py-1 text-xs rounded bg-amber-600 text-white hover:bg-amber-700 js-edit"
-                data-id="${it.id}">
-          Edit
-        </button>
-        <button type="button" class="px-2 py-1 text-xs rounded bg-red-500 text-white hover:bg-red-600 js-delete"
-                data-id="${it.id}">
-          Hapus
-        </button>
-      </div>`;
-  }
-
-  function buildStatusCell(item){
-    const cur = item.internship_status || 'new';
-    const badge = statusMap[cur] || {label: cur, cls:'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200'};
-    return `
-      <div class="flex items-center gap-2 min-w-[12rem] justify-between">
-        <span id="badge-${item.id}"
-              class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}">
-          ${badge.label}
-        </span>
-        <form action="${item.status_update_url}" class="inline status-form-row">
-          <select
-            class="status-select-row text-xs rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800
-                   text-gray-700 dark:text-gray-200 px-2 py-1.5 pr-7 appearance-none
-                   focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-            data-current="${cur}" data-name="${item.fullname || 'pemagang'}" data-id="${item.id}">
-              ${Object.entries(statusMap).map(([val, obj]) =>
-                 `<option value="${val}" ${val===cur?'selected':''}>${obj.label}</option>`).join('')}
-          </select>
-        </form>
-      </div>
-    `;
-  }
-
-  function bindStatusListeners(){
-    document.querySelectorAll('.status-select-row').forEach(sel => {
-      sel.onchange = function(){
-        const form  = this.closest('form');
-        const url   = form.getAttribute('action');
-        const id    = Number(this.dataset.id);
-        const name  = this.dataset.name || 'pemagang';
-        const from  = this.dataset.current;
-        const to    = this.value;
-
-        if (to === from) {
-          if (pending.has(id)) {
-            pending.delete(id);
-            markSelect(this, false);
-            updatePendingBar();
-          }
-          return;
-        }
-
-        // simpan state baru ke pending
-        pending.set(id, {id, name, from, to, url, select: this, badge: document.getElementById(`badge-${id}`)});
-        markSelect(this, true);
-        updatePendingBar();
-      };
-    });
-  }
-
-  function renderRows(payload){
-    const { data, meta } = payload;
-    const offset = (meta.current_page - 1) * meta.per_page;
-
-    if (!data || data.length === 0) {
-      rowsEl.innerHTML = `
-        <tr>
-          <td colspan="{{ count($fields) + 2 }}" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-            Belum ada data.
-          </td>
-        </tr>`;
-      pagerEl.innerHTML = '';
-      return;
-    }
-
-    rowsEl.innerHTML = data.map((it, idx) => {
-        window.rowData.set(it.id, it);
-        // ==== (ISI KOLOM TETAP, PERSIS seperti punyamu) ====
-        return `
-          <tr data-row-id="${it.id}"
-          class="odd:bg-white even:bg-gray-50 hover:bg-gray-100
-                    dark:odd:bg-gray-800 dark:even:bg-gray-800/60 dark:hover:bg-gray-700/60">
-            <td class="px-3 py-2 text-gray-600 dark:text-gray-300">${offset + idx + 1}</td>
-
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.fullname)}">${fmtStr(it.fullname)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.born_date)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.student_id)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.email)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${labelize(genderMapID, it.gender)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.phone_number)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.institution_name)}">${fmtStr(it.institution_name)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.study_program)}">${fmtStr(it.study_program)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.faculty)}">${fmtStr(it.faculty)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.current_city)}">${fmtStr(it.current_city)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_reason)}">${fmtStr(it.internship_reason)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(typeMapID, it.internship_type)}">${labelize(typeMapID, it.internship_type)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(arrangementMapID, it.internship_arrangement)}">${labelize(arrangementMapID, it.internship_arrangement)}</span></td>
-            <td class="px-3 py-2 align-top">
-              <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium ${it.current_status==='Fresh Graduate'
-                ? 'bg-slate-100 text-slate-800 dark:bg-slate-600/20 dark:text-slate-300'
-                : (it.current_status==='Student'
-                  ? 'bg-sky-100 text-sky-800 dark:bg-sky-600/20 dark:text-sky-300'
-                  : 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200')}">
-                ${labelize(statusNowMapID, it.current_status)}
-              </span>
-            </td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.english_book_ability)}">${fmtStr(it.english_book_ability)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.supervisor_contact)}">${fmtStr(it.supervisor_contact)}</span></td>
-
-            <td class="px-3 py-2 align-top">
-              <span class="block max-w-[18rem] truncate" title="${interestLabelID(it.internship_interest)}">
-                ${interestLabelID(it.internship_interest)}
-              </span>
-            </td>
-
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_interest_other)}">${fmtStr(it.internship_interest_other)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.design_software)}">${fmtStr(it.design_software)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.video_software)}">${fmtStr(it.video_software)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.programming_languages)}">${fmtStr(it.programming_languages)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.digital_marketing_type)}">${fmtStr(it.digital_marketing_type)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.digital_marketing_type_other)}">${fmtStr(it.digital_marketing_type_other)}</span></td>
-
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(yesNoMapID, it.laptop_equipment)}">${labelize(yesNoMapID, it.laptop_equipment)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.owned_tools)}">${fmtStr(it.owned_tools)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.owned_tools_other)}">${fmtStr(it.owned_tools_other)}</span></td>
-
-            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.start_date)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.end_date)}</span></td>
-
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_info_sources)}">${fmtStr(it.internship_info_sources)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_info_other)}">${fmtStr(it.internship_info_other)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.current_activities)}">${fmtStr(it.current_activities)}</span></td>
-
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.boarding_info)}">${fmtStr(it.boarding_info)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.family_status)}">${fmtStr(it.family_status)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.parent_wa_contact)}</span></td>
-            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.social_media_instagram)}</span></td>
-
-            <td class="px-3 py-2 align-top">${
-              it.cv_ktp_portofolio_pdf
-                ? `<a href="${it.cv_ktp_portofolio_pdf}" target="_blank" class="text-emerald-600 hover:text-emerald-700 underline">Lihat</a>`
-                : '<span class="text-gray-400">-</span>'}
-            </td>
-            <td class="px-3 py-2 align-top">${
-              it.portofolio_visual
-                ? `<a href="${it.portofolio_visual}" target="_blank" class="text-emerald-600 hover:text-emerald-700 underline">Lihat</a>`
-                : '<span class="text-gray-400">-</span>'}
-            </td>
-
-            <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtDate(it.created_at)}</span></td>
-
-            <td class="px-3 py-2 align-top">
-              ${buildStatusCell(it)}
-            </td>
-
-            ${
-              SCOPE === 'completed'
-                ? `
-                  <td class="px-3 py-2 align-top">
-                    ${
-                      (it.certificate_pdf_url || it.certificate_url || true)
-                        ? `
-                          <div class="flex items-center gap-2">
-                            ${ (it.certificate_pdf_url || it.certificate_url)
-                                ? `<a href="${it.certificate_pdf_url || it.certificate_url}"
-                                      class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                                      title="Unduh PDF yang identik (render JS/canvas)" target="_blank" rel="noopener">
-                                      Magangjogja.com
-                                  </a>`
-                                : ''
-                              }
-                            ${(() => {
-                                const tmpl = @json($certAreaKerjaComRouteTmpl);
-                                const url2 = it.certificate_areakerjacom_url || (tmpl ? tmpl.replace('__ID__', it.id) : '');
-                                if (!url2) return '';
-                                return `<a href="${url2}"
-                                            class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                                            title="Unduh versi certareakerjacom" target="_blank" rel="noopener">
-                                            AreaKerja.com
-                                        </a>`;
-                              })()
-                            }
-                          </div>
-                        `
-                        : '<span class="text-gray-400">-</span>'
-                    }
-                  </td>
-                `
-                : ''
-            }
-                
-            <td class="px-3 py-2 align-top">
-              ${buildActionCell(it)}
-            </td>
-          </tr>
-        `;
-      }).join('');
-
-        bindStatusListeners();
-        buildPager(meta);
-        hydrateSelectOptions();
-        applyColumnFilters();
-      }
-
-      function buildPager(meta){
-        const { current_page, last_page } = meta;
-        const prev = current_page > 1 ? current_page - 1 : null;
-        const next = current_page < last_page ? current_page + 1 : null;
-
-        pagerEl.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-600 dark:text-gray-300">
-              Halaman <strong>${current_page}</strong> dari <strong>${last_page}</strong>
-            </div>
-            <div class="flex gap-2">
-              <button ${!prev?'disabled':''} data-goto="${prev||''}"
-                class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Sebelumnya</button>
-              <button ${!next?'disabled':''} data-goto="${next||''}"
-                class="px-3 py-2 rounded-lg border text-sm disabled:opacity-50">Berikutnya</button>
-            </div>
-          </div>
-        `;
-
-        pagerEl.querySelectorAll('button[data-goto]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const p = Number(btn.dataset.goto);
-            if (p) loadPage(p);
-          });
-        });
-      }
-
-      // ========== AKSI: BATALKAN ==========
-      discardBtn?.addEventListener('click', () => {
-        if (pending.size === 0) return;
-        for (const {select, from} of pending.values()) {
-          select.value = from;
-          // tetap biarkan dataset.current tidak berubah; commit UI saja
-          markSelect(select, false);
-        }
-        pending.clear();
-        updatePendingBar();
-        pushToast('Semua perubahan dibatalkan.', 'success');
-      });
-
-      // Helper: batasi paralel request agar tidak membebani server
-      async function runWithConcurrency(tasks, limit=4){
-        const results = [];
-        let i = 0;
-        const workers = Array.from({length: Math.min(limit, tasks.length)}, async () => {
-          while (i < tasks.length) {
-            const cur = i++;
-            try {
-              results[cur] = await tasks[cur]();
-            } catch (e) {
-              results[cur] = e;
-            }
-          }
-        });
-        await Promise.all(workers);
-        return results;
-      }
-
-      // ========== AKSI: SIMPAN ==========
-      saveAllBtn?.addEventListener('click', async () => {
-        if (pending.size === 0) return;
-
-        const items = Array.from(pending.values());
-        saveAllBtn.disabled = true;
-        discardBtn.disabled = true;
-
-        const tasks = items.map(item => async () => {
-          // jika endpoint-mu memakai field berbeda, ganti di sini:
-          await patchForm(item.url, { internship_status: item.to });
-          return item;
-        });
-
-        try {
-          const results = await runWithConcurrency(tasks, 4);
-
-          let ok = 0, fail = 0;
-          const failed = [];
-
-          results.forEach((res, idx) => {
-            if (res instanceof Error) {
-              fail++;
-              failed.push({item: items[idx], err: res});
-              return;
-            }
-            ok++;
-
-            const it = res; // item yang berhasil
-            it.select.dataset.current = it.to; // commit state baru
-            markSelect(it.select, false);
-            applyBadge(it.badge, it.to);
-
-            pending.delete(it.id);
-          });
-
-          updatePendingBar();
-
-          if (ok)  pushToast(`${ok} perubahan disimpan.`, 'success');
-          if (fail){
-            failed.forEach(({item}) => { // tetap pending
-              item.select.value = item.to;
-              markSelect(item.select, true);
+        // ====== Clamp scroll kanan hanya di tabel ======
+        const wrap = document.getElementById('tableWrap');
+        if (wrap) {
+            wrap.scrollLeft = 0;
+            wrap.addEventListener('scroll', () => {
+                const max = wrap.scrollWidth - wrap.clientWidth;
+                if (wrap.scrollLeft > max) wrap.scrollLeft = max;
+                if (wrap.scrollLeft < 0) wrap.scrollLeft = 0;
+            }, {
+                passive: true
             });
-            pushToast(`${fail} perubahan gagal disimpan. Coba lagi.`, 'error');
-          }
-        } catch (e) {
-          pushToast('Gagal menyimpan perubahan.', 'error');
-        } finally {
-          saveAllBtn.disabled = pending.size === 0;
-          discardBtn.disabled = false;
         }
-      });
 
-      // ===== Loader API
-      async function loadPage(page = 1, perPage = 1000, searchQuery = '') {
-        const params = new URLSearchParams({
-          scope: SCOPE,
-          page: String(page),
-          per_page: searchQuery ? '1000' : String(perPage),
-          search: searchQuery
+        const ADMIN_INTERNS_BASE = @json(url('/admin/interns'));
+        const API_URL = @json(route('admin.interns.api'));
+        const SCOPE = @json($scope ?? 'all');
+        const csrf = document.querySelector('meta[name="csrf-token"]') ?.getAttribute('content') || '';
+
+        const rowsEl = document.getElementById('rows');
+        const pagerEl = document.getElementById('pager');
+        const searchForm = document.getElementById('searchForm');
+        const qInput = document.getElementById('q');
+
+        // ====== Status map (badge + label) ======
+        const statusMap = {
+            new: {
+                label: 'Pendaftar Baru',
+                cls: 'bg-teal-100 text-teal-800 dark:bg-teal-600/20 dark:text-teal-300'
+            },
+            active: {
+                label: 'Aktif',
+                cls: 'bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-300'
+            },
+            completed: {
+                label: 'Selesai',
+                cls: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-600/20 dark:text-indigo-300'
+            },
+            exited: {
+                label: 'Keluar',
+                cls: 'bg-rose-100 text-rose-800 dark:bg-rose-600/20 dark:text-rose-300'
+            },
+            pending: {
+                label: 'Pending',
+                cls: 'bg-amber-100 text-amber-800 dark:bg-amber-600/20 dark:text-amber-300'
+            },
+        };
+
+        // ====== Advanced Column Search ======
+        const columnFilter = {};
+        const TABLE_ID = 'tabel-pemagang';
+        const WRAP_ID = 'tableWrap';
+
+        const dateCols = new Set(['born_date', 'start_date', 'end_date', 'created_at']);
+        const selectCols = new Set([
+            'gender', 'internship_type', 'internship_arrangement',
+            'current_status', 'english_book_ability', 'laptop_equipment',
+            'family_status', 'internship_status'
+        ]);
+
+        // urutan kolom sesuai Blade $fields (tetap sinkron!)
+        const fieldOrder = [
+            'fullname', 'born_date', 'student_id', 'email', 'gender', 'phone_number', 'institution_name', 'study_program',
+            'faculty', 'current_city', 'internship_reason', 'internship_type', 'internship_arrangement', 'current_status',
+            'english_book_ability', 'supervisor_contact', 'internship_interest', 'internship_interest_other', 'design_software',
+            'video_software', 'programming_languages', 'digital_marketing_type', 'digital_marketing_type_other', 'laptop_equipment',
+            'owned_tools', 'owned_tools_other', 'start_date', 'end_date', 'internship_info_sources', 'internship_info_other',
+            'current_activities', 'boarding_info', 'family_status', 'parent_wa_contact', 'social_media_instagram', 'cv_ktp_portofolio_pdf',
+            'portofolio_visual', 'created_at', 'internship_status'
+
+        ];
+
+        // buat baris input filter tepat di bawah header
+        function buildAdvancedSearchRow() {
+            const table = document.getElementById('tableWrap');
+            if (!table) return;
+            const thead = table.querySelector('thead');
+            const headRows = thead ?.querySelectorAll('tr');
+            if (!thead || !headRows ?.length) return;
+
+            // jika sudah ada, jangan duplikasi
+            if (thead.querySelector('tr[data-filter-row]')) return;
+
+            const headerCols = headRows[0].children.length; // termasuk kolom "No"
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-filter-row', '');
+            tr.className = 'divide-x divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800';
+
+            for (let i = 0; i < headerCols; i++) {
+                const th = document.createElement('th');
+                th.className = 'px-2 py-2';
+
+                if (i === 0) { // kolom No: kosong
+                    tr.appendChild(th);
+                    continue;
+                }
+
+                const fieldKey = fieldOrder[i - 1]; // offset karena kolom No
+                if (!fieldKey) {
+                    tr.appendChild(th);
+                    continue;
+                }
+
+                if (dateCols.has(fieldKey)) {
+                    th.innerHTML = `
+                        <input type="text" placeholder="Cari…"
+                            data-col="${i}"
+                            class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>`;
+                    columnFilter[i] = {
+                        kind: 'text',
+                        q: ''
+                    }; // <— bukan 'date-range' lagi
+                } else if (selectCols.has(fieldKey)) {
+                    th.innerHTML = `
+                        <select data-col="${i}"
+                            class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs">
+                            <option value="">Semua</option>
+                        </select>`;
+                    columnFilter[i] = {
+                        kind: 'select',
+                        q: ''
+                    };
+                } else {
+                    th.innerHTML = `
+                        <input type="text" placeholder="Cari…"
+                            data-col="${i}"
+                            class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>`;
+                    columnFilter[i] = {
+                        kind: 'text',
+                        q: ''
+                    };
+                }
+                tr.appendChild(th);
+            }
+            thead.appendChild(tr);
+
+            bindFilterInputs();
+            hydrateSelectOptions();
+        }
+
+        function getFilterTextFromCell(cell) {
+            if (!cell) return '';
+
+            // Prioritas: pakai elemen penanda bila ada (badge status, dsb.)
+            const marker = cell.querySelector('[data-filter-value], [id^="badge-"], .filter-value');
+            if (marker) return (marker.textContent || '').trim();
+
+            // Fallback: clone lalu buang elemen interaktif
+            const clone = cell.cloneNode(true);
+            clone.querySelectorAll('select, option, form, button, input, textarea').forEach(n => n.remove());
+
+            return (clone.textContent || '')
+                .trim()
+                .replace(/\s+/g, ' '); // normalisasi spasi
+        }
+
+        function hydrateSelectOptions() {
+            const table = document.getElementById(TABLE_ID);
+            const tbody = table ?.tBodies ?.[0];
+            if (!tbody) return;
+
+            const rows = [...tbody.rows]; // semua baris yang sedang dirender
+
+            table.querySelectorAll('thead select[data-col]').forEach(sel => {
+                const keep = sel.value; // simpan pilihan user
+
+                // hapus opsi lama (kecuali "Semua")
+                sel.querySelectorAll('option:not(:first-child)').forEach(o => o.remove());
+
+                const col = +sel.dataset.col;
+                const vals = new Set(
+                    rows.map(r => getFilterTextFromCell(r.cells[col]))
+                    .filter(v => v && v !== '-') // kosong & placeholder di-skip
+                );
+
+                [...vals].sort((a, b) => a.localeCompare(b, 'id')).forEach(v => {
+                    const o = document.createElement('option');
+                    o.value = v;
+                    o.textContent = v;
+                    sel.appendChild(o);
+                });
+
+                // kembalikan pilihan sebelumnya bila masih valid
+                if (keep && [...sel.options].some(o => o.value === keep)) sel.value = keep;
+            });
+        }
+
+
+
+        function rowMatchByFilters(tr) {
+            const tds = [...tr.cells];
+            for (const key in columnFilter) {
+                const i = +key;
+                const cfg = columnFilter[key];
+                const raw = getFilterTextFromCell(tds[i]);
+
+                if (cfg.kind === 'text') {
+                    if (cfg.q && !raw.toLowerCase().includes(cfg.q.toLowerCase())) return false;
+                } else if (cfg.kind === 'select') {
+                    if (cfg.q && raw !== cfg.q) return false;
+                }
+            }
+            return true;
+        }
+
+        // ====== TERAPKAN FILTER KE TABEL ======
+        const applyColumnFilters = (() => {
+            const run = () => {
+                const table = document.getElementById(TABLE_ID);
+                const tbody = table ?.tBodies ?.[0];
+                if (!tbody) return;
+
+                [...tbody.rows].forEach(tr => {
+                    tr.style.display = rowMatchByFilters(tr) ? '' : 'none';
+                });
+            };
+            return debounce(run, 120);
+        })();
+
+        function bindFilterInputs() {
+            const table = document.getElementById(TABLE_ID);
+            if (!table) return;
+
+            // input teks per kolom (termasuk kolom tanggal yang sekarang string)
+            table.querySelectorAll('thead input[data-col]').forEach(inp => {
+                const col = +inp.dataset.col;
+                if (!columnFilter[col]) columnFilter[col] = {
+                    kind: 'text',
+                    q: ''
+                };
+                inp.addEventListener('input', e => {
+                    columnFilter[col].q = e.target.value;
+                    applyColumnFilters();
+                });
+            });
+
+            // select per kolom
+            table.querySelectorAll('thead select[data-col]').forEach(sel => {
+                const col = +sel.dataset.col;
+                if (!columnFilter[col]) columnFilter[col] = {
+                    kind: 'select',
+                    q: ''
+                };
+                sel.addEventListener('change', e => {
+                    columnFilter[col].q = e.target.value;
+                    applyColumnFilters();
+                });
+            });
+        }
+
+
+
+
+        // ====== Localized label maps (ID) ======
+        const interestMapID = {
+            'project-manager': 'Manajer Proyek',
+            'administration': 'Administrasi',
+            'hr': 'Sumber Daya Manusia (HR)',
+            'uiux': 'UI/UX',
+            'programmer': 'Programmer (Front End / Backend)',
+            'photographer': 'Fotografer',
+            'videographer': 'Videografer',
+            'graphic-designer': 'Desainer Grafis',
+            'social-media-specialist': 'Spesialis Media Sosial',
+            'content-writer': 'Penulis Konten',
+            'content-planner': 'Perencana Konten',
+            'marketing-and-sales': 'Penjualan & Pemasaran',
+            'public-relation': 'Hubungan Masyarakat (Marcomm)',
+            'digital-marketing': 'Pemasaran Digital',
+            'tiktok-creator': 'Kreator TikTok',
+            'welding': 'Pengelasan',
+            'customer-service': 'Layanan Pelanggan',
+        };
+
+        const genderMapID = {
+            'male': 'Laki-laki',
+            'laki-laki': 'Laki-laki',
+            'pria': 'Laki-laki',
+            'm': 'Laki-laki',
+            'female': 'Perempuan',
+            'perempuan': 'Perempuan',
+            'wanita': 'Perempuan',
+            'f': 'Perempuan'
+        };
+
+        const statusNowMapID = {
+            'Fresh Graduate': 'Lulusan Baru',
+            'Student': 'Mahasiswa/Pelajar',
+            'Employee': 'Karyawan',
+            'Unemployed': 'Tidak Bekerja',
+        };
+
+        const arrangementMapID = { // TIPE MAGANG (cara kerja)
+            'onsite': 'Onsite',
+            'hybrid': 'Hibrida',
+            'remote': 'Remote'
+        };
+
+        const typeMapID = { // JENIS MAGANG (skema)
+            'campus': 'Magang Kampus',
+            'mandiri': 'Magang Mandiri',
+            'pkl': 'PKL',
+            'kampus-merdeka': 'Kampus Merdeka',
+            'mbkm': 'Kampus Merdeka'
+        };
+
+        const yesNoMapID = {
+            'yes': 'Ya',
+            'y': 'Ya',
+            'true': 'Ya',
+            '1': 'Ya',
+            'ya': 'Ya',
+            'no': 'Tidak',
+            'n': 'Tidak',
+            'false': 'Tidak',
+            '0': 'Tidak',
+            'tidak': 'Tidak'
+        };
+
+        // ====== Helpers ======
+        const fmtStr = (s) => (s && String(s).trim() !== '' ? String(s) : '-');
+
+        // labelizer generik dengan fallback string polos
+        const labelize = (map, val) => {
+            if (val == null) return '-';
+            const key = String(val).toLowerCase();
+            for (const k in map) {
+                if (k.toLowerCase() === key) return map[k];
+            }
+            return String(val); // fallback tampilkan apa adanya
+        };
+
+        function interestLabelID(slug) {
+            if (!slug) return '-';
+            const key = String(slug).toLowerCase();
+            return interestMapID[key] ?? String(slug).replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        // created_at dari server → tetap format tanggal
+        const fmtDate = (s) => {
+            if (!s) return '-';
+            const d = new Date(s);
+            if (isNaN(d)) return String(s);
+            return d.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        };
+
+        // ====== Toast helpers ======
+        const toastStack = document.getElementById('toastStack');
+
+        function pushToast(message, type = 'success') {
+            const base = 'flex items-center gap-2 rounded-lg border px-3 py-2 text-sm shadow-sm';
+            const theme = type === 'success' ?
+                'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-700 dark:text-emerald-200' :
+                'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-900/20 dark:border-rose-700 dark:text-rose-200';
+            const el = document.createElement('div');
+            el.className = `${base} ${theme}`;
+            el.innerHTML = `<span>${message}</span>
+                            <button class="ml-2 rounded px-2 py-1 text-xs opacity-70 hover:opacity-100">Tutup</button>`;
+            el.querySelector('button').addEventListener('click', () => el.remove());
+            toastStack.appendChild(el);
+            setTimeout(() => el.remove(), 4000);
+        }
+
+        // ====== Pending bar state ======
+        const pendingBar = document.getElementById('pendingBar');
+        const pendingCount = document.getElementById('pendingCount');
+        const saveAllBtn = document.getElementById('saveAll');
+        const discardBtn = document.getElementById('discardAll');
+        const pending = new Map(); // key: id, value: {id,name,from,to,url,select,badge}
+
+        function updatePendingBar() {
+            const n = pending.size;
+            pendingCount.textContent = n;
+            pendingBar.classList.toggle('hidden', n === 0);
+            saveAllBtn.disabled = n === 0;
+        }
+
+        function markSelect(sel, active) {
+            sel.classList.toggle('ring-2', active);
+            sel.classList.toggle('ring-amber-400', active);
+            sel.classList.toggle('bg-amber-50', active);
+        }
+
+        // ubah tampilan badge status setelah sukses
+        function applyBadge(badgeEl, newVal) {
+            const m = statusMap[newVal] || {
+                label: newVal,
+                cls: 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200'
+            };
+            badgeEl.className = `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${m.cls}`;
+            badgeEl.textContent = m.label;
+        }
+
+        async function patchForm(url, fields) {
+            const fd = new FormData();
+            fd.append('_method', 'PATCH');
+            for (const [k, v] of Object.entries(fields)) fd.append(k, v);
+            const res = await fetch(url, {
+                method: 'POST',
+                body: fd,
+                headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            });
+            if (!res.ok) {
+                const t = await res.text().catch(() => '');
+                throw new Error(t || `HTTP ${res.status}`);
+            }
+            return res;
+        }
+
+        function buildActionCell(it) {
+            return `
+                <div class="flex gap-2">
+                    <button type="button" class="rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600 js-detail"
+                        data-id="${it.id}">
+                        Detail
+                    </button>
+                    <button type="button" class="rounded bg-amber-600 px-2 py-1 text-xs text-white hover:bg-amber-700 js-edit"
+                        data-id="${it.id}">
+                        Edit
+                    </button>
+                    <button type="button" class="rounded bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600 js-delete"
+                        data-id="${it.id}">
+                        Hapus
+                    </button>
+                </div>`;
+        }
+
+        function buildStatusCell(item) {
+            const cur = item.internship_status || 'new';
+            const badge = statusMap[cur] || {
+                label: cur,
+                cls: 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200'
+            };
+            return `
+                <div class="flex min-w-[12rem] items-center justify-between">
+                    <span id="badge-${item.id}"
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}">
+                        ${badge.label}
+                    </span>
+                    <form action="${item.status_update_url}" class="inline status-form-row">
+                        <select
+                            class="status-select-row appearance-none rounded-lg border border-gray-300 bg-white px-2 py-1.5 pr-7 text-xs text-gray-700
+                            dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            data-current="${cur}" data-name="${item.fullname || 'pemagang'}" data-id="${item.id}">
+                            ${Object.entries(statusMap).map(([val, obj]) =>
+                                `<option value="${val}" ${val===cur?'selected':''}>${obj.label}</option>`).join('')}
+                        </select>
+                    </form>
+                </div>`;
+        }
+
+        function bindStatusListeners() {
+            document.querySelectorAll('.status-select-row').forEach(sel => {
+                sel.onchange = function() {
+                    const form = this.closest('form');
+                    const url = form.getAttribute('action');
+                    const id = Number(this.dataset.id);
+                    const name = this.dataset.name || 'pemagang';
+                    const from = this.dataset.current;
+                    const to = this.value;
+
+                    if (to === from) {
+                        if (pending.has(id)) {
+                            pending.delete(id);
+                            markSelect(this, false);
+                            updatePendingBar();
+                        }
+                        return;
+                    }
+
+                    // simpan state baru ke pending
+                    pending.set(id, {
+                        id,
+                        name,
+                        from,
+                        to,
+                        url,
+                        select: this,
+                        badge: document.getElementById(`badge-${id}`)
+                    });
+                    markSelect(this, true);
+                    updatePendingBar();
+                };
+            });
+        }
+
+        function renderRows(payload) {
+            const {
+                data,
+                meta
+            } = payload;
+            const offset = (meta.current_page - 1) * meta.per_page;
+
+            if (!data || data.length === 0) {
+                rowsEl.innerHTML = `
+                    <tr>
+                        <td colspan="{{ count($fields) + 2 }}" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                            Belum ada data.
+                        </td>
+                    </tr>`;
+                pagerEl.innerHTML = '';
+                return;
+            }
+
+            rowsEl.innerHTML = data.map((it, idx) => {
+                window.rowData.set(it.id, it);
+                // ==== (ISI KOLOM TETAP, PERSIS seperti punyamu) ====
+                return `
+                    <tr data-row-id="${it.id}"
+                        class="odd:bg-white even:bg-gray-50 hover:bg-gray-100 dark:odd:bg-gray-800 dark:even:bg-gray-800/60 dark:hover:bg-gray-700/60">
+                        <td class="px-3 py-2 text-gray-600 dark:text-gray-300">${offset + idx + 1}</td>
+
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.fullname)}">${fmtStr(it.fullname)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.born_date)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.student_id)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.email)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${labelize(genderMapID, it.gender)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.phone_number)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.institution_name)}">${fmtStr(it.institution_name)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.study_program)}">${fmtStr(it.study_program)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.faculty)}">${fmtStr(it.faculty)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.current_city)}">${fmtStr(it.current_city)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_reason)}">${fmtStr(it.internship_reason)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(typeMapID, it.internship_type)}">${labelize(typeMapID, it.internship_type)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(arrangementMapID, it.internship_arrangement)}">${labelize(arrangementMapID, it.internship_arrangement)}</span></td>
+                        <td class="px-3 py-2 align-top">
+                            <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium ${it.current_status==='Fresh Graduate'
+                                ? 'bg-slate-100 text-slate-800 dark:bg-slate-600/20 dark:text-slate-300'
+                                : (it.current_status==='Student'
+                                ? 'bg-sky-100 text-sky-800 dark:bg-sky-600/20 dark:text-sky-300'
+                                : 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200')}">
+                                ${labelize(statusNowMapID, it.current_status)}
+                            </span>
+                        </td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.english_book_ability)}">${fmtStr(it.english_book_ability)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.supervisor_contact)}">${fmtStr(it.supervisor_contact)}</span></td>
+
+                        <td class="px-3 py-2 align-top">
+                            <span class="block max-w-[18rem] truncate" title="${interestLabelID(it.internship_interest)}">
+                                ${interestLabelID(it.internship_interest)}
+                            </span>
+                        </td>
+
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_interest_other)}">${fmtStr(it.internship_interest_other)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.design_software)}">${fmtStr(it.design_software)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.video_software)}">${fmtStr(it.video_software)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.programming_languages)}">${fmtStr(it.programming_languages)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.digital_marketing_type)}">${fmtStr(it.digital_marketing_type)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.digital_marketing_type_other)}">${fmtStr(it.digital_marketing_type_other)}</span></td>
+
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(yesNoMapID, it.laptop_equipment)}">${labelize(yesNoMapID, it.laptop_equipment)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.owned_tools)}">${fmtStr(it.owned_tools)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.owned_tools_other)}">${fmtStr(it.owned_tools_other)}</span></td>
+
+                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.start_date)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.end_date)}</span></td>
+
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_info_sources)}">${fmtStr(it.internship_info_sources)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_info_other)}">${fmtStr(it.internship_info_other)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.current_activities)}">${fmtStr(it.current_activities)}</span></td>
+
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.boarding_info)}">${fmtStr(it.boarding_info)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.family_status)}">${fmtStr(it.family_status)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.parent_wa_contact)}</span></td>
+                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.social_media_instagram)}</span></td>
+
+                        <td class="px-3 py-2 align-top">${
+                            it.cv_ktp_portofolio_pdf
+                                ? `<a href="${it.cv_ktp_portofolio_pdf}" target="_blank" class="text-emerald-600 underline hover:text-emerald-700">Lihat</a>`
+                                : '<span class="text-gray-400">-</span>'}
+                        </td>
+                        <td class="px-3 py-2 align-top">${
+                            it.portofolio_visual
+                                ? `<a href="${it.portofolio_visual}" target="_blank" class="text-emerald-600 underline hover:text-emerald-700">Lihat</a>`
+                                : '<span class="text-gray-400">-</span>'}
+                        </td>
+
+                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtDate(it.created_at)}</span></td>
+
+                        <td class="px-3 py-2 align-top">
+                            ${buildStatusCell(it)}
+                        </td>
+
+                        ${
+                            SCOPE === 'completed'
+                                ? `
+                                <td class="px-3 py-2 align-top">
+                                    ${
+                                        (it.certificate_pdf_url || it.certificate_url || true)
+                                            ? `
+                                            <div class="flex items-center gap-2">
+                                                ${(it.certificate_pdf_url || it.certificate_url)
+                                                    ? `<a href="${it.certificate_pdf_url || it.certificate_url}"
+                                                            class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                                            title="Unduh PDF yang identik (render JS/canvas)" target="_blank" rel="noopener">
+                                                            Magangjogja.com
+                                                        </a>`
+                                                    : ''
+                                                    }
+                                                ${(() => {
+                                                    const tmpl = @json($certAreaKerjaComRouteTmpl);
+                                                    const url2 = it.certificate_areakerjacom_url || (tmpl ? tmpl.replace('__ID__', it.id) : '');
+                                                    if (!url2) return '';
+                                                    return `<a href="${url2}"
+                                                                class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                                                title="Unduh versi certareakerjacom" target="_blank" rel="noopener">
+                                                                AreaKerja.com
+                                                            </a>`;
+                                                    })()
+                                                }
+                                            </div>
+                                            `
+                                            : '<span class="text-gray-400">-</span>'
+                                        }
+                                </td>
+                                `
+                                : ''
+                            }
+
+                        <td class="px-3 py-2 align-top">
+                            ${buildActionCell(it)}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            bindStatusListeners();
+            buildPager(meta);
+            hydrateSelectOptions();
+            applyColumnFilters();
+        }
+
+        function buildPager(meta) {
+            const {
+                current_page,
+                last_page
+            } = meta;
+            const prev = current_page > 1 ? current_page - 1 : null;
+            const next = current_page < last_page ? current_page + 1 : null;
+
+            pagerEl.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-600 dark:text-gray-300">
+                        Halaman <strong>${current_page}</strong> dari <strong>${last_page}</strong>
+                    </div>
+                    <div class="flex gap-2">
+                        <button ${!prev?'disabled':''} data-goto="${prev||''}"
+                            class="rounded-lg border px-3 py-2 text-sm disabled:opacity-50">Sebelumnya</button>
+                        <button ${!next?'disabled':''} data-goto="${next||''}"
+                            class="rounded-lg border px-3 py-2 text-sm disabled:opacity-50">Berikutnya</button>
+                    </div>
+                </div>
+            `;
+
+            pagerEl.querySelectorAll('button[data-goto]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const p = Number(btn.dataset.goto);
+                    if (p) loadPage(p);
+                });
+            });
+        }
+
+        // ========== AKSI: BATALKAN ==========
+        discardBtn ?.addEventListener('click', () => {
+            if (pending.size === 0) return;
+            for (const {
+                    select,
+                    from
+                } of pending.values()) {
+                select.value = from;
+                // tetap biarkan dataset.current tidak berubah; commit UI saja
+                markSelect(select, false);
+            }
+            pending.clear();
+            updatePendingBar();
+            pushToast('Semua perubahan dibatalkan.', 'success');
         });
 
-        rowsEl.innerHTML = `
-          <tr>
-            <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
-              Memuat data…
-            </td>
-          </tr>`;
-
-        try {
-          const url = `${API_URL}?${params.toString()}`;
-          const res = await fetch(url, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            credentials: 'same-origin'
-          });
-          if (!res.ok) {
-            const txt = await res.text().catch(() => '');
-            throw new Error(`HTTP ${res.status} ${res.statusText} ${txt}`);
-          }
-          const json = await res.json();
-          renderRows(json);
-
-          // simpan halaman aktif
-          window.__CURRENT_PAGE = page;
-
-          // saat searching, sembunyikan pagination
-          if (searchQuery) pagerEl.innerHTML = '';
-        } catch (e) {
-          console.error('Error loading page data:', e);
-          rowsEl.innerHTML = `
-            <tr>
-              <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-rose-600">
-                Gagal memuat data.
-              </td>
-            </tr>`;
+        // Helper: batasi paralel request agar tidak membebani server
+        async function runWithConcurrency(tasks, limit = 4) {
+            const results = [];
+            let i = 0;
+            const workers = Array.from({
+                length: Math.min(limit, tasks.length)
+            }, async () => {
+                while (i < tasks.length) {
+                    const cur = i++;
+                    try {
+                        results[cur] = await tasks[cur]();
+                    } catch (e) {
+                        results[cur] = e;
+                    }
+                }
+            });
+            await Promise.all(workers);
+            return results;
         }
-      } // <<< AKHIR fungsi loadPage
 
-      // ====== EKSPOR HELPER (agar tombol Edit/Hapus bisa refresh tabel)
-      window.__CURRENT_PAGE = 1;
-      window.reloadInterns  = (p) => {
-        const page = p || window.__CURRENT_PAGE || 1;
-        loadPage(page);
-      }; // <<< JANGAN LUPA TUTUP
+        // ========== AKSI: SIMPAN ==========
+        saveAllBtn ?.addEventListener('click', async () => {
+            if (pending.size === 0) return;
 
-      // ====== INIT
-      bindFilterInputs();
-      loadPage(Number(new URLSearchParams(location.search).get('page') || 1));
+            const items = Array.from(pending.values());
+            saveAllBtn.disabled = true;
+            discardBtn.disabled = true;
 
-      // Peringatan unload jika masih ada pending
-      window.addEventListener('beforeunload', (e) => {
-        if (pending.size > 0) {
-          e.preventDefault();
-          e.returnValue = '';
-        }
-      });
-    }); // <<< penutup DOMContentLoaded
+            const tasks = items.map(item => async () => {
+                // jika endpoint-mu memakai field berbeda, ganti di sini:
+                await patchForm(item.url, {
+                    internship_status: item.to
+                });
+                return item;
+            });
+
+            try {
+                const results = await runWithConcurrency(tasks, 4);
+
+                let ok = 0,
+                    fail = 0;
+                const failed = [];
+
+                results.forEach((res, idx) => {
+                    if (res instanceof Error) {
+                        fail++;
+                        failed.push({
+                            item: items[idx],
+                            err: res
+                        });
+                        return;
+                    }
+                    ok++;
+
+                    const it = res; // item yang berhasil
+                    it.select.dataset.current = it.to; // commit state baru
+                    markSelect(it.select, false);
+                    applyBadge(it.badge, it.to);
+
+                    pending.delete(it.id);
+                });
+
+                updatePendingBar();
+
+                if (ok) pushToast(`${ok} perubahan disimpan.`, 'success');
+                if (fail) {
+                    failed.forEach(({
+                        item
+                    }) => { // tetap pending
+                        item.select.value = item.to;
+                        markSelect(item.select, true);
+                    });
+                    pushToast(`${fail} perubahan gagal disimpan. Coba lagi.`, 'error');
+                }
+            } catch (e) {
+                pushToast('Gagal menyimpan perubahan.', 'error');
+            } finally {
+                saveAllBtn.disabled = pending.size === 0;
+                discardBtn.disabled = false;
+            }
+        });
+
+        // ===== Loader API
+        async function loadPage(page = 1, perPage = 1000, searchQuery = '') {
+            const params = new URLSearchParams({
+                scope: SCOPE,
+                page: String(page),
+                per_page: searchQuery ? '1000' : String(perPage),
+                search: searchQuery
+            });
+
+            rowsEl.innerHTML = `
+                <tr>
+                    <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
+                        Memuat data…
+                    </td>
+                </tr>`;
+
+            try {
+                const url = `${API_URL}?${params.toString()}`;
+                const res = await fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+                if (!res.ok) {
+                    const txt = await res.text().catch(() => '');
+                    throw new Error(`HTTP ${res.status} ${res.statusText} ${txt}`);
+                }
+                const json = await res.json();
+                renderRows(json);
+
+                // simpan halaman aktif
+                window.__CURRENT_PAGE = page;
+
+                // saat searching, sembunyikan pagination
+                if (searchQuery) pagerEl.innerHTML = '';
+            } catch (e) {
+                console.error('Error loading page data:', e);
+                rowsEl.innerHTML = `
+                    <tr>
+                        <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-rose-600">
+                            Gagal memuat data.
+                        </td>
+                    </tr>`;
+            }
+        } // <<< AKHIR fungsi loadPage
+
+        // ====== EKSPOR HELPER (agar tombol Edit/Hapus bisa refresh tabel)
+        window.__CURRENT_PAGE = 1;
+        window.reloadInterns = (p) => {
+            const page = p || window.__CURRENT_PAGE || 1;
+            loadPage(page);
+        }; // <<< JANGAN LUPA TUTUP
+
+        // ====== INIT
+        bindFilterInputs();
+        loadPage(Number(new URLSearchParams(location.search).get('page') || 1));
+
+        // Peringatan unload jika masih ada pending
+        window.addEventListener('beforeunload', (e) => {
+            if (pending.size > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    });
 </script>
 @endsection
 
 
 @push('scripts')
 <script>
-  // gunakan Map dari script utama
-  const rowData = window.rowData || new Map();
-  const ADMIN_INTERNS_BASE = @json(url('/admin/interns'));
-  const csrf  = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    // gunakan Map dari script utama
+    const rowData = window.rowData || new Map();
+    const ADMIN_INTERNS_BASE = @json(url('/admin/interns'));
+    const csrf = document.querySelector('meta[name="csrf-token"]') ?.getAttribute('content') || '';
 
-  // ===== Util Modal =====
-  const $ = (id) => document.getElementById(id);
-  function openModal(titleStr, html, opts = {}) {
-    const appModal  = $('appModal');
-    const appDialog = $('appModalDialog');
-    const appTitle  = $('appModalTitle');
-    const appBody   = $('appModalBody');
-    if (!appModal || !appTitle || !appBody) return console.error('Modal tidak ditemukan');
+    // ===== Util Modal =====
+    const $ = (id) => document.getElementById(id);
 
-    const size = opts.size || 'md'; // md|lg|xl
-    if (appDialog) {
-      appDialog.classList.remove('max-w-md','max-w-lg','max-w-xl','max-w-2xl','max-w-3xl','max-w-4xl');
-      appDialog.classList.add(size === 'md' ? 'max-w-2xl' : size === 'lg' ? 'max-w-3xl' : 'max-w-4xl');
+    function openModal(titleStr, html, opts = {}) {
+        const appModal = $('appModal');
+        const appDialog = $('appModalDialog');
+        const appTitle = $('appModalTitle');
+        const appBody = $('appModalBody');
+        if (!appModal || !appTitle || !appBody) return console.error('Modal tidak ditemukan');
+
+        const size = opts.size || 'md'; // md|lg|xl
+        if (appDialog) {
+            appDialog.classList.remove('max-w-md', 'max-w-lg', 'max-w-xl', 'max-w-2xl', 'max-w-3xl', 'max-w-4xl');
+            appDialog.classList.add(size === 'md' ? 'max-w-2xl' : size === 'lg' ? 'max-w-3xl' : 'max-w-4xl');
+        }
+        appTitle.textContent = titleStr;
+        appBody.innerHTML = html;
+        appModal.classList.remove('hidden');
     }
-    appTitle.textContent = titleStr;
-    appBody.innerHTML = html;
-    appModal.classList.remove('hidden');
-  }
-  function closeModal() {
-    $('appModal')?.classList.add('hidden');
-    const body = $('appModalBody'); if (body) body.innerHTML = '';
-  }
-  $('appModal')?.addEventListener('click', (e) => {
-    if (e.target.hasAttribute('data-modal-close')) closeModal();
-  });
 
-  // ===== Confirm Modal =====
-  let confirmCb = null;
-  function openConfirm(message, onYes){
-    $('confirmBody').innerHTML = message || 'Yakin?';
-    confirmCb = onYes;
-    $('confirmModal')?.classList.remove('hidden');
-  }
-  function closeConfirm(){ $('confirmModal')?.classList.add('hidden'); confirmCb = null; }
-  $('confirmModal')?.addEventListener('click', e => {
-    if (e.target.hasAttribute('data-confirm-close')) closeConfirm();
-  });
-  $('confirmYes')?.addEventListener('click', async () => {
-    try { if (confirmCb) await confirmCb(); } finally { closeConfirm(); }
-  });
+    function closeModal() {
+        $('appModal') ?.classList.add('hidden');
+        const body = $('appModalBody');
+        if (body) body.innerHTML = '';
+    }
+    $('appModal') ?.addEventListener('click', (e) => {
+        if (e.target.hasAttribute('data-modal-close')) closeModal();
+    });
 
-  // ===== Helpers =====
-  const h = (s) => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    // ===== Confirm Modal =====
+    let confirmCb = null;
 
-  function renderDetailHTML(it){
-    const rows = [
-      ['Nama Lengkap', it.fullname],
-      ['Email', it.email],
-      ['No. WA', it.phone_number],
-      ['Institusi', it.institution_name],
-      ['Prodi / Fakultas', [it.study_program, it.faculty].filter(Boolean).join(' / ')],
-      ['Domisili', it.current_city],
-      ['Tipe / Skema', [it.internship_arrangement, it.internship_type].filter(Boolean).join(' · ')],
-      ['Tanggal', [it.start_date, it.end_date].filter(Boolean).join(' s/d ')],
-      ['Status', it.internship_status],
-      ['Alasan Magang', it.internship_reason],
-      ['Minat', it.internship_interest],
-    ];
-    return `
-      <div class="space-y-4">
-        <div class="max-h-[70vh] overflow-auto">
-          <table class="w-full border dark:border-gray-700 rounded-lg overflow-hidden">
-            ${rows.map(([k,v]) => `
-              <tr class="border-b last:border-0 dark:border-gray-700">
-                <td class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 w-44">${h(k)}</td>
-                <td class="px-3 py-2 text-sm text-gray-800 dark:text-gray-100 break-words whitespace-normal">${h(v)}</td>
-              </tr>`).join('')}
-          </table>
-        </div>
-      </div>`;
-  }
+    function openConfirm(message, onYes) {
+        $('confirmBody').innerHTML = message || 'Yakin?';
+        confirmCb = onYes;
+        $('confirmModal') ?.classList.remove('hidden');
+    }
 
-  // ===== Edit form (modal, bukan iframe) =====
-  function openEditForm(it) {
-    const html = `
-      <form id="editForm" data-id="${it.id}" class="space-y-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Nama Lengkap -->
-          <div class="form-group">
-            <label for="fullname" class="text-gray-700 font-medium">Nama Lengkap</label>
-            <input name="fullname" value="${h(it.fullname)}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
-          </div>
+    function closeConfirm() {
+        $('confirmModal') ?.classList.add('hidden');
+        confirmCb = null;
+    }
+    $('confirmModal') ?.addEventListener('click', e => {
+        if (e.target.hasAttribute('data-confirm-close')) closeConfirm();
+    });
+    $('confirmYes') ?.addEventListener('click', async () => {
+        try {
+            if (confirmCb) await confirmCb();
+        } finally {
+            closeConfirm();
+        }
+    });
 
-          <!-- Tanggal Lahir -->
-          <div class="form-group">
-            <label for="born_date" class="text-gray-700 font-medium">Tanggal Lahir</label>
-            <input name="born_date" type="text" value="${h(it.born_date)}" placeholder="dd/mm/yyyy"
-              class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
-          </div>
+    // ===== Helpers =====
+    const h = (s) => String(s ?? '').replace(/[&<>"']/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[m]));
 
-          <!-- NIM / NIS -->
-          <div class="form-group">
-            <label for="student_id" class="text-gray-700 font-medium">NIM / NIS</label>
-            <input name="student_id" value="${h(it.student_id)}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
-          </div>
+    function renderDetailHTML(it) {
+        const rows = [
+            ['Nama Lengkap', it.fullname],
+            ['Email', it.email],
+            ['No. WA', it.phone_number],
+            ['Institusi', it.institution_name],
+            ['Prodi / Fakultas', [it.study_program, it.faculty].filter(Boolean).join(' / ')],
+            ['Domisili', it.current_city],
+            ['Tipe / Skema', [it.internship_arrangement, it.internship_type].filter(Boolean).join(' · ')],
+            ['Tanggal', [it.start_date, it.end_date].filter(Boolean).join(' s/d ')],
+            ['Status', it.internship_status],
+            ['Alasan Magang', it.internship_reason],
+            ['Minat', it.internship_interest],
+        ];
+        return `
+            <div class="space-y-4">
+                <div class="max-h-[70vh] overflow-auto">
+                    <table class="w-full rounded-lg border dark:border-gray-700 overflow-hidden">
+                        ${rows.map(([k, v]) => `
+                            <tr class="border-b last:border-0 dark:border-gray-700">
+                                <td class="w-44 px-3 py-2 text-sm text-gray-500 dark:text-gray-400">${h(k)}</td>
+                                <td class="break-words whitespace-normal px-3 py-2 text-sm text-gray-800 dark:text-gray-100">${h(v)}</td>
+                            </tr>`).join('')}
+                    </table>
+                </div>
+            </div>`;
+    }
 
-          <!-- Email -->
-          <div class="form-group">
-            <label for="email" class="text-gray-700 font-medium">Email</label>
-            <input name="email" type="email" value="${h(it.email || '')}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
-          </div>
+    // ===== Edit form (modal, bukan iframe) =====
+    function openEditForm(it) {
+        const html = `
+            <form id="editForm" data-id="${it.id}" class="space-y-6">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="form-group">
+                        <label for="fullname" class="font-medium text-gray-700">Nama Lengkap</label>
+                        <input name="fullname" value="${h(it.fullname)}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
 
-          <!-- Telepon -->
-          <div class="form-group">
-            <label for="phone_number" class="text-gray-700 font-medium">Telepon</label>
-            <input name="phone_number" value="${h(it.phone_number || '')}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
-          </div>
+                    <div class="form-group">
+                        <label for="born_date" class="font-medium text-gray-700">Tanggal Lahir</label>
+                        <input name="born_date" type="text" value="${h(it.born_date)}" placeholder="dd/mm/yyyy"
+                            class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
 
-          <!-- Institusi -->
-          <div class="form-group">
-            <label for="institution_name" class="text-gray-700 font-medium">Institusi</label>
-            <input name="institution_name" value="${h(it.institution_name || '')}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
-          </div>
+                    <div class="form-group">
+                        <label for="student_id" class="font-medium text-gray-700">NIM / NIS</label>
+                        <input name="student_id" value="${h(it.student_id)}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
 
-          <!-- Prodi -->
-          <div class="form-group">
-            <label for="study_program" class="text-gray-700 font-medium">Prodi</label>
-            <input name="study_program" value="${h(it.study_program || '')}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
-          </div>
+                    <div class="form-group">
+                        <label for="email" class="font-medium text-gray-700">Email</label>
+                        <input name="email" type="email" value="${h(it.email || '')}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
 
-          <!-- Fakultas -->
-          <div class="form-group">
-            <label for="faculty" class="text-gray-700 font-medium">Fakultas</label>
-            <input name="faculty" value="${h(it.faculty || '')}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
-          </div>
+                    <div class="form-group">
+                        <label for="phone_number" class="font-medium text-gray-700">Telepon</label>
+                        <input name="phone_number" value="${h(it.phone_number || '')}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
 
-          <!-- Kota -->
-          <div class="form-group">
-            <label for="current_city" class="text-gray-700 font-medium">Kota</label>
-            <input name="current_city" value="${h(it.current_city || '')}" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
-          </div>
+                    <div class="form-group">
+                        <label for="institution_name" class="font-medium text-gray-700">Institusi</label>
+                        <input name="institution_name" value="${h(it.institution_name || '')}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
 
-          <!-- Alasan Magang -->
-          <div class="form-group">
-            <label for="internship_reason" class="text-gray-700 font-medium">Alasan Magang</label>
-            <textarea name="internship_reason" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm">${h(it.internship_reason || '')}</textarea>
-          </div>
+                    <div class="form-group">
+                        <label for="study_program" class="font-medium text-gray-700">Prodi</label>
+                        <input name="study_program" value="${h(it.study_program || '')}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
 
-          <!-- Tipe Magang -->
-          <div class="form-group">
-            <label for="internship_type" class="text-gray-700 font-medium">Tipe Magang</label>
-            <select name="internship_type" class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm">
-              <option value="remote" ${it.internship_type === 'remote' ? 'selected' : ''}>WFH</option>
-              <option value="onsite" ${it.internship_type === 'onsite' ? 'selected' : ''}>WFO</option>
-            </select>
-          </div>
+                    <div class="form-group">
+                        <label for="faculty" class="font-medium text-gray-700">Fakultas</label>
+                        <input name="faculty" value="${h(it.faculty || '')}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
 
-          <!-- Mulai -->
-          <div class="form-group">
-            <label for="start_date" class="text-gray-700 font-medium">Mulai</label>
-            <input name="start_date" type="text" value="${h(it.start_date)}" placeholder="dd/mm/yyyy"
-              class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
-          </div>
+                    <div class="form-group">
+                        <label for="current_city" class="font-medium text-gray-700">Kota</label>
+                        <input name="current_city" value="${h(it.current_city || '')}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
 
-          <!-- Selesai -->
-          <div class="form-group">
-            <label for="end_date" class="text-gray-700 font-medium">Selesai</label>
-            <input name="end_date" type="text" value="${h(it.end_date)}" placeholder="dd/mm/yyyy"
-              class="w-full p-3 border-0 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg shadow-sm" />
-          </div>
-        </div>
+                    <div class="form-group">
+                        <label for="internship_reason" class="font-medium text-gray-700">Alasan Magang</label>
+                        <textarea name="internship_reason" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">${h(it.internship_reason || '')}</textarea>
+                    </div>
 
-        <div class="flex justify-end gap-2 pt-4">
-          <button type="button" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:text-white hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="btnCancelEdit">Batal</button>
-          <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Simpan</button>
-        </div>
-      </form>
+                    <div class="form-group">
+                        <label for="internship_type" class="font-medium text-gray-700">Tipe Magang</label>
+                        <select name="internship_type" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="remote" ${it.internship_type === 'remote' ? 'selected' : ''}>WFH</option>
+                            <option value="onsite" ${it.internship_type === 'onsite' ? 'selected' : ''}>WFO</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="start_date" class="font-medium text-gray-700">Mulai</label>
+                        <input name="start_date" type="text" value="${h(it.start_date)}" placeholder="dd/mm/yyyy"
+                            class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="end_date" class="font-medium text-gray-700">Selesai</label>
+                        <input name="end_date" type="text" value="${h(it.end_date)}" placeholder="dd/mm/yyyy"
+                            class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-4">
+                    <button type="button" class="rounded-lg border border-gray-300 px-4 py-2 text-gray-600 hover:bg-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" id="btnCancelEdit">Batal</button>
+                    <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Simpan</button>
+                </div>
+            </form>`;
+
+        // Open modal
+        openModal('Edit Pemagang', html, {
+            size: 'md'
+        });
+
+        // Handle cancel button click
+        $('btnCancelEdit') ?.addEventListener('click', closeModal);
+
+        // Handle form submit
+        $('editForm') ?.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const form = ev.currentTarget;
+            const id = Number(form.dataset.id);
+            const fd = new FormData(form);
+
+            // Cek dan konversi format tanggal mulai (start_date) dan selesai (end_date)
+            const dateFormat = (dateString) => {
+                const parts = dateString.split(' ');
+                if (parts.length !== 3) {
+                    // Jika format tidak sesuai, asumsikan sudah YYYY-MM-DD
+                    return dateString;
+                }
+                const [day, month, year] = parts;
+                const monthMapping = {
+                    'Januari': '01',
+                    'Februari': '02',
+                    'Maret': '03',
+                    'April': '04',
+                    'Mei': '05',
+                    'Juni': '06',
+                    'Juli': '07',
+                    'Agustus': '08',
+                    'September': '09',
+                    'Oktober': '10',
+                    'November': '11',
+                    'Desember': '12'
+                };
+                return `${year}-${monthMapping[month]}-${day}`;
+            };
+
+            const startDateInput = form.querySelector('input[name="start_date"]');
+            const endDateInput = form.querySelector('input[name="end_date"]');
+
+            if (startDateInput && startDateInput.value) {
+                const startDateFormatted = dateFormat(startDateInput.value);
+                fd.set('start_date', startDateFormatted);
+            }
+
+            if (endDateInput && endDateInput.value) {
+                const endDateFormatted = dateFormat(endDateInput.value);
+                fd.set('end_date', endDateFormatted);
+            }
+
+            // Cek jika born_date kosong, kirimkan nilai yang lama jika tidak ada perubahan
+            const bornDateInput = form.querySelector('input[name="born_date"]');
+            if (bornDateInput && bornDateInput.value === '') {
+                fd.set('born_date', it.born_date); // Mengirimkan nilai lama
+            } else if (bornDateInput && bornDateInput.value) {
+                // Jika born_date diubah, format menjadi YYYY-MM-DD
+                const bornDateFormatted = dateFormat(bornDateInput.value);
+                fd.set('born_date', bornDateFormatted);
+            }
+
+            fd.append('_method', 'PATCH');
+            try {
+                const res = await fetch(`${ADMIN_INTERNS_BASE}/${id}`, {
+                    method: 'POST',
+                    body: fd,
+                    headers: {
+                        'X-CSRF-TOKEN': csrf,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+                if (!res.ok) throw new Error(await res.text().catch(() => 'Gagal menyimpan'));
+                closeModal();
+                window.reloadInterns ?.();
+                pushToast('Data berhasil disimpan.', 'success');
+            } catch (err) {
+                console.error(err);
+                pushToast('Gagal menyimpan data.', 'error');
+            }
+        });
+    }
 
 
-      `;
-
-    // Open modal
-    openModal('Edit Pemagang', html, { size: 'md' });
-
-    // Handle cancel button click
-    $('btnCancelEdit')?.addEventListener('click', closeModal);
-
-    // Handle form submit
-    $('editForm')?.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      const form = ev.currentTarget;
-      const id = Number(form.dataset.id);
-      const fd = new FormData(form);
-
-      // Cek dan konversi format tanggal mulai (start_date) dan selesai (end_date)
-      const dateFormat = (dateString) => {
-        const [day, month, year] = dateString.split(' ');
-        const monthMapping = {
-          Januari: '01', Februari: '02', Maret: '03', April: '04', Mei: '05', Juni: '06', Juli: '07', Agustus: '08', September: '09', Oktober: '10', November: '11', Desember: '12'
-        };
-        return `${year}-${monthMapping[month]}-${day}`;
-      };
-
-      const startDateInput = form.querySelector('input[name="start_date"]');
-      const endDateInput = form.querySelector('input[name="end_date"]');
-
-      if (startDateInput && startDateInput.value) {
-        const startDateFormatted = dateFormat(startDateInput.value);
-        fd.set('start_date', startDateFormatted);
-      }
-
-      if (endDateInput && endDateInput.value) {
-        const endDateFormatted = dateFormat(endDateInput.value);
-        fd.set('end_date', endDateFormatted);
-      }
-
-      // Cek jika born_date kosong, kirimkan nilai yang lama jika tidak ada perubahan
-      const bornDateInput = form.querySelector('input[name="born_date"]');
-      if (bornDateInput && bornDateInput.value === '') {
-        fd.set('born_date', it.born_date);  // Mengirimkan nilai lama
-      } else if (bornDateInput && bornDateInput.value) {
-        // Jika born_date diubah, format menjadi YYYY-MM-DD
-        const bornDateFormatted = dateFormat(bornDateInput.value);
-        fd.set('born_date', bornDateFormatted);
-      }
-
-      fd.append('_method', 'PATCH');
-      try {
+    // ===== Delete =====
+    async function deleteIntern(id) {
+        const fd = new FormData();
+        fd.append('_method', 'DELETE');
         const res = await fetch(`${ADMIN_INTERNS_BASE}/${id}`, {
-          method: 'POST',
-          body: fd,
-          headers: {
-            'X-CSRF-TOKEN': csrf,
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          credentials: 'same-origin'
+            method: 'POST',
+            body: fd,
+            headers: {
+                'X-CSRF-TOKEN': csrf,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
         });
-        if (!res.ok) throw new Error(await res.text().catch(() => 'Gagal menyimpan'));
-        closeModal();
-        window.reloadInterns?.();
-        pushToast('Data berhasil disimpan.', 'success');
-      } catch (err) {
-        console.error(err);
-        pushToast('Gagal menyimpan data.', 'error');
-      }
+        if (!res.ok) throw new Error(await res.text().catch(() => 'Gagal menghapus'));
+    }
+
+
+    // ===== Event delegation untuk tombol di kolom AKSI =====
+    document.addEventListener('click', async (e) => {
+        // DETAIL
+        const dBtn = e.target.closest('.js-detail');
+        if (dBtn) {
+            e.preventDefault();
+            const id = Number(dBtn.dataset.id);
+            const it = rowData.get(id);
+            if (it) openModal('Detail Pemagang', renderDetailHTML(it), {
+                size: 'md'
+            });
+            return;
+        }
+
+        // EDIT
+        const eBtn = e.target.closest('.js-edit');
+        if (eBtn) {
+            e.preventDefault();
+            const id = Number(eBtn.dataset.id);
+            const it = rowData.get(id);
+            if (it) openEditForm(it); // <— bukan iframe
+            return;
+        }
+
+        // HAPUS
+        const hBtn = e.target.closest('.js-delete');
+        if (hBtn) {
+            e.preventDefault();
+            const id = Number(hBtn.dataset.id);
+            openConfirm('Yakin ingin menghapus data ini?', async () => {
+                try {
+                    await deleteIntern(id);
+                    document.querySelector(`tr[data-row-id="${id}"]`) ?.remove();
+                    window.reloadInterns ?.();
+                    pushToast('Data berhasil dihapus.', 'success');
+                } catch (err) {
+                    console.error(err);
+                    pushToast('Gagal menghapus data.', 'error');
+                }
+            });
+            return;
+        }
     });
-  }
-
-
-  // ===== Delete =====
-  async function deleteIntern(id) {
-    const fd = new FormData();
-    fd.append('_method', 'DELETE'); 
-    const res = await fetch(`${ADMIN_INTERNS_BASE}/${id}`, {
-      method: 'POST', 
-      body: fd,
-      headers: { 
-        'X-CSRF-TOKEN': csrf,
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      credentials: 'same-origin'
-    });
-    if (!res.ok) throw new Error(await res.text().catch(() => 'Gagal menghapus'));
-  }
-
-
-  // ===== Event delegation untuk tombol di kolom AKSI =====
-  document.addEventListener('click', async (e) => {
-    // DETAIL
-    const dBtn = e.target.closest('.js-detail');
-    if (dBtn){
-      e.preventDefault();
-      const id = Number(dBtn.dataset.id);
-      const it = rowData.get(id);
-      if (it) openModal('Detail Pemagang', renderDetailHTML(it), { size: 'md' });
-      return;
-    }
-
-    // EDIT
-    const eBtn = e.target.closest('.js-edit');
-    if (eBtn){
-      e.preventDefault();
-      const id = Number(eBtn.dataset.id);
-      const it = rowData.get(id);
-      if (it) openEditForm(it);   // <— bukan iframe
-      return;
-    }
-
-    // HAPUS
-    const hBtn = e.target.closest('.js-delete');
-      if (hBtn) {
-        e.preventDefault();
-        const id = Number(hBtn.dataset.id);
-        openConfirm('Yakin ingin menghapus data ini?', async () => {
-          try {
-            await deleteIntern(id);
-            document.querySelector(`tr[data-row-id="${id}"]`)?.remove();
-            window.reloadInterns?.();
-            pushToast('Data berhasil dihapus.', 'success');
-          } catch (err) {
-            console.error(err);
-            pushToast('Gagal menghapus data.', 'error');
-          }
-        });
-      return;
-    }
-  });
 </script>
 @endpush
-
