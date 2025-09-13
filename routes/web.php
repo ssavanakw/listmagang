@@ -108,6 +108,10 @@ Route::prefix('admin')->group(function () {
             Route::get('/{intern}/certificate/areakerjacom.pdf',
                 [InternController::class, 'certificateAreaKerjaComPdf'])
                 ->name('admin.interns.certificate.areakerjacom.pdf');
+
+            // ===== HAPUS INTERN (DESTROY) =====
+            Route::delete('/{intern}', [InternController::class, 'destroy'])
+                ->name('admin.interns.destroy');
         });
 
         // ===== API JSON untuk tabel

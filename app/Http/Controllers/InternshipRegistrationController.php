@@ -165,4 +165,5 @@ class InternshipRegistrationController extends Controller
 
         return back()->with('success', 'Data berhasil disimpan!');
     }
+
 }

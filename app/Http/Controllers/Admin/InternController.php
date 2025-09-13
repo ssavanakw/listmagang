@@ -285,10 +285,10 @@ class InternController extends Controller
         // 2) URL aset gambar dari storage:link → /storage/...
         //    Ubah nama file sesuai yang kamu pakai di storage/app/public/images/
         $files = [
-            'logo_left'  => 'images/logo_left.png',
-            'logo_right' => 'images/logo_right.png',
-            'sig_left'   => 'images/ttd_hr.png',
-            'sig_right'  => 'images/ttd_owner.png',
+            'logo_left'  => 'images/logo_magangjogjacom.png',
+            'logo_right' => 'images/logo_seveninc.png',
+            'sig_left'   => 'images/ttd_arisetiahusbana.png',
+            'sig_right'  => 'images/ttd_rekariodanny.png',
         ];
 
         $certAssets = [];
@@ -367,8 +367,8 @@ class InternController extends Controller
         // >>> embed aset jadi data URI supaya 100% ter-render
         $bg     = $this->dataUriPublic('images/bg_areakerja.png');
         $logo   = $this->dataUriPublic('images/logo_areakerja.png');
-        $ttdHr  = $this->dataUriPublic('images/ttd_hr.png');
-        $ttdDir = $this->dataUriPublic('images/ttd_direktur.png');
+        $ttdHr  = $this->dataUriPublic('images/ttd_arisetiahusbana.png');
+        $ttdDir = $this->dataUriPublic('images/ttd_pipitdamayanti.png');
 
         return view('certificates.certareakerjacom', [
             'title'        => 'SERTIFIKAT',
@@ -418,8 +418,8 @@ class InternController extends Controller
         // >>> data URI (base64)
         $bg     = $this->dataUriPublic('images/bg_areakerja.png');
         $logo   = $this->dataUriPublic('images/logo_areakerja.png');
-        $ttdHr  = $this->dataUriPublic('images/ttd_hr.png');
-        $ttdDir = $this->dataUriPublic('images/ttd_direktur.png');
+        $ttdHr  = $this->dataUriPublic('images/ttd_arisetiahusbana.png');
+        $ttdDir = $this->dataUriPublic('images/ttd_pipitdamayanti.png');
 
         $html = view('certificates.certareakerjacom', [
             'title'        => 'SERTIFIKAT',

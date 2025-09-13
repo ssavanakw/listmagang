@@ -445,7 +445,7 @@
           <!-- Instagram -->
           <div>
             <label for="social-media-link" class="{{ $label }}">Sosial Media (Instagram)</label>
-            <input id="social-media-link" name="social_media_instagram" placeholder="cakwlive" class="{{ $input }}" />
+            <input id="social-media-link" name="social_media_instagram" placeholder="@cakwlive" class="{{ $input }}" />
           </div>
 
           <!-- Info unpaid -->

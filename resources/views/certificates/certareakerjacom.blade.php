@@ -36,8 +36,8 @@
   $bg        = $bg        ?? 'images/bg_areakerja.png';
   $logo      = $logo      ?? 'images/logo_areakerja.png';
   $logoRight = $logoRight ?? null;
-  $ttdHr     = $ttdHr     ?? 'images/ttd_hr.png';
-  $ttdDir    = $ttdDir    ?? 'images/ttd_direktur.png';
+  $ttdHr     = $ttdHr     ?? 'images/ttd_arisetiahusbana.png';
+  $ttdDir    = $ttdDir    ?? 'images/ttd_pipitdamayanti.png';
 
   // Helper: jadikan data URI bila file ada di storage/public
   function toDataUriOrUrl($pathOrUrl) {

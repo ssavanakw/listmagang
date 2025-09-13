@@ -74,10 +74,10 @@
   ];
 
   $assetFiles = [
-      'logo_left' => 'images/logo_left.png',
-      'logo_right'=> 'images/logo_right.png',
-      'sig_left'  => 'images/ttd_hr.png',
-      'sig_right' => 'images/ttd_owner.png',
+      'logo_left' => 'images/logo_magangjogjacom.png',
+      'logo_right'=> 'images/logo_seveninc.png',
+      'sig_left'  => 'images/ttd_arisetiahusbana.png',
+      'sig_right' => 'images/ttd_rekariodanny.png',
   ];
 
 
@@ -271,7 +271,7 @@
     const titleY=marginY+180; ctx.fillText('Sertifikat', marginX+innerW/2, titleY);
 
     ctx.font='400 22px "Times New Roman", Times, serif'; ctx.fillStyle=black;
-    ctx.fillText('Diberikan kepada:', marginX+innerW/2, titleY+36);
+    ctx.fillText('Diberikan kepada:', marginX+innerW/2, titleY+90);
 
     // nama
     ctx.font='italic 72px "Edwardian Script ITC","Segoe Script","Brush Script MT",cursive,serif';
