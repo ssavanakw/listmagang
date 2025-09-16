@@ -27,51 +27,63 @@
 
     <!-- Statistik Cards -->
     <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-5">
-        <!-- Pendaftar Baru -->
-        <div class="rounded-lg shadow-lg bg-emerald-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-emerald-900 duration-300">
-            <div class="flex justify-between items-center">
-                <p class="mb-2 text-sm font-medium text-gray-100">Pendaftar Baru</p>
-                <i class="fas fa-user-plus text-gray-100 text-2xl"></i>
-            </div>
-            <p class="text-4xl font-bold text-gray-100">{{ $counts['new'] ?? 0 }}</p>
-        </div>
 
-        <!-- Pemagang Aktif -->
-        <div class="rounded-lg shadow-lg bg-blue-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-blue-900 duration-300">
-            <div class="flex justify-between items-center">
-                <p class="mb-2 text-sm font-medium text-gray-100">Pemagang Aktif</p>
-                <i class="fas fa-users text-gray-100 text-2xl"></i>
-            </div>
-            <p class="text-4xl font-bold text-gray-100">{{ $counts['active'] ?? 0 }}</p>
+      <!-- Pendaftar Baru -->
+      <a href="{{ route('admin.interns.index') }}"
+        class="block cursor-pointer rounded-lg shadow-lg bg-emerald-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-emerald-900 duration-300"
+        aria-label="Lihat semua pendaftar">
+        <div class="flex justify-between items-center">
+          <p class="mb-2 text-sm font-medium text-gray-100">Pendaftar Baru</p>
+          <i class="fas fa-user-plus text-gray-100 text-2xl"></i>
         </div>
+        <p class="text-4xl font-bold text-gray-100">{{ $counts['new'] ?? 0 }}</p>
+      </a>
 
-        <!-- Selesai -->
-        <div class="rounded-lg shadow-lg bg-indigo-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-indigo-900 duration-300">
-            <div class="flex justify-between items-center">
-                <p class="mb-2 text-sm font-medium text-gray-100">Selesai</p>
-                <i class="fas fa-check-circle text-gray-100 text-2xl"></i>
-            </div>
-            <p class="text-4xl font-bold text-gray-100">{{ $counts['completed'] ?? 0 }}</p>
+      <!-- Pemagang Aktif -->
+      <a href="{{ route('admin.interns.active') }}"
+        class="block cursor-pointer rounded-lg shadow-lg bg-blue-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-blue-900 duration-300"
+        aria-label="Lihat pemagang aktif">
+        <div class="flex justify-between items-center">
+          <p class="mb-2 text-sm font-medium text-gray-100">Pemagang Aktif</p>
+          <i class="fas fa-users text-gray-100 text-2xl"></i>
         </div>
+        <p class="text-4xl font-bold text-gray-100">{{ $counts['active'] ?? 0 }}</p>
+      </a>
 
-        <!-- Keluar -->
-        <div class="rounded-lg shadow-lg bg-rose-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-rose-900 duration-300">
-            <div class="flex justify-between items-center">
-                <p class="mb-2 text-sm font-medium text-gray-100">Keluar</p>
-                <i class="fas fa-sign-out-alt text-gray-100 text-2xl"></i>
-            </div>
-            <p class="text-4xl font-bold text-gray-100">{{ $counts['exited'] ?? 0 }}</p>
+      <!-- Selesai -->
+      <a href="{{ route('admin.interns.completed') }}"
+        class="block cursor-pointer rounded-lg shadow-lg bg-indigo-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-indigo-900 duration-300"
+        aria-label="Lihat pemagang selesai">
+        <div class="flex justify-between items-center">
+          <p class="mb-2 text-sm font-medium text-gray-100">Selesai</p>
+          <i class="fas fa-check-circle text-gray-100 text-2xl"></i>
         </div>
+        <p class="text-4xl font-bold text-gray-100">{{ $counts['completed'] ?? 0 }}</p>
+      </a>
 
-        <!-- Pending -->
-        <div class="rounded-lg shadow-lg bg-amber-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-amber-900 duration-300">
-            <div class="flex justify-between items-center">
-                <p class="mb-2 text-sm font-medium text-gray-100">Pending</p>
-                <i class="fas fa-clock text-gray-100 text-2xl"></i>
-            </div>
-            <p class="text-4xl font-bold text-gray-100">{{ $counts['pending'] ?? 0 }}</p>
+      <!-- Keluar -->
+      <a href="{{ route('admin.interns.exited') }}"
+        class="block cursor-pointer rounded-lg shadow-lg bg-rose-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-rose-900 duration-300"
+        aria-label="Lihat pemagang keluar">
+        <div class="flex justify-between items-center">
+          <p class="mb-2 text-sm font-medium text-gray-100">Keluar</p>
+          <i class="fas fa-sign-out-alt text-gray-100 text-2xl"></i>
         </div>
+        <p class="text-4xl font-bold text-gray-100">{{ $counts['exited'] ?? 0 }}</p>
+      </a>
+
+      <!-- Pending -->
+      <a href="{{ route('admin.interns.pending') }}"
+        class="block cursor-pointer rounded-lg shadow-lg bg-amber-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-amber-900 duration-300"
+        aria-label="Lihat pemagang pending">
+        <div class="flex justify-between items-center">
+          <p class="mb-2 text-sm font-medium text-gray-100">Pending</p>
+          <i class="fas fa-clock text-gray-100 text-2xl"></i>
+        </div>
+        <p class="text-4xl font-bold text-gray-100">{{ $counts['pending'] ?? 0 }}</p>
+      </a>
     </div>
+
 
     <!-- Chart: 1 Line Chart Total Pendaftar / Bulan -->
     <div class="grid grid-cols-1 gap-6 mb-8">
