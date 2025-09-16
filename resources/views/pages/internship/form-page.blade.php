@@ -8,14 +8,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-emerald-400/20 dark:bg-emerald-950 min-h-screen flex items-start sm:items-center justify-center p-4">
+<body class="bg-emerald-400/20  min-h-screen flex items-start sm:items-center justify-center p-4">
   <div class="w-full max-w-2xl">
-    <div class="bg-white/80 dark:bg-zinc-900/80 backdrop-blur rounded-2xl shadow-xl ring-1 ring-zinc-200 dark:ring-zinc-800 overflow-hidden">
+    <div class="bg-white/80  backdrop-blur rounded-2xl shadow-xl ring-1 ring-zinc-200 overflow-hidden">
       <section class="py-8 lg:py-10 px-5 sm:px-8">
-        <h2 class="mb-3 text-2xl sm:text-3xl font-extrabold text-center text-zinc-900 dark:text-zinc-50">
+        <h2 class="mb-3 text-2xl sm:text-3xl font-extrabold text-center text-zinc-900">
           Form Pendaftaran Magang/PKL
         </h2>
-        <p class="mb-8 text-center text-sm sm:text-base text-zinc-600 dark:text-zinc-400">
+        <p class="mb-8 text-center text-sm sm:text-base text-zinc-600">
           Silakan isi form pendaftaran ini dengan lengkap untuk memudahkan kami dalam memproses. Terima kasih.
         </p>
 
@@ -23,13 +23,13 @@
           @csrf
 
           @php
-            $label = 'block mb-2 text-sm font-medium text-zinc-800 dark:text-zinc-200';
-            $help  = 'mt-1 text-xs text-zinc-500 dark:text-zinc-400';
-            $input = 'block w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 px-3 py-2.5 shadow-sm';
-            $group = 'bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-lg';
-            $radio = 'w-4 h-4 text-emerald-600 border-zinc-300 dark:border-zinc-600 focus:ring-2 focus:ring-emerald-500 dark:bg-zinc-800';
+            $label = 'block mb-2 text-sm font-medium text-zinc-800';
+            $help  = 'mt-1 text-xs text-zinc-500';
+            $input = 'block w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 px-3 py-2.5 shadow-sm';
+            $group = 'bg-white border border-zinc-300 rounded-lg';
+            $radio = 'w-4 h-4 text-emerald-600 border-zinc-300 focus:ring-2 focus:ring-emerald-500';
             $check = $radio;
-            $item  = 'flex items-center gap-3 px-3 py-2 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition';
+            $item  = 'flex items-center gap-3 px-3 py-2 hover:bg-zinc-50 transition';
           @endphp
 
           <!-- Nama Lengkap -->
@@ -60,7 +60,7 @@
           <div>
             <h3 class="{{ $label }}">Jenis Kelamin</h3>
             <ul class="{{ $group }}">
-              <li class="border-b border-zinc-200 dark:border-zinc-800">
+              <li class="border-b border-zinc-200">
                 <label for="gender-lk" class="{{ $item }}">
                   <input id="gender-lk" type="radio" value="Laki-laki" name="gender" class="{{ $radio }}" />
                   <span class="text-sm">Laki-laki</span>
@@ -115,7 +115,7 @@
           <div>
             <h3 class="{{ $label }}">Jenis Magang yang dipilih</h3>
             <ul class="{{ $group }}">
-              <li class="border-b border-zinc-200 dark:border-zinc-800">
+              <li class="border-b border-zinc-200">
                 <label for="type-mandiri" class="{{ $item }}">
                   <input id="type-mandiri" type="radio" value="Magang Mandiri" name="internship_type" class="{{ $radio }}" />
                   <span class="text-sm">Magang Mandiri</span>
@@ -147,13 +147,13 @@
           <div>
             <h3 class="{{ $label }}">Status Anda saat ini</h3>
             <ul class="{{ $group }}">
-              <li class="border-b border-zinc-200 dark:border-zinc-800">
+              <li class="border-b border-zinc-200">
                 <label for="status-student" class="{{ $item }}">
                   <input id="status-student" type="radio" value="Mahasiswa/Pelajar" name="current_status" class="{{ $radio }}" />
                   <span class="text-sm">Masih sekolah/kuliah</span>
                 </label>
               </li>
-              <li class="border-b border-zinc-200 dark:border-zinc-800">
+              <li class="border-b border-zinc-200">
                 <label for="status-unemployed" class="{{ $item }}">
                   <input id="status-unemployed" type="radio" value="Tidak Bekerja" name="current_status" class="{{ $radio }}" />
                   <span class="text-sm">Lulus & belum bekerja</span>
@@ -172,13 +172,13 @@
           <div>
             <h3 class="{{ $label }}">Kemampuan membaca buku berbahasa Inggris</h3>
             <ul class="{{ $group }}">
-              <li class="border-b border-zinc-200 dark:border-zinc-800">
+              <li class="border-b border-zinc-200">
                 <label for="eng-bisa" class="{{ $item }}">
                   <input id="eng-bisa" type="radio" value="Saya bisa" name="english_book_ability" class="{{ $radio }}" />
                   <span class="text-sm">Saya bisa</span>
                 </label>
               </li>
-              <li class="border-b border-zinc-200 dark:border-zinc-800">
+              <li class="border-b border-zinc-200">
                 <label for="eng-kurang" class="{{ $item }}">
                   <input id="eng-kurang" type="radio" value="Kurang bisa" name="english_book_ability" class="{{ $radio }}" />
                   <span class="text-sm">Kurang bisa</span>
@@ -206,7 +206,7 @@
               @foreach ([
                       'Project Manager', 'Administration', 'Human Resources (HR)', 'UI/UX', 'Programmer (Front End / Backend)', 'Photographer', 'Videographer', 'Graphic Designer', 'Social Media Specialist', 'Content Writer', 'Content Planner', 'Sales & Marketing', 'Public Relations (Marcomm)', 'Digital Marketing', 'TikTok Creator', 'Welding', 'Customer Service'
               ] as $labelText)
-                <li class="border-b last:border-0 border-zinc-200 dark:border-zinc-800">
+                <li class="border-b last:border-0 border-zinc-200">
                   <label class="{{ $item }}">
                     <input type="radio" value="{{ $labelText }}" name="internship_interest" class="{{ $radio }}" />
                     <span class="text-sm">{{ $labelText }}</span>
@@ -265,7 +265,7 @@
           <div>
             <h3 class="{{ $label }}">Jika memilih Digital Marketing, materi yang dipilih</h3>
             <ul class="{{ $group }}">
-              <li class="border-b border-zinc-200 dark:border-zinc-800">
+              <li class="border-b border-zinc-200">
                 <label for="dm-organik" class="{{ $item }}">
                   <input id="dm-organik" type="radio" value="Organik" name="digital_marketing_type" class="{{ $radio }}" />
                   <span class="text-sm">
@@ -274,7 +274,7 @@
                   </span>
                 </label>
               </li>
-              <li class="border-b border-zinc-200 dark:border-zinc-800">
+              <li class="border-b border-zinc-200">
                 <label for="dm-ads" class="{{ $item }}">
                   <input id="dm-ads" type="radio" value="Iklan (FB/IG Ads)" name="digital_marketing_type" class="{{ $radio }}" />
                   <span class="text-sm">
@@ -297,7 +297,7 @@
           <div>
             <h3 class="{{ $label }}">Apakah memiliki laptop untuk magang?</h3>
             <ul class="{{ $group }}">
-              <li class="border-b border-zinc-200 dark:border-zinc-800">
+              <li class="border-b border-zinc-200 ">
                 <label for="laptop-ya" class="{{ $item }}">
                   <input id="laptop-ya" type="radio" value="Ya" name="laptop_equipment" class="{{ $radio }}" />
                   <span class="text-sm">YA ADA</span>
@@ -324,7 +324,7 @@
                 'Pen Tablet',
                 'Tripod',
               ] as $text)
-                <li class="border-b last:border-0 border-zinc-200 dark:border-zinc-800">
+                <li class="border-b last:border-0 border-zinc-200">
                   <label class="{{ $item }}">
                     <input type="checkbox" value="{{ $text }}" name="owned_tools[]" class="{{ $check }}" />
                     <span class="text-sm">{{ $text }}</span>
@@ -359,7 +359,7 @@
             <h3 class="{{ $label }}">Anda tahu info magang ini dari mana?</h3>
             <ul class="{{ $group }}">
               @foreach (['Website','Instagram','Twitter','Glints','YouTube'] as $text)
-                <li class="border-b last:border-0 border-zinc-200 dark:border-zinc-800">
+                <li class="border-b last:border-0 border-zinc-200">
                   <label class="{{ $item }}">
                     <input type="checkbox" value="{{ \Illuminate\Support\Str::lower($text) }}" name="internship_info_sources[]" class="{{ $check }}" />
                     <span class="text-sm">{{ $text }}</span>
@@ -402,7 +402,7 @@
           <div>
             <label class="{{ $label }}">Butuh info kos/kontrakan dekat kantor?</label>
             <ul class="{{ $group }}">
-              <li class="border-b border-zinc-200 dark:border-zinc-800">
+              <li class="border-b border-zinc-200">
                 <label for="boarding-yes" class="{{ $item }}">
                   <input id="boarding-yes" type="radio" value="Ya" name="boarding_info" class="{{ $radio }}" />
                   <span class="text-sm">YA</span>
@@ -421,7 +421,7 @@
           <div>
             <h3 class="{{ $label }}">Apakah Anda sudah berkeluarga?</h3>
             <ul class="{{ $group }}">
-              <li class="border-b border-zinc-200 dark:border-zinc-800">
+              <li class="border-b border-zinc-200">
                 <label for="family-yes" class="{{ $item }}">
                   <input id="family-yes" type="radio" value="Ya" name="family_status" class="{{ $radio }}" />
                   <span class="text-sm">YA</span>
@@ -450,7 +450,7 @@
 
           <!-- Info unpaid -->
           <div>
-            <div class="p-5 rounded-lg border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-100">
+            <div class="p-5 rounded-lg border border-amber-300  bg-amber-50 text-amber-900 ">
               <h1 class="text-sm md:text-base leading-relaxed">
                 Program Magang ini bersifat <span class="font-semibold">unpaid / tidak bergaji</span>.
                 Jika Anda setuju, silakan <strong>SUBMIT</strong> dan <strong>KONFIRMASI</strong> ke WA Admin
