@@ -253,7 +253,7 @@
       left:50%;
       transform:translateX(-50%);
       bottom: 20px;
-      font-size:14px;
+      font-size:16px;
       color:var(--brand);
       font-weight:600;
       z-index:2;
