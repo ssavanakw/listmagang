@@ -4,15 +4,175 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\InternshipRegistration as IR;
+use App\Services\CertificatePdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File as FileFacade;
 use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class InternController extends Controller
 {
+    public function certificatePdfDynamic(IR $intern, string $template)
+    {
+        if ($intern->internship_status !== IR::STATUS_COMPLETED) {
+            abort(403, 'Sertifikat hanya tersedia untuk pemagang yang sudah selesai.');
+        }
+
+        $view = 'certificates.' . $template;
+        if (!view()->exists($view)) {
+            abort(404, "Template {$template} tidak ditemukan");
+        }
+
+        // Kirim hanya yang esensial
+        $data = ['intern' => $intern, 'template' => $template];
+
+        $filename = 'Sertifikat_' . \Illuminate\Support\Str::slug($intern->fullname ?: 'Pemagang', '_')
+                . "_{$template}.pdf";
+
+        return $this->downloadPdfFromView($view, $data, $filename);
+    }
+
+    private function downloadPdfFromView(string $view, array $data, string $downloadName)
+    {
+        $html = view($view, $data)->render();
+
+        // ---- Embed <img src> ----
+        $toPublicFile = function (string $src) {
+            if (preg_match('~^https?://~i', $src)) {
+                $path = parse_url($src, PHP_URL_PATH) ?: '';
+            } else {
+                $path = $src;
+            }
+            $path = ltrim($path, '/');
+
+            // dukung public/storage/... dan public/images/...
+            $candidates = [];
+            if (stripos($path, 'storage/') === 0 || stripos($path, 'images/') === 0) {
+                $candidates[] = public_path($path);
+            }
+            foreach ($candidates as $full) {
+                if (is_file($full)) return $full;
+            }
+            return null;
+        };
+
+        $imgToDataUri = function (string $file) {
+            $mime = FileFacade::mimeType($file) ?: 'image/png';
+            $data = base64_encode(FileFacade::get($file));
+            return "data:{$mime};base64,{$data}";
+        };
+
+        // DOM parse
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NOERROR | LIBXML_NOWARNING);
+        libxml_clear_errors();
+
+        // <img src="...">
+        $imgs = $dom->getElementsByTagName('img');
+        $imgNodes = [];
+        foreach ($imgs as $i) { $imgNodes[] = $i; }
+        foreach ($imgNodes as $img) {
+            if (!($img instanceof \DOMElement)) continue;
+            $src = $img->getAttribute('src');
+            if (!$src) continue;
+            if ($file = $toPublicFile($src)) {
+                $img->setAttribute('src', $imgToDataUri($file));
+            }
+        }
+
+        // inline style url(...)
+        $xpath = new \DOMXPath($dom);
+        foreach ($xpath->query('//*[@style]') as $el) {
+            if (!($el instanceof \DOMElement)) continue;
+            $style = $el->getAttribute('style');
+            $style = preg_replace_callback(
+                '~url\((["\']?)([^)\'"]+)\1\)~i',
+                function ($m) use ($toPublicFile, $imgToDataUri) {
+                    $file = $toPublicFile($m[2]);
+                    return $file ? 'url(' . $imgToDataUri($file) . ')' : $m[0];
+                },
+                $style
+            );
+            $el->setAttribute('style', $style);
+        }
+
+        // <style> blocks url(...)
+        $styleNodes = $dom->getElementsByTagName('style');
+        for ($i = 0; $i < $styleNodes->length; $i++) {
+            /** @var \DOMElement $styleEl */
+            $styleEl = $styleNodes->item($i);
+            $css = $styleEl->nodeValue ?? '';
+            $css = preg_replace_callback(
+                '~url\((["\']?)([^)\'"]+)\1\)~i',
+                function ($m) use ($toPublicFile, $imgToDataUri) {
+                    $file = $toPublicFile($m[2]);
+                    return $file ? 'url(' . $imgToDataUri($file) . ')' : $m[0];
+                },
+                $css
+            );
+            while ($styleEl->firstChild) { $styleEl->removeChild($styleEl->firstChild); }
+            $styleEl->appendChild($dom->createTextNode($css));
+        }
+
+        $html = $dom->saveHTML();
+
+        // Hook ready
+        $html .= <<<'HTML'
+    <script>
+    (function(){
+    function imagesReady(){
+        var imgs=[].slice.call(document.images||[]);
+        if(!imgs.length) return Promise.resolve();
+        return Promise.all(imgs.map(function(i){
+        if(i.complete) return Promise.resolve();
+        return new Promise(function(r){
+            i.addEventListener('load', r, {once:true});
+            i.addEventListener('error', r, {once:true});
+        });
+        }));
+    }
+    var timer=setTimeout(function(){window.__CERT_READY=true;}, 800);
+    imagesReady().then(function(){ clearTimeout(timer); window.__CERT_READY=true; });
+    })();
+    </script>
+    HTML;
+
+        // Save PDF
+        $safe = trim(preg_replace('/[^A-Za-z0-9_\- ]+/', '', pathinfo($downloadName, PATHINFO_FILENAME))) ?: 'Sertifikat';
+        $filename = $safe . '.pdf';
+        $dir  = storage_path('app/public/certificates');
+        if (!is_dir($dir)) { @mkdir($dir, 0775, true); }
+        $path = $dir . DIRECTORY_SEPARATOR . $filename;
+
+        $bs = Browsershot::html($html)
+            ->showBackground()
+            ->margins(0, 0, 0, 0)
+            ->setOption('printBackground', true)
+            ->setOption('preferCSSPageSize', true)
+            ->emulateMedia('print')
+            ->windowSize(1123, 794)
+            ->deviceScaleFactor(2)
+            ->waitForFunction('window.__CERT_READY === true')
+            ->setOption('waitUntil', 'networkidle0')
+            ->timeout(180);
+
+        if ($chromePath = env('BROWSERSHOT_CHROME_PATH')) {
+            $bs->setChromePath($chromePath);
+        }
+        // $bs->addChromiumArguments(['--no-sandbox','--disable-setuid-sandbox']);
+
+        $bs->savePdf($path);
+
+        return response()->download($path, $filename, ['Content-Type' => 'application/pdf'])
+                        ->deleteFileAfterSend(true);
+    }
+
+
+
     /**
      * Baca file dari storage:public lalu ubah jadi data URI (base64).
      * Return null bila file tidak ada.
@@ -100,6 +260,7 @@ class InternController extends Controller
             'Semua Pemagang',
             'all'
         );
+        
     }
 
     public function active(Request $request)
@@ -266,82 +427,50 @@ class InternController extends Controller
      * Spatie Browsershot — render JS/canvas → PDF 1 halaman (full-bleed).
      * GET /admin/interns/{intern}/certificate.pdf
      */
-    public function certificatePdf(IR $intern)
+    public function certificatePdf(IR $intern, CertificatePdf $pdf)
     {
         if ($intern->internship_status !== IR::STATUS_COMPLETED) {
             abort(403, 'Sertifikat hanya tersedia untuk pemagang yang sudah selesai.');
         }
 
-        // 1) Payload ke JS (pakai Y-m-d agar fungsi parse di kanvas akurat)
-        $certPayload = [
-            'name'       => (string) $intern->fullname,
-            'role'       => (string) $intern->internship_interest,
-            'start_date' => $intern->start_date ? Carbon::parse($intern->start_date)->format('Y-m-d') : null,
-            'end_date'   => $intern->end_date   ? Carbon::parse($intern->end_date)->format('Y-m-d')   : null,
-            'city'       => (string) $intern->current_city,
-            'issued'     => $intern->end_date   ? Carbon::parse($intern->end_date)->format('Y-m-d')   : null,
-        ];
+        Carbon::setLocale('id');
+        $start = $intern->start_date ? Carbon::parse($intern->start_date) : null;
+        $end   = $intern->end_date   ? Carbon::parse($intern->end_date)   : null;
 
-        // 2) URL aset gambar dari storage:link → /storage/...
-        //    Ubah nama file sesuai yang kamu pakai di storage/app/public/images/
-        $files = [
-            'logo_left'  => 'images/logo_magangjogjacom.png',
-            'logo_right' => 'images/logo_seveninc.png',
-            'sig_left'   => 'images/ttd_arisetiahusbana.png',
-            'sig_right'  => 'images/ttd_rekariodanny.png',
-        ];
+        $startDateStr = $start ? $start->translatedFormat('j F Y') : '';
+        $endDateStr   = $end   ? $end->translatedFormat('j F Y')   : '';
 
-        $certAssets = [];
-        foreach ($files as $key => $relPath) {
-            $certAssets[$key] = Storage::disk('public')->exists($relPath)
-                ? asset('storage/' . $relPath)   // absolut URL, bisa diakses Chromium
-                : null;                          // biarkan null → fallback teks/vektor di kanvas
+        $durationText = 'beberapa bulan';
+        if ($start && $end) {
+            $months = round($start->diffInDays($end) / 30, 1);
+            $durationText = str_replace('.', ',', (string) $months) . ' bulan';
         }
 
-        // 3) Render Blade sertifikat dengan kedua variabel ini
-        //    Di Blade, pastikan ada:
-        //    <script>window.__CERT__=@json($certPayload);</script>
-        //    <script>window.__ASSETS__=@json($certAssets);</script>
-        $html = view('certificates/certmagangjogjacom', [
-            'intern'      => $intern,
-            'certPayload' => $certPayload,
-            'certAssets'  => $certAssets,
-        ])->render();
+        $data = [
+            'title'          => 'Sertifikat',
+            'name'           => (string) $intern->fullname,
+            'role'           => (string) ($intern->internship_interest ?: 'Programmer'),
+            'company'        => 'Seven Inc.',
+            'duration'       => $durationText,
+            'start_date'     => $startDateStr,
+            'end_date'       => $endDateStr,
+            'city'           => (string) ($intern->current_city ?: 'Yogyakarta'),
 
-        // 4) Siapkan file keluaran
-        $safeName = trim(preg_replace('/[^A-Za-z0-9_\- ]+/', '', (string) $intern->fullname)) ?: 'Pemagang';
-        $filename = 'Sertifikat_' . Str::slug($safeName, '_') . '.pdf';
-        $dir  = storage_path('app/public/certificates');
-        if (!is_dir($dir)) { @mkdir($dir, 0775, true); }
-        $path = $dir . DIRECTORY_SEPARATOR . $filename;
+            // label & penandatangan
+            'hr_label'       => 'HR Department',
+            'owner_label'    => 'Owner Seven Inc.',
+            'hr_name'        => 'Ari Setia Husbana',
+            'owner_name'     => 'Rekario Danny',
 
-        // 5) Browsershot
-        $bs = Browsershot::html($html)
-            ->showBackground()
-            ->margins(0, 0, 0, 0)
-            ->setOption('printBackground', true)
-            ->setOption('preferCSSPageSize', true)
-            ->emulateMedia('print')
-            ->windowSize(1123, 794)
-            ->deviceScaleFactor(2)
-            // Tunggu kanvas selesai (flag dari script: window.__CERT_READY = true)
-            ->waitForFunction('window.__CERT_READY === true')
-            // Opsional: tunggu jaringan idle agar gambar logo/ttd tersedot tuntas
-            ->setOption('waitUntil', 'networkidle0')
-            // Base URL membantu Chromium resolve resource relatif (jika ada)
-            ->setOption('baseURL', config('app.url'))
-            ->timeout(120);
+        ];
 
-        if ($chromePath = env('BROWSERSHOT_CHROME_PATH')) {
-            $bs->setChromePath($chromePath);
-        }
-        // Jika perlu di server:
-        // $bs->addChromiumArguments(['--no-sandbox','--disable-setuid-sandbox']);
+        $safe = trim(preg_replace('/[^A-Za-z0-9_\- ]+/', '', (string) $intern->fullname)) ?: 'Pemagang';
+        $downloadName = 'Sertifikat_' . Str::slug($safe, '_') . '.pdf';
 
-        $bs->savePdf($path);
-
-        return response()->download($path)->deleteFileAfterSend(true);
+        // Ganti view sesuai template yang ingin dipakai
+        return $pdf->download('certificates.certmagangjogjacom', $data, $downloadName);
     }
+
     /**
      * PREVIEW HTML — certareakerjacom (opsional)
      */
@@ -477,7 +606,6 @@ class InternController extends Controller
             ->deviceScaleFactor(2)
             ->waitForFunction('document.readyState === "complete" || window.__CERT_READY === true')
             ->setOption('waitUntil', 'domcontentloaded')
-            ->setOption('baseURL', config('app.url'))
             ->timeout(180);
 
         if ($chromePath = env('BROWSERSHOT_CHROME_PATH')) {

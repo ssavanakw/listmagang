@@ -23,7 +23,6 @@ use App\Http\Controllers\Admin\InternApiController;     // return JSON
 Route::view('/dummycertificate','certificates.dummycertificate')
     ->name('dummycertificate');
 
-// Preview dummy untuk versi certareakerjacom (payload sederhana)
 Route::view(
     '/dummycertificate-areakerjacom',
     'certificates.certareakerjacom',
@@ -39,6 +38,21 @@ Route::view(
         'endDate'       => '30 Mei 2025',
     ]
 )->name('dummycertificate.areakerjacom');
+
+// routes/web.php
+Route::get('/dummycertificate-magangjogja', function () {
+    return view('certificates/dummycertificate', [
+        'name'       => 'Muhammad Alvin',
+        'role'       => 'Programmer',
+        'duration'   => '3 Bulan',
+        'start_date' => '01 Juni 2025',
+        'end_date'   => '31 Agustus 2025',
+        'city'       => 'Yogyakarta',
+        'hr_name'    => 'Ari Setia Husbana',
+        'owner_name' => 'Rekario Danny',
+    ]);
+});
+
 
 // =================== GUEST / INTERNSHIP ===================
 Route::get('/', [PublicRegController::class, 'create'])->name('internship.form');
@@ -112,6 +126,13 @@ Route::prefix('admin')->group(function () {
             // ===== HAPUS INTERN (DESTROY) =====
             Route::delete('/{intern}', [InternController::class, 'destroy'])
                 ->name('admin.interns.destroy');
+
+            // Tambahkan di dalam group admin/interns
+            Route::get('/{intern}/certificate/{template}.pdf',
+                [InternController::class, 'certificatePdfDynamic'])
+                ->name('admin.interns.certificate.dynamic')
+                ->whereIn('template', ['certmagangjogjacom','certareakerjacom','certtipisinicom']);
+
         });
 
         // ===== API JSON untuk tabel

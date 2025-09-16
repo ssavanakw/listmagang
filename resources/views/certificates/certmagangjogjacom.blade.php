@@ -1,361 +1,293 @@
 @php
+use Carbon\Carbon;
+Carbon::setLocale('id');
 
-  $pdfBaseName = 'magangjogja-' . \Illuminate\Support\Str::slug(optional($intern)->fullname ?? 'nama-pemagang', '-');
+$intern = $intern ?? null;
+
+/* Formatter tanggal */
+$fmt = static fn($d) => $d ? Carbon::parse($d)->translatedFormat('d F Y') : '—';
+
+/* ---- Teks dinamis utama ---- */
+$recipient    = $recipient    ?? ($intern->fullname ?? 'Nama Pemagang');
+$deptText     = $deptText     ?? ($intern->internship_interest ?? 'Human Resource');
+$company      = $company      ?? 'Seven Inc.';
+$startDate    = $startDate    ?? $fmt($intern->start_date ?? null);
+$endDate      = $endDate      ?? $fmt($intern->end_date   ?? null);
+$city         = 'Yogyakarta';
+
+if (!empty($intern?->start_date) && !empty($intern?->end_date)) {
+  $months = round(Carbon::parse($intern->start_date)->diffInDays(Carbon::parse($intern->end_date))/30, 1);
+  $durationText = $durationText ?? str_replace('.', ',', (string)$months) . ' bulan';
+} else {
+  $durationText = $durationText ?? 'beberapa bulan';
+}
+
+/* ---- Aset default (boleh tetap, tidak mengubah layout) ---- */
+$bg         = $bg         ?? '/storage/images/bg_magangjogjacom.png';
+$logo_left  = $logo_left  ?? '/storage/images/logo_magangjogjacom.png';
+$logo_right = $logo_right ?? '/storage/images/logo_seveninc.png';
+$ttd_hr     = $ttd_hr     ?? '/storage/images/ttd_arisetiahusbana.png';
+$ttd_owner  = $ttd_owner  ?? '/storage/images/ttd_rekariodanny.png';
+
+/* ---- Label & nama tanda tangan (tanpa ubah posisi/tag) ---- */
+$hr_label    = $hr_label    ?? 'HR Department';
+$owner_label = $owner_label ?? 'Owner Seven Inc.';
+$hrName      = $hrName      ?? 'Ari Setia Husbana';
+$owner_name  = $owner_name  ?? 'Rekario Danny';
+
+/* Catatan: di struktur ini, elemen .name kiri memakai variabel $hrRole.
+   Agar tidak ubah struktur, isi $hrRole dengan NAMA HR. */
+$hrRole = $hrRole ?? $hrName;
+
+/* ---- Viewer background untuk inline style ---- */
+$viewerBg = $viewerBg ?? ($bg ? "url('{$bg}') center/cover no-repeat #ffffff" : '#ffffff');
 @endphp
 
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>{{ $pdfBaseName }}</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-<style>
-  /* A4 landscape @96DPI = 1123 x 794 px */
-  @page { size: 1123px 794px; margin: 0; }
+  <title>Sertifikat Magang</title>
+  <style>
+    /* ==== Size & print setup (A4 landscape @ ~96DPI => 1123x794) ==== */
+    @page { size: 1123px 794px; margin: 0; }
+    :root{
+      --page-w: 1123px;
+      --page-h: 794px;
+      --pad: 32px;
+      --text: #000;
+      --dark: #293936;
+      --accent: #BE5640;
+      --serif: "Times New Roman", Times, serif;
+      --script1: "Edwardian Script ITC","Segoe Script","Brush Script MT","Lucida Handwriting",cursive,serif;
+      --script2: "Segoe Script","Brush Script MT","Lucida Handwriting",cursive,serif;
+    }
+    *{ box-sizing: border-box; }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#f0f0f0;
+    }
 
-  :root{
-    --dark: #293936;
-    --accent: #BE5640;
-    --black: #000;
-    --greenHL: #2EBE54;
-    --redHL: #D62118;
-  }
+    /* ==== Page container ==== */
+    .page{
+      position: relative;
+      width: var(--page-w);
+      height: var(--page-h);
+      overflow: hidden;
+      /* background akan dioverride inline style supaya aman untuk data URI */
+      background:#fff center/cover no-repeat;
+    }
 
-  html, body{
-    margin:0 !important;
-    padding:0 !important;
-    width:1123px;
-    height:794px;
-    background: var(--dark);
-    -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-  }
+    .content{
+      position: absolute;
+      inset: 0;
+      padding: 60px 72px;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+    }
 
-  .page{
-    width:1123px;
-    height:794px;
-    overflow:hidden;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background: var(--dark);
-    box-sizing:border-box;
-  }
+    /* ==== Top logos ==== */
+    .logos{
+      position: relative;
+      width: 100%;
+      height: 120px;
+    }
+    .logo-left{
+      position: absolute;
+      top: -20px;
+      left: 25px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+    .logo-right{
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+    .logo-left img{
+      max-height: 90px;
+      max-width: 350px;
+      object-fit: contain;
+    }
+    .logo-right img{
+      max-height: 120px;
+      max-width: 300px;
+      object-fit: contain;
+    }
 
-  #certificate{
-    width:1123px;
-    height:794px;
-    display:block;
-    background:#fff;
-    box-shadow:none;
-  }
-</style>
+    /* ==== Title & subtitle ==== */
+    .headings{ text-align: center; margin-top: 0; }
+    .title{
+      font: italic 700 72px var(--script2);
+      color: var(--dark);
+      line-height: 1;
+      margin: 0 0 8px;
+    }
+    .subtitle{
+      font: 400 22px var(--serif);
+      color: var(--text);
+      margin: 0 0 10px;
+    }
+
+    /* ==== Recipient name ==== */
+    .name-wrap{ text-align: center; margin-top: 14px; }
+    .name{
+      display: inline-block;
+      font: italic 72px var(--script1);
+      color: var(--text);
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+    .name-line{
+      width: 80%;
+      max-width: 780px;
+      height: 2px;
+      background: #000;
+      margin: 1px auto 0;
+    }
+
+    /* ==== Body text ==== */
+    .body{
+      margin-top: 8px;
+      text-align: center;
+      font: 400 20px var(--serif);
+      color: var(--text);
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+    }
+    .body > div:last-child{
+      margin-top: 16px;
+    }
+
+    /* ==== Signatures ==== */
+    .signatures{
+      position: relative;
+      width: 100%;
+      height: 230px;
+      margin-top: -40px;
+      font: 400 18px var(--serif);
+      color: var(--text);
+    }
+    .sig{
+      position: absolute;
+      bottom: 20px;
+      width: 260px;
+      text-align: center;
+    }
+    .sig-left{ left: 50px; }
+    .sig-right{ right: 50px; }
+
+    .sig .role,
+    .sig .line,
+    .sig .name{
+      position: relative;
+      z-index: 1;
+    }
+    .sig .line{
+      height: 2px;
+      background: #000;
+      margin: 0 0 6px;
+    }
+    .sig .name{
+      font: 600 18px "Times New Roman", Times, serif;
+      letter-spacing: .2px;
+    }
+    .sig .role{
+      margin-bottom: 65px;
+    }
+
+    .sig .image{
+      position: absolute;
+      z-index: 3;
+      pointer-events: none;
+    }
+    .sig .image img{
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      opacity: 0.95;
+    }
+
+    @media print{
+      body{ background: none; }
+      .page{ box-shadow: none; }
+    }
+  </style>
 </head>
 <body>
+  {{-- gunakan viewerBg untuk memastikan background selalu render --}}
+  <div class="page" style="background: {{ $viewerBg }};">
+    <div class="content">
 
-<div class="page">
-  <canvas id="certificate"></canvas>
-</div>
+      <!-- LOGOS -->
+      <div class="logos">
+        <div class="logo-left">
+          <img src="{{ $logo_left }}" alt="magangjogja.com" />
+        </div>
+        <div class="logo-right">
+          <img src="{{ $logo_right }}" alt="SEVEN INC" />
+        </div>
+      </div>
 
-{{-- ================== Data dinamis dari server ================== --}}
-@php
-  use Illuminate\Support\Facades\Storage;
-  use Illuminate\Support\Str;
+      <!-- TITLES -->
+      <div class="headings">
+        <div class="title">{{ $title ?? 'Sertifikat' }}</div>
+        <div class="subtitle">Diberikan kepada:</div>
+      </div>
 
-  $certPayload = [
-      'name'       => optional($intern)->fullname ?? 'Nama Pemagang',
-      'role'       => optional($intern)->internship_interest ?? 'Programmer',
-      'start_date' => optional($intern)->start_date ?? '',
-      'end_date'   => optional($intern)->end_date ?? '',
-      'city'       => 'Yogyakarta',
-      'issued'     => optional($intern)->end_date ?? '',
-  ];
+      <!-- RECIPIENT NAME -->
+      <div class="name-wrap">
+        <span class="name">{{ $recipient }}</span>
+        <div class="name-line" aria-hidden="true"></div>
+      </div>
 
-  $assetFiles = [
-      'logo_left' => 'images/logo_magangjogjacom.png',
-      'logo_right'=> 'images/logo_seveninc.png',
-      'sig_left'  => 'images/ttd_arisetiahusbana.png',
-      'sig_right' => 'images/ttd_rekariodanny.png',
-  ];
+      <!-- BODY TEXT -->
+      <div class="body">
+        <div>Telah menyelesaikan magang bidang <strong>{{ $deptText }}</strong> di {{ $company }} selama <strong>{{ $durationText }}</strong> yaitu</div>
+        <div>mulai dari <strong>{{ $startDate }}</strong> sampai dengan <strong>{{ $endDate }}</strong></div>
+        <div><strong>{{ $city }}</strong>, <strong>{{ $endDate }}</strong></div>
+      </div>
 
+      <!-- SIGNATURES -->
+      <div class="signatures">
+        <!-- Left: HR Department -->
+        <div class="sig sig-left">
+          <div class="role">{{ $hr_label }}</div>
+          <div class="image" style="top:-10px; left:-24px; width:300px; height:140px;">
+            <img src="{{ $ttd_hr }}" alt="Tanda tangan HR" />
+          </div>
+          <div class="line" aria-hidden="true"></div>
+          <div class="name">{{ $hrRole }}</div>
+        </div>
 
-  $certAssets = [];
-  foreach ($assetFiles as $k => $rel) {
-      if ($rel && Storage::disk('public')->exists($rel)) {
-          $bytes = Storage::disk('public')->get($rel);
+        <!-- Right: Owner -->
+        <div class="sig sig-right">
+          <div class="role">{{ $owner_label }}</div>
+          <div class="image" style="top:-16px; left:-27px; width:300px; height:160px;">
+            <img src="{{ $ttd_owner }}" alt="Tanda tangan Owner" />
+          </div>
+          <div class="line" aria-hidden="true"></div>
+          <div class="name">{{ $owner_name }}</div>
+        </div>
+      </div>
 
-          // Deteksi MIME dari ekstensi sederhana
-          $ext = Str::lower(pathinfo($rel, PATHINFO_EXTENSION));
-          $mime = match ($ext) {
-              'jpg', 'jpeg' => 'image/jpeg',
-              'png'         => 'image/png',
-              'gif'         => 'image/gif',
-              'webp'        => 'image/webp',
-              'svg'         => 'image/svg+xml',
-              default       => 'application/octet-stream',
-          };
-
-          $certAssets[$k] = 'data:' . $mime . ';base64,' . base64_encode($bytes);
-      } else {
-          // null = biar JS fallback ke bentuk vektor/teks
-          $certAssets[$k] = null;
-      }
-  }
-@endphp
-
-<script>window.__CERT__  = @json($certPayload);</script>
-<script>window.__ASSETS__ = @json($certAssets);</script>
-
-<script>
-(function(){
-  const canvas = document.getElementById('certificate');
-  const ctx = canvas.getContext('2d');
-
-  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-  const darkGreen = css('--dark') || '#293936';
-  const rustyRed  = css('--accent') || '#BE5640';
-  const black     = '#000';
-  const greenHL   = css('--greenHL') || '#2EBE54';
-  const redHL     = css('--redHL') || '#D62118';
-
-  const cert   = (window.__CERT__ || {});
-  const ASSETS = (window.__ASSETS__ || {});
-
-  const NAME  = cert.name || 'Nama Pemagang';
-  const ROLE  = cert.role || 'Programmer';
-  const CITY  = cert.city || 'Yogyakarta';
-  const SDATE = cert.start_date || '';
-  const EDATE = cert.end_date || cert.issued || '';
-
-  function parseYmd(s){
-    if(!s) return null;
-    const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (m) return new Date(+m[1], +m[2]-1, +m[3]);
-    const d = new Date(s); return isNaN(d) ? null : d;
-  }
-  function formatIndoDate(s){
-    const d = parseYmd(s);
-    if(!d) return s || '??';
-    const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-    return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
-  }
-
-  // Loader gambar aman (resolve null jika gagal)
-  function loadImage(url){
-    return new Promise((resolve) => {
-      if(!url){ resolve(null); return; }
-      const img = new Image();
-      // NOTE: untuk data: URL / same-origin, tidak perlu crossOrigin
-      img.onload = () => resolve(img);
-      img.onerror = () => {
-        console.error('[CERT] Gagal memuat gambar:', url);
-        resolve(null);
-      };
-      img.src = url;
-    });
-  }
-
-  // Gambar image ke box dengan menjaga aspect ratio (contain)
-  function drawImageContained(img, x, y, w, h){
-    if(!img) return;
-    const ir = img.width / img.height;
-    const br = w / h;
-    let dw = w, dh = h;
-    if (ir > br) { // gambar lebih lebar -> batasi width
-      dh = w / ir;
-    } else {       // gambar lebih tinggi -> batasi height
-      dw = h * ir;
-    }
-    const dx = x + (w - dw)/2;
-    const dy = y + (h - dh)/2;
-    ctx.drawImage(img, dx, dy, dw, dh);
-  }
-
-  // Hi-DPI
-  function setupHiDPI(){
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const W = 1123, H = 794;
-    canvas.width  = Math.round(W * dpr);
-    canvas.height = Math.round(H * dpr);
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-  }
-
-  async function draw(){
-    const [logoLeft, logoRight, sigLeft, sigRight] = await Promise.all([
-      loadImage(ASSETS.logo_left),
-      loadImage(ASSETS.logo_right),
-      loadImage(ASSETS.sig_left),
-      loadImage(ASSETS.sig_right),
-    ]);
-
-    const W = 1123, H = 794;
-    ctx.clearRect(0,0,W,H);
-
-    // latar hijau gelap
-    ctx.fillStyle = darkGreen;
-    ctx.fillRect(0,0,W,H);
-
-    // kertas putih
-    const marginX = 50, marginY = 40;
-    const innerW  = W - marginX*2;
-    const innerH  = H - marginY*2;
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(marginX, marginY, innerW, innerH);
-
-    // border oranye
-    const b = 25;
-    ctx.strokeStyle = rustyRed; ctx.lineWidth = 4; ctx.beginPath();
-    ctx.moveTo(marginX+b, marginY+b);                    ctx.lineTo(marginX+innerW-b, marginY+b);
-    ctx.moveTo(marginX+b, marginY+innerH-b);             ctx.lineTo(marginX+innerW-b, marginY+innerH-b);
-    ctx.moveTo(marginX+b, marginY+b);                    ctx.lineTo(marginX+b, marginY+innerH-b);
-    ctx.moveTo(marginX+innerW-b, marginY+b);             ctx.lineTo(marginX+innerW-b, marginY+innerH-b);
-    ctx.stroke();
-
-    // kotak sudut
-    ctx.fillStyle = rustyRed;
-    const s=14;
-    ctx.fillRect(marginX+b-4,                       marginY+b-4,                       s, s);
-    ctx.fillRect(marginX+innerW-b-s+4,              marginY+b-4,                       s, s);
-    ctx.fillRect(marginX+b-4,                       marginY+innerH-b-s+4,              s, s);
-    ctx.fillRect(marginX+innerW-b-s+4,              marginY+innerH-b-s+4,              s, s);
-
-    // pita tengah atas
-    const pW=100, pH=74, pX=marginX+innerW/2-pW/2, pY=marginY-2;
-    ctx.fillStyle = rustyRed; ctx.beginPath();
-    ctx.moveTo(pX, pY); ctx.lineTo(pX+pW, pY); ctx.lineTo(pX+pW, pY+pH);
-    ctx.lineTo(pX+pW/2, pY+pH-26); ctx.lineTo(pX, pY+pH); ctx.closePath(); ctx.fill();
-
-    // ==== LOGO KIRI ATAS ====
-    // area rekomendasi: 180 x 64
-    const logoL_X = marginX + b + 30;
-    const logoL_Y = marginY + 15;
-    const logoL_W = 350;
-    const logoL_H = 90;
-    if (logoLeft) {
-      drawImageContained(logoLeft, logoL_X, logoL_Y, logoL_W, logoL_H);
-    } else {
-      // fallback teks "magangjogja.com"
-      ctx.textAlign='left'; ctx.textBaseline='top'; ctx.fillStyle=black; ctx.font='700 32px Arial, Helvetica, sans-serif';
-      const mj1='magangjogja.', mj2='com';
-      ctx.fillText(mj1, logoL_X, logoL_Y+6);
-      const w1=ctx.measureText(mj1).width;
-      ctx.fillStyle=greenHL; ctx.fillText(mj2, logoL_X+w1, logoL_Y+6);
-    }
-
-    // ==== LOGO KANAN ATAS ====
-    // area rekomendasi: 200 x 80
-    const logoR_W = 300, logoR_H = 120;
-    const logoR_X = marginX + 780;
-    const logoR_Y = marginY + 30;
-    if (logoRight) {
-      drawImageContained(logoRight, logoR_X, logoR_Y, logoR_W, logoR_H);
-    } else {
-      // fallback bentuk vektor "SEVEN INC"
-      const sevenX=logoR_X+40, sevenY=logoR_Y+6;
-      ctx.fillStyle=redHL; ctx.beginPath();
-      ctx.moveTo(sevenX, sevenY); ctx.lineTo(sevenX+30, sevenY); ctx.lineTo(sevenX+20, sevenY+20); ctx.lineTo(sevenX-10, sevenY+20); ctx.closePath(); ctx.fill();
-      ctx.fillStyle=darkGreen; ctx.beginPath();
-      ctx.moveTo(sevenX+30, sevenY); ctx.lineTo(sevenX+74, sevenY); ctx.lineTo(sevenX+52, sevenY+40); ctx.lineTo(sevenX+8, sevenY+40); ctx.closePath(); ctx.fill();
-      ctx.fillStyle=redHL; ctx.beginPath();
-      ctx.moveTo(sevenX+42, sevenY+45); ctx.lineTo(sevenX+72, sevenY+45); ctx.lineTo(sevenX+82, sevenY+25); ctx.lineTo(sevenX+52, sevenY+25); ctx.closePath(); ctx.fill();
-      ctx.textAlign='left'; ctx.textBaseline='top'; ctx.fillStyle=black; ctx.font='italic 800 22px Arial, Helvetica, sans-serif'; ctx.fillText('SEVEN', sevenX+15, sevenY+49);
-      ctx.font='700 14px Arial, Helvetica, sans-serif'; const inc='INC', incX=sevenX+92, incY=sevenY+52; ctx.fillText(inc, incX, incY);
-      const incW=ctx.measureText(inc).width; ctx.fillStyle=redHL; ctx.beginPath(); ctx.arc(incX+incW+8, incY+7, 4, 0, Math.PI*2); ctx.fill();
-    }
-
-    // judul + subjudul
-    ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.fillStyle=darkGreen;
-    ctx.font='italic 700 72px "Segoe Script","Brush Script MT","Lucida Handwriting",cursive,serif';
-    const titleY=marginY+180; ctx.fillText('Sertifikat', marginX+innerW/2, titleY);
-
-    ctx.font='400 22px "Times New Roman", Times, serif'; ctx.fillStyle=black;
-    ctx.fillText('Diberikan kepada:', marginX+innerW/2, titleY+90);
-
-    // nama
-    ctx.font='italic 72px "Edwardian Script ITC","Segoe Script","Brush Script MT",cursive,serif';
-    const nameY = 390; ctx.fillText(NAME, marginX+innerW/2, nameY);
-
-    // garis bawah
-    const lineY = 412; ctx.strokeStyle=black; ctx.beginPath();
-    ctx.moveTo(marginX+b+55, lineY); ctx.lineTo(marginX+innerW-b-55, lineY); ctx.stroke();
-
-    // paragraf
-    ctx.font='400 20px "Times New Roman", Times, serif'; ctx.textBaseline='top';
-    const paraTop=lineY+22, CX=marginX+innerW/2;
-    const startTxt = SDATE ? formatIndoDate(SDATE) : '??';
-    const endTxt   = EDATE ? formatIndoDate(EDATE) : '??';
-
-    // lama magang
-    (function(){
-      const a=parseYmd(SDATE), b=parseYmd(EDATE);
-      let m=null;
-      if(a&&b){ m=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth()); if(b.getDate()<a.getDate()) m-=1; if(m<0) m=0; }
-      const DURTXT = (m!==null && m>0) ? `${m} bulan` : 'beberapa bulan';
-      ctx.textAlign='center';
-      ctx.fillText(`Telah menyelesaikan magang bidang ${ROLE}`, CX, paraTop);
-      ctx.fillText(`di Seven Inc. selama ${DURTXT} yaitu`, CX, paraTop+30);
-      ctx.fillText(`mulai dari ${startTxt} sampai dengan ${endTxt}`, CX, paraTop+60);
-      ctx.fillText(`${CITY}, ${endTxt}`, CX, paraTop+110);
-    })();
-
-    // strip kiri/kanan
-    ctx.strokeStyle=darkGreen; ctx.lineWidth=5;
-    const tripleLen=64, tripleGap=12, stripInset=-35, stripYCenter=marginY+Math.floor(innerH*0.46), startY=stripYCenter-tripleGap;
-    const leftX=marginX+b+stripInset;
-    for(let i=0;i<3;i++){ const y=startY+i*tripleGap; ctx.beginPath(); ctx.moveTo(leftX,y); ctx.lineTo(leftX+tripleLen,y); ctx.stroke(); }
-    const rightXStart=marginX+innerW-b-stripInset-tripleLen;
-    for(let i=0;i<3;i++){ const y=startY+i*tripleGap; ctx.beginPath(); ctx.moveTo(rightXStart,y); ctx.lineTo(rightXStart+tripleLen,y); ctx.stroke(); }
-
-    // area tanda tangan
-    ctx.font='400 18px "Times New Roman", Times, serif';
-    const sigBaseY=marginY+innerH-170, sigLineW=220, sigImgH=140;
-
-    // kiri (HR)
-    const leftLineX=marginX+b+50, leftCenterX=leftLineX+sigLineW/2;
-    ctx.textAlign='center'; ctx.fillStyle=black;
-    ctx.fillText('HR Department', leftCenterX, sigBaseY);
-    drawImageContained(sigLeft, leftLineX, sigBaseY-5, sigLineW, sigImgH);
-    ctx.strokeStyle=black; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(leftLineX, sigBaseY+96); ctx.lineTo(leftLineX+sigLineW, sigBaseY+96); ctx.stroke();
-    ctx.fillText('Ari Setia Husbana', leftCenterX, sigBaseY+106);
-
-    // kanan (Owner) – ukuran khusus untuk ttd_owner
-    const rightLineXEnd   = marginX + innerW - b - 50;
-    const rightLineXStart = rightLineXEnd - sigLineW;
-    const rightCenterX    = (rightLineXStart + rightLineXEnd) / 2;
-
-    ctx.fillText('Owner Seven Inc.', rightCenterX, sigBaseY);
-
-    // >>> Atur skala di sini: >1 lebih besar, <1 lebih kecil
-    const ownerScale = 1.4;          // contoh: 1.25 = 125% (lebih besar). 0.85 = 85% (lebih kecil)
-    const ownerW = sigLineW * ownerScale;
-    const ownerH = sigImgH * ownerScale;
-
-    // Posisikan gambar supaya tetap center di atas garis
-    const ownerX = rightCenterX - ownerW / 2;
-
-    // Gambar tanda tangan kanan
-    drawImageContained(sigRight, ownerX, sigBaseY - 20, ownerW, ownerH);
-
-    // Garis tanda tangan & nama (OPS A: panjang garis tetap seperti semula)
-    ctx.beginPath();
-    ctx.moveTo(rightLineXStart, sigBaseY + 96);
-    ctx.lineTo(rightLineXEnd,   sigBaseY + 96);
-    ctx.stroke();
-
-    ctx.fillText('Rekario Danny', rightCenterX, sigBaseY + 106);
-
-  }
-
-  // Pastikan font & layout siap, lalu gambar
-  window.addEventListener('load', () => {
-    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(()=>{
-      setupHiDPI();
-      draw().then(()=>{ window.__CERT_READY = true; });
-    });
-  });
-})();
-</script>
+    </div>
+  </div>
 </body>
 </html>

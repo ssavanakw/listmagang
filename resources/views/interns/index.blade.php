@@ -21,6 +21,7 @@
         'admin.interns.certificate.areakerjacom',
         ['intern' => '__ID__']
     );
+
 @endphp
 
 @section('content')
@@ -132,118 +133,243 @@
     <div class="rounded-xl bg-white shadow ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
 
         {{-- Table --}}
-        <div id="tableWrap" class="overflow-x-auto">
-            <table id="tabel-pemagang" class="w-max min-w-full text-left text-sm text-gray-700 dark:text-gray-200">
-                <thead class="sticky bg-gray-50 text-xs uppercase tracking-wider text-gray-600
-                              dark:bg-gray-700 dark:text-gray-300">
+        <div id="tableWrap" class="overflow-x-auto" data-base="{{ url('/admin/interns') }}">
+        <table id="tabel-pemagang" class="w-max min-w-full text-left text-sm text-gray-700 dark:text-gray-200">
+            <thead class="sticky bg-gray-50 text-xs uppercase tracking-wider text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+            @php
+                // daftar kolom
+                $fields = [
+                    'fullname'                   => 'NAMA LENGKAP',
+                    'born_date'                  => 'TANGGAL LAHIR',
+                    'student_id'                 => 'NIM / NIS',
+                    'email'                      => 'EMAIL',
+                    'gender'                     => 'GENDER',
+                    'phone_number'               => 'TELEPON',
+                    'institution_name'           => 'INSTITUSI',
+                    'study_program'              => 'PRODI',
+                    'faculty'                    => 'FAKULTAS',
+                    'current_city'               => 'KOTA',
+                    'internship_reason'          => 'ALASAN MAGANG',
+                    'internship_type'            => 'JENIS MAGANG',
+                    'internship_arrangement'     => 'TIPE MAGANG',
+                    'current_status'             => 'STATUS SAAT INI',
+                    'english_book_ability'       => 'BACA B.INGGRIS',
+                    'supervisor_contact'         => 'KONTAK PEMBIMBING',
+                    'internship_interest'        => 'BIDANG MINAT',
+                    'internship_interest_other'  => 'MINAT LAIN',
+                    'design_software'            => 'SOFTWARE DESAIN',
+                    'video_software'             => 'SOFTWARE VIDEO',
+                    'programming_languages'      => 'BAHASA PEMROGRAMAN',
+                    'digital_marketing_type'     => 'DIGITAL MARKETING',
+                    'digital_marketing_type_other'=> 'MARKETING LAIN',
+                    'laptop_equipment'           => 'PUNYA LAPTOP',
+                    'owned_tools'                => 'ALAT DIMILIKI',
+                    'owned_tools_other'          => 'ALAT LAIN',
+                    'start_date'                 => 'MULAI',
+                    'end_date'                   => 'SELESAI',
+                    'internship_info_sources'    => 'SUMBER INFO',
+                    'internship_info_other'      => 'INFO LAIN',
+                    'current_activities'         => 'AKTIVITAS SAAT INI',
+                    'boarding_info'              => 'INFO KOST',
+                    'family_status'              => 'SUDAH BERKELUARGA',
+                    'parent_wa_contact'          => 'KONTAK ORANG TUA',
+                    'social_media_instagram'     => 'INSTAGRAM',
+                    'cv_ktp_portofolio_pdf'      => 'FILE PDF',
+                    'portofolio_visual'          => 'FILE VISUAL',
+                    'created_at'                 => 'DIBUAT',
+                    'internship_status'          => 'STATUS',
+                ];
+                if (($scope ?? '') === 'completed') {
+                    $fields['certificate'] = 'SERTIFIKAT';
+                }
 
-                    @php
-                        // daftar kolom
-                        $fields = [
-                            'fullname'                   => 'NAMA LENGKAP',
-                            'born_date'                  => 'TANGGAL LAHIR',
-                            'student_id'                 => 'NIM / NIS',
-                            'email'                      => 'EMAIL',
-                            'gender'                     => 'GENDER',
-                            'phone_number'               => 'TELEPON',
-                            'institution_name'           => 'INSTITUSI',
-                            'study_program'              => 'PRODI',
-                            'faculty'                    => 'FAKULTAS',
-                            'current_city'               => 'KOTA',
-                            'internship_reason'          => 'ALASAN MAGANG',
-                            'internship_type'            => 'JENIS MAGANG',
-                            'internship_arrangement'     => 'TIPE MAGANG',
-                            'current_status'             => 'STATUS SAAT INI',
-                            'english_book_ability'       => 'BACA B.INGGRIS',
-                            'supervisor_contact'         => 'KONTAK PEMBIMBING',
-                            'internship_interest'        => 'BIDANG MINAT',
-                            'internship_interest_other'  => 'MINAT LAIN',
-                            'design_software'            => 'SOFTWARE DESAIN',
-                            'video_software'             => 'SOFTWARE VIDEO',
-                            'programming_languages'      => 'BAHASA PEMROGRAMAN',
-                            'digital_marketing_type'     => 'DIGITAL MARKETING',
-                            'digital_marketing_type_other' => 'MARKETING LAIN',
-                            'laptop_equipment'           => 'PUNYA LAPTOP',
-                            'owned_tools'                => 'ALAT DIMILIKI',
-                            'owned_tools_other'          => 'ALAT LAIN',
-                            'start_date'                 => 'MULAI',
-                            'end_date'                   => 'SELESAI',
-                            'internship_info_sources'    => 'SUMBER INFO',
-                            'internship_info_other'      => 'INFO LAIN',
-                            'current_activities'         => 'AKTIVITAS SAAT INI',
-                            'boarding_info'              => 'INFO KOST',
-                            'family_status'              => 'SUDAH BERKELUARGA',
-                            'parent_wa_contact'          => 'KONTAK ORANG TUA',
-                            'social_media_instagram'     => 'INSTAGRAM',
-                            'cv_ktp_portofolio_pdf'      => 'FILE PDF',
-                            'portofolio_visual'          => 'FILE VISUAL',
-                            'created_at'                 => 'DIBUAT',
-                            'internship_status'          => 'STATUS',
-                        ];
-                        if (($scope ?? '') === 'completed') {
-                            $fields['certificate'] = 'SERTIFIKAT';
-                        }
+                // tipe input per kolom
+                $dateFields   = ['born_date', 'start_date', 'end_date', 'created_at'];
+                $selectFields = ['gender','internship_type','internship_arrangement','current_status','english_book_ability','laptop_equipment','family_status','internship_status'];
 
-                        // tipe input per kolom
-                        $dateFields = ['born_date', 'start_date', 'end_date', 'created_at'];
-                        $selectFields = [
-                            'gender', 'internship_type', 'internship_arrangement',
-                            'current_status', 'english_book_ability', 'laptop_equipment',
-                            'family_status', 'internship_status'
-                        ];
-                    @endphp
+                // daftar template sertifikat
+                $certTemplates = [
+                    'certmagangjogjacom' => 'Magangjogja.com',
+                    'certareakerjacom'   => 'AreaKerja.com',
+                    'certitipsinicom'    => 'Titipsini.com',
+                ];
 
-                    {{-- Row: Header Judul Kolom --}}
-                    <tr class="divide-x divide-gray-200 dark:divide-gray-600">
-                        <th class="whitespace-nowrap px-3 py-3 font-semibold">No</th>
-                        @foreach ($fields as $label)
-                            <th class="whitespace-nowrap px-3 py-3 font-semibold">{{ $label }}</th>
-                        @endforeach
-                        <th class="whitespace-nowrap px-3 py-3 font-semibold">AKSI</th>
-                    </tr>
+                // helper format tanggal
+                $fmt = function($d){
+                    if (!$d) return '-';
+                    try { return \Carbon\Carbon::parse($d)->locale('id')->translatedFormat('d M Y'); }
+                    catch (\Throwable $e) { return $d; }
+                };
+            @endphp
 
-                    {{-- Row: Advanced Search (dibuat statis di Blade agar SEO/SSR oke) --}}
-                    <tr class="divide-x divide-gray-200 bg-white dark:divide-gray-600 dark:bg-gray-800">
-                        {{-- kolom "No" tanpa filter --}}
-                        <th class="px-2 py-2"></th>
+            {{-- Header kolom --}}
+            <tr class="divide-x divide-gray-200 dark:divide-gray-600">
+                <th class="whitespace-nowrap px-3 py-3 font-semibold">No</th>
+                @foreach ($fields as $label)
+                    <th class="whitespace-nowrap px-3 py-3 font-semibold">{{ $label }}</th>
+                @endforeach
+                <th class="whitespace-nowrap px-3 py-3 font-semibold">AKSI</th>
+            </tr>
 
-                        @foreach ($fields as $key => $label)
-                            <th class="px-2 py-2">
-                                @if (in_array($key, $dateFields))
-                                    <input type="text" placeholder="Cari…"
-                                           data-col="{{ $loop->index + 1 }}"
-                                           class="w-full rounded-md border-gray-300 text-xs
-                                                  dark:bg-gray-700"/>
-                                @elseif(in_array($key, $selectFields))
-                                    <select data-col="{{ $loop->index + 1 }}"
-                                            class="w-full rounded-md border-gray-300 text-xs
-                                                   dark:bg-gray-700">
-                                        <option value="">Semua</option>
-                                        {{-- opsi akan diisi otomatis dari data oleh JS --}}
-                                    </select>
-                                @else
-                                    <input type="text" placeholder="Cari…"
-                                           data-col="{{ $loop->index + 1 }}"
-                                           class="w-full rounded-md border-gray-300 text-xs
-                                                  dark:bg-gray-700"/>
-                                @endif
-                            </th>
-                        @endforeach
+            {{-- Baris filter --}}
+            <tr class="divide-x divide-gray-200 bg-white dark:divide-gray-600 dark:bg-gray-800">
+                <th class="px-2 py-2"></th>
+                @foreach ($fields as $key => $label)
+                    <th class="px-2 py-2">
+                        @if (in_array($key, $dateFields))
+                            <input type="text" placeholder="Cari…" data-col="{{ $loop->index + 1 }}"
+                                class="w-full rounded-md border-gray-300 text-xs dark:bg-gray-700" />
+                        @elseif (in_array($key, $selectFields))
+                            <select data-col="{{ $loop->index + 1 }}"
+                                    class="w-full rounded-md border-gray-300 text-xs dark:bg-gray-700">
+                                <option value="">Semua</option>
+                            </select>
+                        @elseif ($key === 'certificate')
+                            {{-- HANYA SATU SELECT untuk filter sertifikat --}}
+                            <select data-col="{{ $loop->index + 1 }}"
+                                    class="w-full rounded-md border-gray-300 text-xs dark:bg-gray-700">
+                                <option value="">Semua</option>
+                                @foreach ($certTemplates as $tplKey => $tplLabel)
+                                    <option value="{{ $tplLabel }}">{{ $tplLabel }}</option>
+                                @endforeach
+                            </select>
+                        @else
+                            <input type="text" placeholder="Cari…" data-col="{{ $loop->index + 1 }}"
+                                class="w-full rounded-md border-gray-300 text-xs dark:bg-gray-700" />
+                        @endif
+                    </th>
+                @endforeach
+                <th class="px-2 py-2"></th>
+            </tr>
+            </thead>
 
-                        {{-- kolom "AKSI" juga tanpa filter --}}
-                        <th class="px-2 py-2"></th>
-                    </tr>
-                </thead>
+            <tbody id="rows" class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+            @forelse ($interns as $i => $intern)
+                @php
+                    $defaultTpl = $intern->certificate_template ?? 'certmagangjogjacom';
+                @endphp
+                <tr class="divide-x divide-gray-200 dark:divide-gray-700">
+                    <td class="px-3 py-3 whitespace-nowrap">{{ $loop->iteration }}</td>
 
-                <tbody id="rows" class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                    <tr>
-                        <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
-                            Memuat data…
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                    @foreach ($fields as $key => $label)
+                        @switch($key)
+                            @case('born_date')
+                            @case('start_date')
+                            @case('end_date')
+                            @case('created_at')
+                                <td class="px-3 py-3 whitespace-nowrap">{{ $fmt($intern->{$key}) }}</td>
+                                @break
+
+                            @case('social_media_instagram')
+                                <td class="px-3 py-3 whitespace-nowrap">
+                                    @if ($intern->social_media_instagram)
+                                        <a href="https://instagram.com/{{ ltrim($intern->social_media_instagram, '@') }}"
+                                        class="text-blue-600 hover:underline" target="_blank">
+                                        {{ '@'.ltrim($intern->social_media_instagram, '@') }}
+                                        </a>
+                                    @else - @endif
+                                </td>
+                                @break
+
+                            @case('cv_ktp_portofolio_pdf')
+                                <td class="px-3 py-3 whitespace-nowrap">
+                                    @if ($intern->cv_ktp_portofolio_pdf)
+                                        <a href="{{ asset('storage/'.$intern->cv_ktp_portofolio_pdf) }}" target="_blank"
+                                        class="text-blue-600 hover:underline">Lihat</a>
+                                    @else - @endif
+                                </td>
+                                @break
+
+                            @case('portofolio_visual')
+                                <td class="px-3 py-3 whitespace-nowrap">
+                                    @if ($intern->portofolio_visual)
+                                        <a href="{{ asset('storage/'.$intern->portofolio_visual) }}" target="_blank"
+                                        class="text-blue-600 hover:underline">Lihat</a>
+                                    @else - @endif
+                                </td>
+                                @break
+
+                            @case('internship_status')
+                                <td class="px-3 py-3 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
+                                        {{ ucfirst($intern->internship_status) }}
+                                    </span>
+                                </td>
+                                @break
+
+                            @case('certificate')
+                                <td class="px-3 py-3 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                        {{-- Dropdown pilihan template sertifikat --}}
+                                        <select class="cert-tpl form-select rounded-md border-gray-300 text-xs dark:bg-gray-700"
+                                                data-intern="{{ $intern->id }}"
+                                                style="min-width: 160px;">
+                                            @foreach($certTemplates as $tplKey => $tplLabel)
+                                                <option value="{{ $tplKey }}" {{ $defaultTpl === $tplKey ? 'selected' : '' }}>
+                                                    {{ $tplLabel }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+
+                                        {{-- 1 tombol download --}}
+                                        <button type="button"
+                                                class="btn btn-sm btn-primary js-download-cert"
+                                                data-intern="{{ $intern->id }}">
+                                            Download PDF
+                                        </button>
+                                    </div>
+                                </td>
+                            @break
+
+                            @default
+                                <td class="px-3 py-3 whitespace-nowrap">{{ $intern->{$key} ?? '-' }}</td>
+                        @endswitch
+                    @endforeach
+
+                    {{-- AKSI --}}
+                    <td class="px-3 py-3 whitespace-nowrap">
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('admin.interns.certificate', $intern->id) }}" class="btn btn-xs btn-info">Detail</a>
+                            <a href="{{ route('admin.interns.update', $intern->id) }}" class="btn btn-xs btn-warning">Edit</a>
+                            <form action="{{ route('admin.interns.destroy', $intern->id) }}" method="POST" onsubmit="return confirm('Hapus data ini?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn btn-xs btn-danger">Hapus</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
+                        Tidak ada data.
+                    </td>
+                </tr>
+            @endforelse
+            </tbody>
+        </table>
         </div>
+
+        {{-- JS handler Download/Preview --}}
+        @push('scripts')
+        <script>
+        document.addEventListener('click', function (e) {
+            if (!e.target.classList.contains('js-download-cert')) return;
+
+            const btn = e.target;
+            const internId = btn.getAttribute('data-intern');
+            const sel = document.querySelector('select.cert-tpl[data-intern="'+ internId +'"]');
+            const tpl = (sel && sel.value) ? sel.value : 'certmagangjogjacom';
+
+            // Bangun URL sesuai route backend: /admin/interns/{id}/certificate/{template}.pdf
+            const url = `{{ url('/admin/interns') }}/${internId}/certificate/${tpl}.pdf`;
+
+            // UX kecil: disable tombol sesaat biar tidak double click
+            btn.disabled = true;
+            try { window.location.href = url; } finally { setTimeout(() => btn.disabled = false, 1200); }
+        });
+        </script>
+        @endpush
+
 
         {{-- Pagination placeholder (dibangun via JS) --}}
         <div id="pager" class="px-6 py-4"></div>
@@ -260,6 +386,41 @@ window.rowData = window.rowData || new Map();
 function debounce(fn, ms=400) {
   let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+  // DOWNLOAD PDF
+  document.querySelectorAll('.js-download-cert').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id   = btn.getAttribute('data-intern');
+      var base = btn.getAttribute('data-base'); // ex: /admin/interns
+      var select = document.querySelector('select.cert-tpl[data-intern="'+ id +'"]');
+      var tpl  = (select && select.value) ? select.value : 'certmagangjogjacom';
+      var url  = base + '/' + id + '/certificate/' + tpl + '.pdf';
+      window.location.href = url; // trigger download
+    });
+  });
+
+  // PREVIEW (opsional – mapkan sesuai route preview yg tersedia)
+  document.querySelectorAll('.js-preview-cert').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var id   = btn.getAttribute('data-intern');
+      var base = btn.getAttribute('data-base');
+      var select = document.querySelector('select.cert-tpl[data-intern="'+ id +'"]');
+      var tpl  = (select && select.value) ? select.value : 'certmagangjogjacom';
+
+      // Mapping preview per template (ubah sesuai route-mu)
+      var previewMap = {
+        'certmagangjogjacom': base + '/' + id + '/certificate', // HTML view existing
+        'certareakerjacom'  : base + '/' + id + '/certificate/areakerjacom/preview',
+        'certtitipsinicom'   : base + '/' + id + '/certificate/titipsinicom/preview'
+      };
+
+      var url = previewMap[tpl] || previewMap['certmagangjogjacom'];
+      window.open(url, '_blank');
+    });
+  });
+});
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -555,9 +716,9 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const arrangementMapID = { // TIPE MAGANG (cara kerja)
-            'onsite': 'Onsite',
-            'hybrid': 'Hibrida',
-            'remote': 'Remote'
+            'onsite': 'WFO',
+            'hybrid': 'HYBRID',
+            'remote': 'WFH'
         };
 
         const typeMapID = { // JENIS MAGANG (skema)
@@ -695,6 +856,38 @@ document.addEventListener('DOMContentLoaded', () => {
                         Hapus
                     </button>
                 </div>`;
+        }
+
+        // ====== Konstanta pilihan template yang muncul di dropdown ======
+        const CERT_OPTIONS = [
+        { value: 'certmagangjogjacom', label: 'Magangjogja.com' },
+        { value: 'certareakerjacom',   label: 'AreaKerja.com'   },
+        { value: 'certtitipsinicom',    label: 'Titipsini.com'    },
+        ];
+
+        // ====== Helper membuat isi cell "SERTIFIKAT" (dropdown + 1 tombol) ======
+        function buildCertCell(it) {
+        const selected = it.certificate_template || 'certmagangjogjacom';
+        const options  = CERT_OPTIONS.map(o =>
+            `<option value="${o.value}" ${o.value === selected ? 'selected' : ''}>${o.label}</option>`
+        ).join('');
+
+        const base = document.getElementById('tableWrap')?.dataset?.base || '/admin/interns';
+
+        return `
+            <div class="flex items-center gap-2">
+            <select class="cert-tpl rounded-md border-gray-300 text-xs dark:bg-gray-700"
+                    data-intern="${it.id}" style="min-width: 160px;">
+                ${options}
+            </select>
+
+            <button type="button"
+                    class="btn btn-sm btn-primary js-download-cert"
+                    data-intern="${it.id}" data-base="${base}">
+                Download
+            </button>
+            </div>
+        `;
         }
 
         function buildStatusCell(item) {
@@ -852,43 +1045,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td class="px-3 py-2 align-top">
                             ${buildStatusCell(it)}
                         </td>
-
                         ${
-                            SCOPE === 'completed'
-                                ? `
-                                <td class="px-3 py-2 align-top">
-                                    ${
-                                        (it.certificate_pdf_url || it.certificate_url || true)
-                                            ? `
-                                            <div class="flex items-center gap-2">
-                                                ${(it.certificate_pdf_url || it.certificate_url)
-                                                    ? `<a href="${it.certificate_pdf_url || it.certificate_url}"
-                                                            class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                                                            title="Unduh PDF yang identik (render JS/canvas)" target="_blank" rel="noopener">
-                                                            Magangjogja.com
-                                                        </a>`
-                                                    : ''
-                                                    }
-                                                ${(() => {
-                                                    const tmpl = @json($certAreaKerjaComRouteTmpl);
-                                                    const url2 = it.certificate_areakerjacom_url || (tmpl ? tmpl.replace('__ID__', it.id) : '');
-                                                    if (!url2) return '';
-                                                    return `<a href="${url2}"
-                                                                class="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                                                                title="Unduh versi certareakerjacom" target="_blank" rel="noopener">
-                                                                AreaKerja.com
-                                                            </a>`;
-                                                    })()
-                                                }
-                                            </div>
-                                            `
-                                            : '<span class="text-gray-400">-</span>'
-                                        }
-                                </td>
-                                `
-                                : ''
-                            }
-
+                        SCOPE === 'completed'
+                            ? `<td class="px-3 py-2 align-top">${buildCertCell(it)}</td>`
+                            : ''
+                        }
                         <td class="px-3 py-2 align-top">
                             ${buildActionCell(it)}
                         </td>
@@ -1197,173 +1358,194 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`;
     }
 
-    // ===== Edit form (modal, bukan iframe) =====
+    // ===== Edit form (modal, polished UI) =====
     function openEditForm(it) {
+        // ——— helpers ———
+        const monthsID = {
+            Januari:'01', Februari:'02', Maret:'03', April:'04', Mei:'05', Juni:'06',
+            Juli:'07', Agustus:'08', September:'09', Oktober:'10', November:'11', Desember:'12'
+        };
+        const pad2 = (n) => String(n).padStart(2, '0');
+
+        // normalisasi ke YYYY-MM-DD utk <input type="date">
+        function toInputDate(s) {
+            if (!s) return '';
+            const str = String(s).trim();
+
+            // sudah YYYY-MM-DD
+            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+
+            // dd/mm/yyyy
+            const m1 = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (m1) return `${m1[3]}-${pad2(m1[2])}-${pad2(m1[1])}`;
+
+            // “23 Oktober 1999”
+            const m2 = str.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
+            if (m2 && monthsID[m2[2]]) return `${m2[3]}-${monthsID[m2[2]]}-${pad2(m2[1])}`;
+
+            // fallback: biarkan apa adanya
+            return str;
+        }
+
+        const initials = (name) =>
+            (name || '')
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map(w => w[0]?.toUpperCase() || '')
+            .join('') || 'IN';
+
+        const vBorn  = toInputDate(it.born_date);
+        const vStart = toInputDate(it.start_date);
+        const vEnd   = toInputDate(it.end_date);
+
+        const baseInput =
+            "w-full rounded-xl border border-gray-200 bg-white/80 p-3 shadow-sm " +
+            "focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 " +
+            "placeholder:text-gray-400";
+
+        const baseLabel = "text-sm font-medium text-gray-700";
+
         const html = `
-            <form id="editForm" data-id="${it.id}" class="space-y-6">
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div class="form-group">
-                        <label for="fullname" class="font-medium text-gray-700">Nama Lengkap</label>
-                        <input name="fullname" value="${h(it.fullname)}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    </div>
+        <form id="editForm" data-id="${it.id}" class="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
+            <!-- Header mini profile -->
+            <div class="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gradient-to-r from-white to-gray-50 p-4">
+            <div class="h-12 w-12 shrink-0 rounded-full bg-indigo-600/10 text-indigo-700 grid place-items-center font-semibold">
+                ${initials(it.fullname)}
+            </div>
+            <div class="min-w-0">
+                <p class="text-sm text-gray-500">Edit Pemagang</p>
+                <p class="truncate text-base font-semibold text-gray-800">${h(it.fullname || '-')}</p>
+            </div>
+            </div>
 
-                    <div class="form-group">
-                        <label for="born_date" class="font-medium text-gray-700">Tanggal Lahir</label>
-                        <input name="born_date" type="text" value="${h(it.born_date)}" placeholder="dd/mm/yyyy"
-                            class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="student_id" class="font-medium text-gray-700">NIM / NIS</label>
-                        <input name="student_id" value="${h(it.student_id)}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email" class="font-medium text-gray-700">Email</label>
-                        <input name="email" type="email" value="${h(it.email || '')}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="phone_number" class="font-medium text-gray-700">Telepon</label>
-                        <input name="phone_number" value="${h(it.phone_number || '')}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="institution_name" class="font-medium text-gray-700">Institusi</label>
-                        <input name="institution_name" value="${h(it.institution_name || '')}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="study_program" class="font-medium text-gray-700">Prodi</label>
-                        <input name="study_program" value="${h(it.study_program || '')}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="faculty" class="font-medium text-gray-700">Fakultas</label>
-                        <input name="faculty" value="${h(it.faculty || '')}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="current_city" class="font-medium text-gray-700">Kota</label>
-                        <input name="current_city" value="${h(it.current_city || '')}" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="internship_reason" class="font-medium text-gray-700">Alasan Magang</label>
-                        <textarea name="internship_reason" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">${h(it.internship_reason || '')}</textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="internship_type" class="font-medium text-gray-700">Tipe Magang</label>
-                        <select name="internship_type" class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="remote" ${it.internship_type === 'remote' ? 'selected' : ''}>WFH</option>
-                            <option value="onsite" ${it.internship_type === 'onsite' ? 'selected' : ''}>WFO</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="start_date" class="font-medium text-gray-700">Mulai</label>
-                        <input name="start_date" type="text" value="${h(it.start_date)}" placeholder="dd/mm/yyyy"
-                            class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="end_date" class="font-medium text-gray-700">Selesai</label>
-                        <input name="end_date" type="text" value="${h(it.end_date)}" placeholder="dd/mm/yyyy"
-                            class="w-full rounded-lg border-0 p-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    </div>
+            <!-- Identitas -->
+            <fieldset class="rounded-2xl border border-gray-100 bg-white p-4">
+            <legend class="px-2 text-sm font-semibold text-gray-800">Identitas</legend>
+            <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                <label class="${baseLabel}" for="fullname">Nama Lengkap</label>
+                <input id="fullname" name="fullname" value="${h(it.fullname)}" class="${baseInput}" required />
                 </div>
-
-                <div class="flex justify-end gap-2 pt-4">
-                    <button type="button" class="rounded-lg border border-gray-300 px-4 py-2 text-gray-600 hover:bg-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" id="btnCancelEdit">Batal</button>
-                    <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Simpan</button>
+                <div>
+                <label class="${baseLabel}" for="born_date">Tanggal Lahir</label>
+                <input id="born_date" name="born_date" type="date" value="${h(vBorn)}" class="${baseInput}" />
+                <p class="mt-1 text-xs text-gray-500">Opsional. Format otomatis.</p>
                 </div>
-            </form>`;
+                <div>
+                <label class="${baseLabel}" for="student_id">NIM / NIS</label>
+                <input id="student_id" name="student_id" value="${h(it.student_id)}" class="${baseInput}" />
+                </div>
+                <div>
+                <label class="${baseLabel}" for="email">Email</label>
+                <input id="email" name="email" type="email" value="${h(it.email || '')}" class="${baseInput}" />
+                </div>
+                <div>
+                <label class="${baseLabel}" for="phone_number">Telepon</label>
+                <input id="phone_number" name="phone_number" value="${h(it.phone_number || '')}" class="${baseInput}" inputmode="tel" />
+                </div>
+                <div>
+                <label class="${baseLabel}" for="current_city">Kota</label>
+                <input id="current_city" name="current_city" value="${h(it.current_city || '')}" class="${baseInput}" />
+                </div>
+            </div>
+            </fieldset>
 
-        // Open modal
-        openModal('Edit Pemagang', html, {
-            size: 'md'
-        });
+            <!-- Akademik -->
+            <fieldset class="rounded-2xl border border-gray-100 bg-white p-4">
+            <legend class="px-2 text-sm font-semibold text-gray-800">Akademik</legend>
+            <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                <label class="${baseLabel}" for="institution_name">Institusi</label>
+                <input id="institution_name" name="institution_name" value="${h(it.institution_name || '')}" class="${baseInput}" />
+                </div>
+                <div>
+                <label class="${baseLabel}" for="faculty">Fakultas</label>
+                <input id="faculty" name="faculty" value="${h(it.faculty || '')}" class="${baseInput}" />
+                </div>
+                <div>
+                <label class="${baseLabel}" for="study_program">Prodi</label>
+                <input id="study_program" name="study_program" value="${h(it.study_program || '')}" class="${baseInput}" />
+                </div>
+                <div class="sm:col-span-2">
+                <label class="${baseLabel}" for="internship_reason">Alasan Magang</label>
+                <textarea id="internship_reason" name="internship_reason" rows="3" class="${baseInput}">${h(it.internship_reason || '')}</textarea>
+                </div>
+            </div>
+            </fieldset>
 
-        // Handle cancel button click
-        $('btnCancelEdit') ?.addEventListener('click', closeModal);
+            <!-- Penugasan -->
+            <fieldset class="rounded-2xl border border-gray-100 bg-white p-4">
+            <legend class="px-2 text-sm font-semibold text-gray-800">Penugasan</legend>
+            <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                <label class="${baseLabel}" for="internship_type">Tipe Magang</label>
+                <select id="internship_type" name="internship_type" class="${baseInput}">
+                    <option value="remote" ${it.internship_type === 'remote' ? 'selected' : ''}>WFH</option>
+                    <option value="onsite" ${it.internship_type === 'onsite' ? 'selected' : ''}>WFO</option>
+                </select>
+                </div>
+                <div>
+                <label class="${baseLabel}" for="start_date">Mulai</label>
+                <input id="start_date" name="start_date" type="date" value="${h(vStart)}" class="${baseInput}" />
+                </div>
+                <div>
+                <label class="${baseLabel}" for="end_date">Selesai</label>
+                <input id="end_date" name="end_date" type="date" value="${h(vEnd)}" class="${baseInput}" />
+                </div>
+            </div>
+            </fieldset>
 
-        // Handle form submit
-        $('editForm') ?.addEventListener('submit', async (ev) => {
+            <!-- Footer actions (sticky) -->
+            <div class="sticky bottom-0 -mx-4 border-t bg-white/70 px-4 pt-4 backdrop-blur">
+            <div class="flex justify-end gap-2">
+                <button type="button" id="btnCancelEdit"
+                class="rounded-xl border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-100">Batal</button>
+                <button type="submit" id="btnSaveEdit"
+                class="rounded-xl bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700 disabled:opacity-60">Simpan</button>
+            </div>
+            </div>
+        </form>
+        `;
+
+        openModal('Edit Pemagang', html, { size: 'lg' });
+
+        $('btnCancelEdit')?.addEventListener('click', closeModal);
+
+        $('editForm')?.addEventListener('submit', async (ev) => {
             ev.preventDefault();
             const form = ev.currentTarget;
             const id = Number(form.dataset.id);
             const fd = new FormData(form);
 
-            // Cek dan konversi format tanggal mulai (start_date) dan selesai (end_date)
-            const dateFormat = (dateString) => {
-                const parts = dateString.split(' ');
-                if (parts.length !== 3) {
-                    // Jika format tidak sesuai, asumsikan sudah YYYY-MM-DD
-                    return dateString;
-                }
-                const [day, month, year] = parts;
-                const monthMapping = {
-                    'Januari': '01',
-                    'Februari': '02',
-                    'Maret': '03',
-                    'April': '04',
-                    'Mei': '05',
-                    'Juni': '06',
-                    'Juli': '07',
-                    'Agustus': '08',
-                    'September': '09',
-                    'Oktober': '10',
-                    'November': '11',
-                    'Desember': '12'
-                };
-                return `${year}-${monthMapping[month]}-${day}`;
-            };
-
-            const startDateInput = form.querySelector('input[name="start_date"]');
-            const endDateInput = form.querySelector('input[name="end_date"]');
-
-            if (startDateInput && startDateInput.value) {
-                const startDateFormatted = dateFormat(startDateInput.value);
-                fd.set('start_date', startDateFormatted);
-            }
-
-            if (endDateInput && endDateInput.value) {
-                const endDateFormatted = dateFormat(endDateInput.value);
-                fd.set('end_date', endDateFormatted);
-            }
-
-            // Cek jika born_date kosong, kirimkan nilai yang lama jika tidak ada perubahan
-            const bornDateInput = form.querySelector('input[name="born_date"]');
-            if (bornDateInput && bornDateInput.value === '') {
-                fd.set('born_date', it.born_date); // Mengirimkan nilai lama
-            } else if (bornDateInput && bornDateInput.value) {
-                // Jika born_date diubah, format menjadi YYYY-MM-DD
-                const bornDateFormatted = dateFormat(bornDateInput.value);
-                fd.set('born_date', bornDateFormatted);
-            }
+            // Safeguard: jika born_date kosong, kirim nilai lama
+            if (!fd.get('born_date')) fd.set('born_date', toInputDate(it.born_date || ''));
 
             fd.append('_method', 'PATCH');
+
+            const btn = $('btnSaveEdit');
+            btn?.setAttribute('disabled', 'true');
+
             try {
-                const res = await fetch(`${ADMIN_INTERNS_BASE}/${id}`, {
-                    method: 'POST',
-                    body: fd,
-                    headers: {
-                        'X-CSRF-TOKEN': csrf,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    credentials: 'same-origin'
-                });
-                if (!res.ok) throw new Error(await res.text().catch(() => 'Gagal menyimpan'));
-                closeModal();
-                window.reloadInterns ?.();
-                pushToast('Data berhasil disimpan.', 'success');
+            const res = await fetch(`${ADMIN_INTERNS_BASE}/${id}`, {
+                method: 'POST',
+                body: fd,
+                headers: { 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
+            });
+            if (!res.ok) throw new Error(await res.text().catch(()=>'Gagal menyimpan'));
+            closeModal();
+            window.reloadInterns?.();
+            pushToast('Data berhasil disimpan.', 'success');
             } catch (err) {
-                console.error(err);
-                pushToast('Gagal menyimpan data.', 'error');
+            console.error(err);
+            pushToast('Gagal menyimpan data.', 'error');
+            } finally {
+            btn?.removeAttribute('disabled');
             }
         });
     }
+
 
 
     // ===== Delete =====
