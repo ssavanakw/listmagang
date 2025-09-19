@@ -32,6 +32,10 @@
         routeName="admin.interns.pending"  
         title="Pending"
     />
+        <x-sidebar-menu-dashboard 
+        routeName="certificate.form"  
+        title="Generate Certificates"
+    />
 
     {{-- Logout --}}
     <div class="mt-auto px-4 pb-4">

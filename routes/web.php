@@ -11,11 +11,12 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\InternController;        // update status + certificate
 use App\Http\Controllers\Admin\InternPageController;    // return view
 use App\Http\Controllers\Admin\InternApiController;     // return JSON
+use App\Http\Controllers\Admin\CertificateGeneratorController;
 
 /*
-|--------------------------------------------------------------------------
+|----------------------------------------------------------------------
 | Web Routes
-|--------------------------------------------------------------------------
+|----------------------------------------------------------------------
 */
 
 // =================== DUMMY PREVIEW (OPSIONAL) ===================
@@ -99,7 +100,6 @@ Route::prefix('admin')->group(function () {
             Route::patch('/{intern}', [InternController::class, 'update'])
                 ->name('admin.interns.update');
 
-
             // ===== Sertifikat default (yang sudah ada)
             Route::get('/{intern}/certificate', [InternController::class, 'certificate'])
                 ->name('admin.interns.certificate');
@@ -132,7 +132,16 @@ Route::prefix('admin')->group(function () {
                 [InternController::class, 'certificatePdfDynamic'])
                 ->name('admin.interns.certificate.dynamic')
                 ->whereIn('template', ['certmagangjogjacom','certareakerjacom','certtipisinicom']);
+        });
 
+        // ===== Sertifikat Generator Routes =====
+        Route::prefix('certificates')->group(function () {
+            Route::get('/generator', [CertificateGeneratorController::class, 'showForm'])
+            ->name('certificate.form');
+            Route::post('/preview', [CertificateGeneratorController::class, 'generatePreview'])
+            ->name('certificate.generatePreview');
+            Route::post('/generate-pdf', [CertificateGeneratorController::class, 'generatePDF'])
+            ->name('certificate.generatePDF');
         });
 
         // ===== API JSON untuk tabel
