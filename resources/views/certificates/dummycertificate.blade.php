@@ -2,652 +2,910 @@
 <html lang="id">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Chess — 2 Player (Castling, En-passant, Promotion) — Fixed</title>
+<meta name="viewport" content="width=device-width, user-scalable=no" />
+<title>Guitar Hero Mini - Side-by-Side (Fixed)</title>
 <style>
-  :root{
-    --light:#f0d9b5;
-    --dark:#b58863;
-    --accent:#2563eb;
-    --bg:#071026;
-    --panel:#0b1220;
+  :root {
+    --bg: #0b0f14;
+    --panel: #121821;
+    --accent: #56ccf2;
+    --text: #eaf2ff;
+    --sub: #9fb3c8;
+    --good: #a1ff6a;
+    --great: #ffd93d;
+    --perfect: #56ccf2;
+    --miss: #ff4b4b;
   }
-  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
-  body{background:linear-gradient(180deg,#071025 0%, #071226 50%), var(--bg); color:#e6eef8; display:flex; align-items:center; justify-content:center; padding:28px;}
-  .container{display:grid; grid-template-columns: 560px 340px; gap:20px; align-items:start; width:100%; max-width:980px;}
-  .board-wrap{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:18px; border-radius:12px; box-shadow:0 8px 30px rgba(2,6,23,0.6); }
-  .board{width:512px; height:512px; display:grid; grid-template-columns:repeat(8,1fr); grid-template-rows:repeat(8,1fr); border-radius:8px; overflow:hidden; }
-  .square{width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:36px; cursor:pointer; user-select:none; position:relative; transition:background .12s;}
-  .square.light{background:var(--light); color:#222;}
-  .square.dark{background:var(--dark); color:#fff;}
-  .square.selected{outline:4px solid rgba(37,99,235,0.18); box-shadow:inset 0 0 0 2px rgba(37,99,235,0.06);}
-  .square.move-target::after{content:""; width:14px; height:14px; border-radius:50%; position:absolute; z-index:2; }
-  .square.move-target.capture::after{ width:36px; height:36px; border-radius:6px; opacity:0.9; top:calc(50% - 18px); left:calc(50% - 18px);}
-  .square.move-target:not(.capture)::after{ background:rgba(37,99,235,0.95); top:calc(50% - 7px); left:calc(50% - 7px); }
-  .square.move-target.capture{ background:linear-gradient(180deg, rgba(255,150,150,0.95), rgba(255,80,80,0.95)); }
-  .info{background:var(--panel); padding:16px; border-radius:12px; min-height:280px; width:320px; box-shadow:0 6px 20px rgba(2,6,23,0.6);}
-  h1{margin:0 0 8px 0; font-size:18px;}
-  .turn{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
-  .badge{padding:6px 10px; border-radius:8px; font-weight:600; background:rgba(255,255,255,0.03); color:#dbeafe;}
-  .controls{display:flex; gap:8px; margin-top:10px;}
-  .btn{padding:8px 10px; border-radius:8px; cursor:pointer; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.03); color:inherit;}
-  .log{margin-top:12px; background:rgba(255,255,255,0.02); padding:8px; border-radius:8px; max-height:300px; overflow:auto; font-family:monospace; font-size:13px;}
-  .coord{position:absolute; font-size:11px; opacity:0.6; top:6px; left:6px;}
-  .status{margin-top:8px; font-weight:700;}
-  .small{font-size:13px; opacity:0.85;}
-  footer{margin-top:12px; opacity:0.7; font-size:12px;}
-  .highlight-check{box-shadow:0 0 0 4px rgba(255,80,80,0.12) inset;}
-  /* promotion modal */
-  .modal-backdrop{position:fixed; inset:0; background:rgba(2,6,23,0.6); display:flex; align-items:center; justify-content:center; z-index:60;}
-  .promo-modal{background:linear-gradient(180deg,#0e1724,#071026); border-radius:12px; padding:14px; width:300px; box-shadow:0 10px 40px rgba(2,6,23,0.7); text-align:center; color:#e6eef8;}
-  .promo-row{display:flex; gap:8px; justify-content:center; margin-top:10px;}
-  .promo-button{padding:8px 10px; border-radius:8px; cursor:pointer; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); min-width:56px;}
-  @media (max-width:960px){ .container{grid-template-columns:1fr; } .board-wrap{margin:0 auto;} .info{width:100%;} }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; padding: 0;
+    background: radial-gradient(1000px 600px at 20% -20%, #1a2230, #0b0f14 60%);
+    color: var(--text);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+    overflow: hidden;
+  }
+
+  /* Layout: menu kiri + gameplay kanan */
+  #wrap {
+    height: 100dvh;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: 1fr auto;
+    gap: 14px;
+    padding: 12px;
+  }
+
+  /* Panel Menu (kiri) */
+  #menu {
+    grid-column: 1; grid-row: 1 / span 2;
+    display: flex; flex-direction: column; gap: 12px;
+    background: rgba(18,24,33,0.78);
+    border: 1px solid rgba(136,152,170,0.15);
+    border-radius: 14px; padding: 12px;
+    backdrop-filter: blur(6px);
+    overflow: auto; min-width: 280px;
+  }
+  .brand {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px; border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(136,152,170,0.15);
+  }
+  .title { display: flex; align-items: center; gap: 10px; font-weight: 800; }
+  .title .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+  .btn {
+    cursor: pointer; border: none; border-radius: 10px;
+    background: linear-gradient(180deg, #2a95d6, #1b6ea3);
+    color: white; padding: 8px 12px; font-weight: 700; letter-spacing: 0.4px;
+    box-shadow: 0 6px 16px rgba(45,156,219,0.25);
+    transition: transform .08s ease, filter .08s ease;
+  }
+  .btn.secondary { background: linear-gradient(180deg, #364155, #232b3a); box-shadow: none; color: #cfe2ff; }
+  .btn.small { padding: 6px 10px; }
+  .btn:hover { filter: brightness(1.05); }
+  .btn:active { transform: translateY(1px) scale(0.99); }
+
+  .section {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(136,152,170,0.15);
+    border-radius: 12px; padding: 10px;
+    display: grid; gap: 10px;
+  }
+  .section h3 {
+    margin: 2px 2px 6px; font-size: 13px; font-weight: 800; color: #cfe2ff; letter-spacing: .3px;
+  }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .control {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 10px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(136,152,170,0.18);
+    width: 100%;
+  }
+  .control.inline { width: auto; }
+  .control label { font-size: 12px; color: var(--sub); white-space: nowrap; }
+  .control input[type="range"] { width: 140px; }
+  .control small { color: var(--sub); font-size: 11px; }
+  .control .grow { flex: 1; }
+  .status { color: var(--sub); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Grup Audio + Offset rapih bertingkat */
+  .control-audio { display: grid; gap: 8px; }
+  .control-audio .line {
+    display: grid; gap: 8px; align-items: center;
+    grid-template-columns: auto 1fr auto;
+  }
+  .control-audio input[type="file"] { width: 100%; }
+  .right-val { min-width: 56px; text-align: right; }
+
+  /* Gameplay (kanan) */
+  #game {
+    grid-column: 2; grid-row: 1;
+    position: relative;
+    background: linear-gradient(180deg, #0c1118, #0b0f14 60%);
+    border: 1px solid rgba(136,152,170,0.15); border-radius: 16px; overflow: hidden;
+    min-height: 0;
+  }
+  #canvas {
+    display: block; width: 100%; height: 100%;
+    aspect-ratio: 10/15;
+    background: transparent;
+  }
+  #hudTop {
+    position: absolute; inset: 22px 10px auto 10px; display: flex; justify-content: space-between; align-items: center; pointer-events: none;
+  }
+  #leftHUD, #rightHUD { display: flex; gap: 8px; }
+  .pill {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
+    padding: 6px 10px; border-radius: 999px; font-size: 12px; color: #d7e6ff;
+  }
+  .pill strong { color: white; }
+  #judgement {
+    position: absolute; left: 50%; transform: translateX(-50%); top: 24%; font-size: 28px; font-weight: 800;
+    text-shadow: 0 4px 18px rgba(0,0,0,0.45); opacity: 0; pointer-events: none; transition: opacity .12s ease, transform .12s ease;
+  }
+
+  /* Touch lanes transparent di bawah */
+  .touch-areas {
+    position: absolute; inset: auto 0 0 0; height: 24%; display: grid; grid-template-columns: repeat(4,1fr); opacity: 0.02;
+  }
+  .touch-areas div { background: #fff; }
+
+  /* Overlay hasil */
+  #overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(2px);
+  }
+  #overlay .card {
+    width: min(92vw, 420px); background: rgba(18,24,33,0.96); border: 1px solid rgba(136,152,170,0.25);
+    border-radius: 14px; padding: 18px; color: #eaf2ff; text-align: center; box-shadow: 0 20px 80px rgba(0,0,0,0.35);
+  }
+  #overlay .card h2 { margin: 8px 0 10px; }
+  #overlay .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 14px 0; }
+  #overlay .kpis .k { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px; }
+  #overlay .k .label { color: var(--sub); font-size: 12px; }
+  #overlay .k .value { font-size: 20px; font-weight: 800; }
+
+  /* Footer melebar di bawah */
+  footer {
+    grid-column: 2; grid-row: 2;
+    display: flex; gap: 10px; align-items: center; justify-content: space-between;
+    padding: 10px 12px; background: rgba(18,24,33,0.7);
+    border: 1px solid rgba(136,152,170,0.15); border-radius: 12px; backdrop-filter: blur(6px);
+    font-size: 12px; color: var(--sub);
+  }
+  code.key {
+    display: inline-flex; align-items: center; justify-content: center; min-width: 22px; padding: 2px 6px;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; color: #eaf2ff; font-weight: 700;
+  }
 </style>
 </head>
 <body>
-  <div class="container" role="application" aria-label="Chess game">
-    <div class="board-wrap" aria-hidden="false">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <div>
-          <h1>Chess — 2 Pemain (Fixed)</h1>
-          <div class="small">Castling, En-passant, Promosi dengan pilihan. Perbaikan bug logika en-passant/simulasi.</div>
+<div id="wrap">
+  <!-- MENU KIRI -->
+  <aside id="menu">
+    <div class="brand">
+      <div class="title"><span class="dot"></span> <span>Guitar Hero Mini</span></div>
+    </div>
+
+    <div class="section">
+      <h3>Aksi</h3>
+      <div class="row">
+        <button id="startBtn" class="btn">Start</button>
+        <button id="pauseBtn" class="btn secondary">Pause</button>
+        <button id="restartBtn" class="btn secondary">Restart</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Gameplay</h3>
+      <div class="control">
+        <label>Kecepatan</label>
+        <input id="speed" type="range" min="0.8" max="3" step="0.1" value="1.4" />
+      </div>
+      <div class="control inline">
+        <label>Autoplay</label>
+        <input id="autoplay" type="checkbox" />
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Audio</h3>
+      <div class="control">
+        <label>SFX</label>
+        <input id="volume" type="range" min="0" max="1" step="0.01" value="0.35" />
+      </div>
+      <div class="control">
+        <label>Music</label>
+        <input id="musicVol" type="range" min="0" max="1" step="0.01" value="0.8" />
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Lagu & Offset</h3>
+      <div class="control control-audio">
+        <div class="line">
+          <label>Pilih Lagu</label>
+          <input id="audioFile" type="file" accept="audio/*" />
+          <button id="clearAudioBtn" class="btn secondary small">Hapus</button>
         </div>
-        <div style="text-align:right">
-          <div class="small">Local Play — Single file</div>
-          <div style="font-size:12px; opacity:.8">Klik kotak untuk memilih → klik tujuan</div>
+        <div class="line">
+          <label>Offset (ms)</label>
+          <input id="offset" type="range" min="-300" max="300" step="5" value="0" />
+          <small id="offsetVal" class="right-val">0 ms</small>
         </div>
       </div>
-      <div id="board" class="board" aria-label="Chess board"></div>
-    </div>
-
-    <div class="info" aria-live="polite">
-      <div class="turn">
-        <div class="badge" id="turnBadge">White to move</div>
-        <div id="checkBadge" style="color:#ff8a8a; font-weight:700;"></div>
+      <div class="control">
+        <label>Status</label>
+        <div class="status grow" id="audioStatus">Tidak ada lagu</div>
       </div>
+    </div>
 
-      <div class="controls">
-        <button id="resetBtn" class="btn">Reset</button>
-        <button id="flipBtn" class="btn">Flip Board</button>
-        <button id="undoBtn" class="btn">Undo</button>
+    <div class="section">
+      <h3>Tips</h3>
+      <div class="status">Kontrol: D F J K • Spasi=Pause • R=Restart • M=Mute</div>
+      <div class="status">Geser Offset jika not terasa maju/mundur dibanding musik.</div>
+    </div>
+  </aside>
+
+  <!-- GAMEPLAY KANAN -->
+  <main id="game">
+    <canvas id="canvas" width="520" height="780"></canvas>
+
+    <div id="hudTop">
+      <div id="leftHUD">
+        <div class="pill">Skor: <strong id="scoreTxt">0</strong></div>
+        <div class="pill">Combo: <strong id="comboTxt">0</strong></div>
       </div>
-
-      <div class="status" id="statusText">Game ready</div>
-
-      <div class="log" id="moveLog" aria-live="polite"></div>
-
-      <footer>Rules: castling, en-passant, promotion choice. (No clocks, no PGN export).</footer>
+      <div id="rightHUD">
+        <div class="pill">Akurasi: <strong id="accTxt">0.00%</strong></div>
+        <div class="pill">Hit: <strong><span id="pTxt" style="color:var(--perfect)">P</span>/<span id="gTTxt" style="color:var(--great)">G</span>/<span id="gDTxt" style="color:var(--good)">g</span>/<span id="mTxt" style="color:var(--miss)">M</span></strong></div>
+      </div>
     </div>
-  </div>
 
-  <!-- Promotion modal -->
-  <div id="promoModal" class="modal-backdrop" style="display:none;">
-    <div class="promo-modal" role="dialog" aria-modal="true">
-      <div style="font-weight:700; font-size:15px;">Pilih promosi</div>
-      <div class="small" style="opacity:.9; margin-top:6px;">Promote pawn menjadi:</div>
-      <div class="promo-row" id="promoOptions"></div>
-      <div style="margin-top:10px; font-size:12px; opacity:.7;">Klik untuk memilih</div>
+    <div id="judgement">Perfect</div>
+
+    <div class="touch-areas" id="touchAreas">
+      <div data-lane="0"></div>
+      <div data-lane="1"></div>
+      <div data-lane="2"></div>
+      <div data-lane="3"></div>
     </div>
-  </div>
+
+    <div id="overlay">
+      <div class="card" id="resultCard">
+        <h2>Hasil</h2>
+        <div class="kpis">
+          <div class="k"><div class="label">Skor</div><div class="value" id="rScore">0</div></div>
+          <div class="k"><div class="label">Akurasi</div><div class="value" id="rAcc">0%</div></div>
+          <div class="k"><div class="label">Max Combo</div><div class="value" id="rCombo">0</div></div>
+          <div class="k"><div class="label">Hit (P/G/g/M)</div><div class="value"><span id="rP">0</span>/<span id="rGT">0</span>/<span id="rGD">0</span>/<span id="rM">0</span></div></div>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:center;">
+          <button class="btn" id="againBtn">Main Lagi</button>
+          <button class="btn secondary" id="closeBtn">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>
+      Kontrol: <code class="key">D</code> <code class="key">F</code> <code class="key">J</code> <code class="key">K</code>
+      | <code class="key">Spasi</code> Pause | <code class="key">R</code> Restart | <code class="key">M</code> Mute
+    </div>
+    <div>1 File • Tanpa library</div>
+  </footer>
+</div>
 
 <script>
-/*
-  Fixed Chess implementation (single-file)
-  - Major fix: pass enPassantTarget into move-generation/simulation so check/legalty are correct.
-  - Supports: castling, en-passant, promotion choice, undo.
-*/
+(() => {
+  // Canvas setup
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
 
-const PIECE_SYMBOLS = {
-  'p': {'w':'♙','b':'♟'},
-  'r': {'w':'♖','b':'♜'},
-  'n': {'w':'♘','b':'♞'},
-  'b': {'w':'♗','b':'♝'},
-  'q': {'w':'♕','b':'♛'},
-  'k': {'w':'♔','b':'♚'}
-};
+  // UI elements
+  const scoreTxt = document.getElementById('scoreTxt');
+  const comboTxt = document.getElementById('comboTxt');
+  const accTxt = document.getElementById('accTxt');
+  const pTxt = document.getElementById('pTxt');
+  const gTTxt = document.getElementById('gTTxt');
+  const gDTxt = document.getElementById('gDTxt');
+  const mTxt = document.getElementById('mTxt');
+  const startBtn = document.getElementById('startBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const speedSlider = document.getElementById('speed');
+  const sfxVolSlider = document.getElementById('volume');
+  const musicVolSlider = document.getElementById('musicVol');
+  const autoplayToggle = document.getElementById('autoplay');
+  const overlay = document.getElementById('overlay');
+  const againBtn = document.getElementById('againBtn');
+  const closeBtn = document.getElementById('closeBtn');
+  const rScore = document.getElementById('rScore');
+  const rAcc = document.getElementById('rAcc');
+  const rCombo = document.getElementById('rCombo');
+  const rP = document.getElementById('rP');
+  const rGT = document.getElementById('rGT');
+  const rGD = document.getElementById('rGD');
+  const rM = document.getElementById('rM');
 
-const boardElem = document.getElementById('board');
-const turnBadge = document.getElementById('turnBadge');
-const statusText = document.getElementById('statusText');
-const moveLog = document.getElementById('moveLog');
-const resetBtn = document.getElementById('resetBtn');
-const flipBtn = document.getElementById('flipBtn');
-const checkBadge = document.getElementById('checkBadge');
-const promoModal = document.getElementById('promoModal');
-const promoOptions = document.getElementById('promoOptions');
-const undoBtn = document.getElementById('undoBtn');
+  const judgementEl = document.getElementById('judgement');
+  const touchAreas = document.getElementById('touchAreas'); // deklarasi SATU KALI
 
-let board = [];
-let selected = null;
-let legalMoves = [];
-let turn = 'w';
-let flipped = false;
-let enPassantTarget = null; // {r,c} or null
-let history = [];
-let moveNumber = 1;
+  const audioFile = document.getElementById('audioFile');
+  const clearAudioBtn = document.getElementById('clearAudioBtn');
+  const audioStatus = document.getElementById('audioStatus');
+  const offsetSlider = document.getElementById('offset');
+  const offsetVal = document.getElementById('offsetVal');
 
-const inBounds = (r,c) => r>=0 && r<8 && c>=0 && c<8;
-const cloneBoard = (bd) => bd.map(row => row.map(cell => cell ? {...cell} : null));
-const coordToAlgebraic = (r,c) => String.fromCharCode(97+c) + (8-r);
-
-// --- Initialization ---
-function resetBoard(){
-  board = Array.from({length:8}, ()=>Array(8).fill(null));
-  for(let c=0;c<8;c++){ board[1][c] = {type:'p', color:'b', hasMoved:false}; board[6][c] = {type:'p', color:'w', hasMoved:false}; }
-  const place = (r,c,t,col)=> board[r][c] = {type:t, color:col, hasMoved:false};
-  place(0,0,'r','b'); place(0,1,'n','b'); place(0,2,'b','b'); place(0,3,'q','b'); place(0,4,'k','b'); place(0,5,'b','b'); place(0,6,'n','b'); place(0,7,'r','b');
-  place(7,0,'r','w'); place(7,1,'n','w'); place(7,2,'b','w'); place(7,3,'q','w'); place(7,4,'k','w'); place(7,5,'b','w'); place(7,6,'n','w'); place(7,7,'r','w');
-
-  selected = null; legalMoves = []; turn = 'w'; flipped = false;
-  enPassantTarget = null; history = []; moveNumber = 1;
-  moveLog.innerHTML = '';
-  statusText.textContent = 'Game reset. White starts.';
-  checkBadge.textContent = '';
-  updateUI();
-}
-
-// --- Find king ---
-function getKingPos(bd, color){
-  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
-    const p = bd[r][c];
-    if(p && p.type==='k' && p.color===color) return {r,c};
+  // Device pixel ratio scaling
+  function resizeCanvas() {
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
-  return null;
-}
+  window.addEventListener('resize', () => { resizeCanvas(); computeLayout(); }, { passive: true });
+  resizeCanvas();
 
-// --- Generate moves ---
-// generateAllMoves(bd, color, epTarget) -> returns pseudo-legal moves (not filtered for leaving king in check)
-function generateAllMoves(bd, color, epTarget = null){
-  const moves = [];
-  for(let r=0;r<8;r++){
-    for(let c=0;c<8;c++){
-      const p = bd[r][c];
-      if(p && p.color===color){
-        const ms = generateMovesForPiece(bd, r, c, true, epTarget);
-        ms.forEach(m => moves.push({...m, from:{r,c}}));
-      }
+  // Audio setup
+  let audioCtx = null;
+  let masterGain = null; // final
+  let sfxGain = null;    // hit beep
+  let musicGain = null;  // music file
+  let muted = false;
+
+  function ensureAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = muted ? 0 : 1;
+      masterGain.connect(audioCtx.destination);
+
+      sfxGain = audioCtx.createGain();
+      sfxGain.gain.value = parseFloat(sfxVolSlider.value);
+      sfxGain.connect(masterGain);
+
+      musicGain = audioCtx.createGain();
+      musicGain.gain.value = parseFloat(musicVolSlider.value);
+      musicGain.connect(masterGain);
     }
   }
-  return moves;
-}
 
-// generateMovesForPiece(bd, r, c, pseudoOnly=false, epTarget=null)
-function generateMovesForPiece(bd, r, c, pseudoOnly=false, epTarget=null){
-  const p = bd[r][c];
-  if(!p) return [];
-  const moves = [];
-  const dir = p.color === 'w' ? -1 : 1;
-  const add = (rr,cc, opts={capture:false, enPassant:false, castle: null})=>{
-    if(!inBounds(rr,cc)) return;
-    const target = bd[rr][cc];
-    if(!target || target.color !== p.color) moves.push({r:rr, c:cc, capture: !!target || !!opts.capture, enPassant: !!opts.enPassant, castle: opts.castle || null});
+  sfxVolSlider.addEventListener('input', (e) => { ensureAudio(); sfxGain.gain.value = parseFloat(e.target.value); });
+  musicVolSlider.addEventListener('input', (e) => { ensureAudio(); musicGain.gain.value = parseFloat(e.target.value); });
+
+  function playHitSound(lane, judgement='Perfect') {
+    if (!audioCtx || muted) return;
+    const freqs = [261.63, 329.63, 392.00, 523.25];
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    let f = freqs[lane] || 440;
+    if (judgement === 'Great') f *= 0.98;
+    if (judgement === 'Good') f *= 0.95;
+    osc.frequency.value = f;
+    gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.12);
+    osc.connect(gain);
+    gain.connect(sfxGain);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.15);
+  }
+
+  // Music file handling
+  let musicBuffer = null;
+  let musicSource = null;
+  let musicStartCtxTime = 0;
+  let musicPlayhead = 0;
+  let musicIsPlaying = false;
+
+  function formatTime(s) {
+    const m = Math.floor(s/60);
+    const ss = Math.floor(s%60).toString().padStart(2,'0');
+    return `${m}:${ss}`;
+  }
+  function updateAudioStatus() {
+    if (!musicBuffer) audioStatus.textContent = 'Tidak ada lagu';
+    else audioStatus.textContent = `Loaded (${formatTime(musicBuffer.duration)})`;
+  }
+  async function loadMusicFile(file) {
+    try {
+      ensureAudio();
+      audioStatus.textContent = 'Memuat...';
+      const ab = await file.arrayBuffer();
+      const buf = await audioCtx.decodeAudioData(ab);
+      stopMusic();
+      musicBuffer = buf;
+      musicPlayhead = 0;
+      updateAudioStatus();
+    } catch (e) {
+      console.error(e);
+      musicBuffer = null;
+      audioStatus.textContent = 'Gagal memuat file';
+    }
+  }
+  function startMusic() {
+    if (!musicBuffer || !audioCtx) return;
+    stopMusic();
+    musicSource = audioCtx.createBufferSource();
+    musicSource.buffer = musicBuffer;
+    musicSource.connect(musicGain);
+    musicStartCtxTime = audioCtx.currentTime;
+    musicSource.start(0, Math.max(0, Math.min(musicBuffer.duration, musicPlayhead)));
+    musicIsPlaying = true;
+    musicSource.onended = () => { musicIsPlaying = false; };
+  }
+  function pauseMusic() {
+    if (!musicBuffer || !musicSource) return;
+    musicPlayhead = Math.min(musicBuffer.duration, musicPlayhead + (audioCtx.currentTime - musicStartCtxTime));
+    try { musicSource.stop(); } catch(_) {}
+    try { musicSource.disconnect(); } catch(_) {}
+    musicSource = null;
+    musicIsPlaying = false;
+  }
+  function stopMusic() {
+    if (musicSource) {
+      try { musicSource.stop(); } catch(_) {}
+      try { musicSource.disconnect(); } catch(_) {}
+    }
+    musicSource = null;
+    musicIsPlaying = false;
+  }
+
+  // Game constants and state
+  const LANES = 4;
+  const KEYS = ['KeyD', 'KeyF', 'KeyJ', 'KeyK'];
+  const KEY_LABELS = ['D', 'F', 'J', 'K'];
+  const LANE_COLORS = ['#ff4b4b', '#ffd93d', '#4cd964', '#5ac8fa'];
+  const HIT_WINDOWS = { perfect: 0.04, great: 0.09, good: 0.14 };
+  const NOTE_SCORE = { Perfect: 300, Great: 200, Good: 100, Miss: 0 };
+
+  // Geometry
+  const padding = { x: 28, top: 20, bottom: 96 };
+  let playfield = { x: padding.x, y: padding.top, w: 0, h: 0, laneW: 0, hitY: 0 };
+  function computeLayout() {
+    const rect = canvas.getBoundingClientRect();
+    const viewW = rect.width;
+    const viewH = rect.height;
+    const w = viewW - padding.x * 2;
+    const h = viewH - (padding.top + padding.bottom);
+    const laneW = w / LANES;
+    const hitY = padding.top + h - 12;
+    playfield = { x: padding.x, y: padding.top, w, h, laneW, hitY };
+  }
+  computeLayout();
+
+  // Chart generation (contoh default)
+  function generateChart() {
+    const notes = [];
+    const bpm = 120;
+    const spb = 60 / bpm;
+    let t = 2.0;
+
+    function add(time, lane) { notes.push({ id: notes.length, time, lane, judged: false, hit: false }); }
+
+    for (let i = 0; i < 8; i++) add(t + i * spb, i % 4);
+    t += 8 * spb;
+
+    const pattern = [0,1,2,3,1,2,3,0,2,3,1,2,0,3,1,0];
+    for (let r = 0; r < 2; r++) {
+      for (let i = 0; i < pattern.length; i++) add(t + i * (spb/2), pattern[i]);
+      t += pattern.length * (spb/2);
+    }
+
+    for (let i = 0; i < 8; i++) {
+      const pair = [[0,2],[1,3],[0,3],[1,2]][i % 4];
+      add(t + i * spb, pair[0]); add(t + i * spb, pair[1]);
+      if (i % 2 === 1) add(t + i * spb - spb/4, i % 4);
+    }
+    t += 8 * spb;
+
+    for (let b = 0; b < 8; b++) {
+      const base = t + b * spb;
+      const lanes = (b % 2 === 0) ? [0,1] : [2,3];
+      for (let k = 0; k < 3; k++) add(base + k * (spb/3), lanes[k % 2]);
+    }
+    t += 8 * spb;
+
+    for (let i = 0; i < 16; i++) add(t + i * (spb/2), (3 - (i % 4)));
+
+    const duration = Math.max(...notes.map(n => n.time)) + 2.0;
+    const laneNotes = [...Array(LANES)].map(() => []);
+    for (const n of notes) laneNotes[n.lane].push(n);
+    for (const arr of laneNotes) arr.sort((a,b)=>a.time-b.time);
+    return { notes, laneNotes, duration, bpm };
+  }
+
+  // Game state variables
+  let chart = generateChart();
+  let laneIndex = new Array(LANES).fill(0);
+  let started = false, paused = false, finished = false;
+  let pauseAt = 0;
+  let approachBase = 2.2;
+  let approach = approachBase / parseFloat(speedSlider.value);
+  let keyboard = new Array(LANES).fill(false);
+  let laneFlash = new Array(LANES).fill(0);
+  let autoplay = false;
+
+  // Timer fallback (tanpa audio file)
+  const nowSec = () => performance.now() / 1000;
+  let startTime = 0;
+
+  // Global offset (ms)
+  let globalOffsetSec = 0;
+  offsetSlider.addEventListener('input', (e) => {
+    globalOffsetSec = parseInt(e.target.value, 10) / 1000;
+    offsetVal.textContent = `${parseInt(e.target.value,10)} ms`;
+  });
+  offsetVal.textContent = '0 ms';
+
+  // Score stats
+  let score = 0;
+  let combo = 0, maxCombo = 0;
+  let counts = { Perfect: 0, Great: 0, Good: 0, Miss: 0 };
+  let maxScore = chart.notes.length * NOTE_SCORE.Perfect;
+
+  function resetGame() {
+    chart = generateChart();
+    laneIndex = new Array(LANES).fill(0);
+    score = 0; combo = 0; maxCombo = 0;
+    counts = { Perfect: 0, Great: 0, Good: 0, Miss: 0 };
+    maxScore = chart.notes.length * NOTE_SCORE.Perfect;
+    paused = false; started = false; finished = false;
+    pauseAt = 0;
+    autoplay = !!autoplayToggle.checked;
+    approach = approachBase / Math.max(0.8, parseFloat(speedSlider.value));
+    updateHUD();
+    hideOverlay();
+    drawFrame(0); // clear frame
+  }
+
+  // Waktu lagu/notes: pakai posisi audio jika ada musik, jika tidak pakai timer performa.
+  const songTime = () => {
+    const off = globalOffsetSec;
+    if (!started) return 0;
+    if (musicBuffer) {
+      let audioPos = musicPlayhead;
+      if (!paused && musicIsPlaying) {
+        audioPos = musicPlayhead + (audioCtx.currentTime - musicStartCtxTime);
+      }
+      return Math.max(0, audioPos) - off;
+    } else {
+      if (paused) return Math.max(0, (pauseAt || nowSec()) - startTime) - off;
+      return Math.max(0, nowSec() - startTime) - off;
+    }
   };
 
-  switch(p.type){
-    case 'p':
-      // forward 1
-      const one = r + dir;
-      if(inBounds(one,c) && !bd[one][c]) add(one,c,{capture:false});
-      // double from start
-      const startRow = p.color==='w'?6:1;
-      const two = r + 2*dir;
-      if(r===startRow && inBounds(two,c) && !bd[one][c] && !bd[two][c]) add(two,c,{capture:false});
-      // captures
-      for(const dc of [-1,1]){
-        const rr = r + dir, cc = c + dc;
-        if(inBounds(rr,cc) && bd[rr][cc] && bd[rr][cc].color !== p.color) add(rr,cc,{capture:true});
-      }
-      // en-passant using epTarget (passed in)
-      if(epTarget){
-        for(const dc of [-1,1]){
-          const rr = r + dir, cc = c + dc;
-          if(inBounds(rr,cc) && epTarget.r === rr && epTarget.c === cc){
-            add(rr,cc,{capture:true, enPassant:true});
-          }
-        }
-      }
-      break;
-
-    case 'n':
-      for(const [dr,dc] of [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]){
-        const rr=r+dr, cc=c+dc;
-        if(!inBounds(rr,cc)) continue;
-        if(!bd[rr][cc] || bd[rr][cc].color !== p.color) add(rr,cc,{capture:!!bd[rr][cc]});
-      }
-      break;
-
-    case 'b':
-      for(const [dr,dc] of [[-1,-1],[-1,1],[1,-1],[1,1]]){
-        let rr=r+dr, cc=c+dc;
-        while(inBounds(rr,cc)){
-          if(!bd[rr][cc]) { add(rr,cc,{capture:false}); rr+=dr; cc+=dc; continue; }
-          if(bd[rr][cc].color !== p.color) add(rr,cc,{capture:true});
-          break;
-        }
-      }
-      break;
-
-    case 'r':
-      for(const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1]]){
-        let rr=r+dr, cc=c+dc;
-        while(inBounds(rr,cc)){
-          if(!bd[rr][cc]) { add(rr,cc,{capture:false}); rr+=dr; cc+=dc; continue; }
-          if(bd[rr][cc].color !== p.color) add(rr,cc,{capture:true});
-          break;
-        }
-      }
-      break;
-
-    case 'q':
-      for(const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]]){
-        let rr=r+dr, cc=c+dc;
-        while(inBounds(rr,cc)){
-          if(!bd[rr][cc]) { add(rr,cc,{capture:false}); rr+=dr; cc+=dc; continue; }
-          if(bd[rr][cc].color !== p.color) add(rr,cc,{capture:true});
-          break;
-        }
-      }
-      break;
-
-    case 'k':
-      for(const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]]){
-        const rr=r+dr, cc=c+dc;
-        if(!inBounds(rr,cc)) continue;
-        if(!bd[rr][cc] || bd[rr][cc].color !== p.color) add(rr,cc,{capture:!!bd[rr][cc]});
-      }
-      // Castling logic — use p.hasMoved and rook.hasMoved, and ensure not in check and not passing attacked squares.
-      if(!p.hasMoved && !isInCheck(bd, p.color, epTarget)){
-        // king-side attempt: rook at c+3 (initial layout assumption)
-        // ensure squares between empty and not attacked
-        // king from c to c+2
-        if(c+3 < 8){
-          const rook = bd[r][c+3];
-          if(rook && rook.type==='r' && rook.color===p.color && !rook.hasMoved){
-            if(!bd[r][c+1] && !bd[r][c+2]){
-              // simulate king moving to c+1 and c+2 — check if attacked
-              const pass1 = simulateAndCheckAttack(bd, r, c, r, c+1, p.color, epTarget);
-              const pass2 = simulateAndCheckAttack(bd, r, c, r, c+2, p.color, epTarget);
-              if(!pass1 && !pass2){
-                add(r, c+2, {capture:false, castle:'king'});
-              }
-            }
-          }
-        }
-        // queen-side: rook at c-4
-        if(c-4 >= 0){
-          const rook = bd[r][c-4];
-          if(rook && rook.type==='r' && rook.color===p.color && !rook.hasMoved){
-            if(!bd[r][c-1] && !bd[r][c-2] && !bd[r][c-3]){
-              const pass1 = simulateAndCheckAttack(bd, r, c, r, c-1, p.color, epTarget);
-              const pass2 = simulateAndCheckAttack(bd, r, c, r, c-2, p.color, epTarget);
-              if(!pass1 && !pass2){
-                add(r, c-2, {capture:false, castle:'queen'});
-              }
-            }
-          }
-        }
-      }
-      break;
+  function judge(delta) {
+    const a = Math.abs(delta);
+    if (a <= HIT_WINDOWS.perfect) return 'Perfect';
+    if (a <= HIT_WINDOWS.great) return 'Great';
+    if (a <= HIT_WINDOWS.good) return 'Good';
+    return 'Miss';
   }
 
-  // If not pseudoOnly: filter moves that leave king in check (simulate each move using appropriate epTarget for the copy)
-  if(!pseudoOnly){
-    const legal = [];
-    for(const m of moves){
-      const copy = cloneBoard(bd);
-      const piece = copy[r][c];
-      // perform move on copy taking en-passant & castling into account
-      let epForCopy = null;
-      if(m.enPassant){
-        // move pawn, remove captured pawn behind landing square
-        copy[m.r][m.c] = piece;
-        copy[r][c] = null;
-        const capRow = m.r + (piece.color === 'w' ? 1 : -1);
-        copy[capRow][m.c] = null;
-        // after en-passant there is no en-passant target
-        epForCopy = null;
-        if(copy[m.r][m.c]) copy[m.r][m.c].hasMoved = true;
-      } else if(m.castle){
-        // move king
-        copy[m.r][m.c] = piece;
-        copy[r][c] = null;
-        if(m.castle === 'king'){
-          const rook = copy[r][c+3];
-          copy[r][c+1] = rook;
-          copy[r][c+3] = null;
-          if(copy[r][c+1]) copy[r][c+1].hasMoved = true;
-        } else {
-          const rook = copy[r][c-4];
-          copy[r][c-1] = rook;
-          copy[r][c-4] = null;
-          if(copy[r][c-1]) copy[r][c-1].hasMoved = true;
-        }
-        if(copy[m.r][m.c]) copy[m.r][m.c].hasMoved = true;
-        epForCopy = null;
-      } else {
-        const target = copy[m.r][m.c];
-        copy[m.r][m.c] = piece;
-        copy[r][c] = null;
-        // handle pawn double-step creating ep target for subsequent move in copy
-        if(piece.type === 'p' && Math.abs(m.r - r) === 2){
-          epForCopy = {r: Math.floor((m.r + r)/2), c: m.c};
-        } else {
-          epForCopy = null;
-        }
-        if(copy[m.r][m.c]) copy[m.r][m.c].hasMoved = true;
-        // promotion: to queen for legality testing
-        if(piece.type === 'p'){
-          if((piece.color === 'w' && m.r === 0) || (piece.color === 'b' && m.r === 7)){
-            copy[m.r][m.c] = {type:'q', color: piece.color, hasMoved:true};
-          }
-        }
-      }
+  function tryHit(lane, t) {
+    const idx = laneIndex[lane];
+    const arr = chart.laneNotes[lane];
+    if (idx >= arr.length) return false;
 
-      // Now check if king is attacked in copy. Pass epForCopy to generateAllMoves so en-passant in copy respected.
-      const kingPos = getKingPos(copy, piece.color);
-      if(!kingPos) continue;
-      const opp = piece.color === 'w' ? 'b' : 'w';
-      const oppMoves = generateAllMoves(copy, opp, epForCopy);
-      const attacked = oppMoves.some(mm => mm.r===kingPos.r && mm.c===kingPos.c);
-      if(!attacked) legal.push(m);
+    const note = arr[idx];
+    const dt = t - note.time;
+    if (Math.abs(dt) <= HIT_WINDOWS.good) {
+      const res = judge(dt);
+      note.judged = true; note.hit = (res !== 'Miss'); note.judgement = res; note.hitTime = t;
+      laneIndex[lane]++;
+      applyJudgement(lane, res, dt);
+      return true;
     }
-    return legal;
+    return false;
   }
 
-  return moves;
-}
+  function applyJudgement(lane, res, delta) {
+    if (res === 'Miss') {
+      combo = 0;
+      counts.Miss++;
+      flashJudgement('Miss', 'var(--miss)');
+    } else {
+      counts[res]++;
+      combo += 1;
+      maxCombo = Math.max(maxCombo, combo);
+      score += NOTE_SCORE[res];
+      flashJudgement(res, res === 'Perfect' ? 'var(--perfect)' : res === 'Great' ? 'var(--great)' : 'var(--good)');
+      playHitSound(lane, res);
+      laneFlash[lane] = nowSec();
+    }
+    updateHUD();
+  }
 
-// simulate moving king to (tr,tc) and check if that square would be attacked (use epTarget passed)
-function simulateAndCheckAttack(bd, r, c, tr, tc, color, epTarget){
-  const copy = cloneBoard(bd);
-  const king = copy[r][c];
-  copy[tr][tc] = king;
-  copy[r][c] = null;
-  // note: epTarget remains as passed
-  const opp = color === 'w' ? 'b' : 'w';
-  const oppMoves = generateAllMoves(copy, opp, epTarget);
-  return oppMoves.some(mm => mm.r===tr && mm.c===tc);
-}
+  function updateHUD() {
+    scoreTxt.textContent = score.toLocaleString('id-ID');
+    comboTxt.textContent = combo;
+    const acc = maxScore ? (score / maxScore) * 100 : 0;
+    accTxt.textContent = acc.toFixed(2) + '%';
+    pTxt.textContent = counts.Perfect;
+    gTTxt.textContent = counts.Great;
+    gDTxt.textContent = counts.Good;
+    mTxt.textContent = counts.Miss;
+  }
 
-// isInCheck with epTarget awareness
-function isInCheck(bd, color, epTarget = null){
-  const kingPos = getKingPos(bd, color);
-  if(!kingPos) return false;
-  const opp = color === 'w' ? 'b' : 'w';
-  const oppMoves = generateAllMoves(bd, opp, epTarget);
-  return oppMoves.some(m => m.r===kingPos.r && m.c===kingPos.c);
-}
+  function flashJudgement(text, color) {
+    judgementEl.textContent = text;
+    judgementEl.style.color = color;
+    judgementEl.style.opacity = '1';
+    judgementEl.style.transform = 'translateX(-50%) scale(1.05)';
+    clearTimeout(judgementEl._t);
+    judgementEl._t = setTimeout(() => {
+      judgementEl.style.opacity = '0';
+      judgementEl.style.transform = 'translateX(-50%) scale(1.0)';
+    }, 280);
+  }
 
-// --- UI Rendering ---
-function updateUI(){
-  boardElem.innerHTML = '';
-  const display = [];
-  for(let r=0;r<8;r++) for(let c=0;c<8;c++) display.push({r,c});
-  if(flipped) display.reverse();
+  function updateMisses(t) {
+    for (let l = 0; l < LANES; l++) {
+      const arr = chart.laneNotes[l];
+      while (laneIndex[l] < arr.length) {
+        const n = arr[laneIndex[l]];
+        if (t > n.time + HIT_WINDOWS.good) {
+          n.judged = true; n.hit = false; n.judgement = 'Miss';
+          laneIndex[l]++;
+          applyJudgement(l, 'Miss', t - n.time);
+        } else break;
+      }
+    }
+  }
 
-  display.forEach(cell => {
-    const r = cell.r, c = cell.c;
-    const sq = document.createElement('div');
-    const isLight = (r + c) % 2 === 0;
-    sq.className = 'square ' + (isLight ? 'light' : 'dark');
-    sq.dataset.r = r; sq.dataset.c = c;
-    sq.setAttribute('role','button');
-    sq.setAttribute('aria-label', `square ${coordToAlgebraic(r,c)}`);
+  function updateAutoplay(t) {
+    if (!autoplay) return;
+    for (let l = 0; l < LANES; l++) {
+      const idx = laneIndex[l];
+      const arr = chart.laneNotes[l];
+      if (idx >= arr.length) continue;
+      const n = arr[idx];
+      const dt = n.time - t;
+      if (dt <= 0.0 && Math.abs(dt) <= HIT_WINDOWS.perfect) {
+        tryHit(l, t);
+      }
+    }
+  }
 
-    const coord = document.createElement('div');
-    coord.className = 'coord';
-    coord.textContent = coordToAlgebraic(r,c);
-    sq.appendChild(coord);
+  function drawFrame(t) {
+    const rect = canvas.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
 
-    const p = board[r][c];
-    if(p){
-      const span = document.createElement('div');
-      span.textContent = PIECE_SYMBOLS[p.type][p.color];
-      span.style.pointerEvents = 'none';
-      sq.appendChild(span);
+    ctx.clearRect(0, 0, w, h);
+    const grd = ctx.createLinearGradient(0, playfield.y, 0, playfield.y + playfield.h);
+    grd.addColorStop(0, '#0e141d');
+    grd.addColorStop(1, '#0a0f15');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, w, h);
+
+    // lanes
+    const LCOL = ['#ff4b4b', '#ffd93d', '#4cd964', '#5ac8fa'];
+    for (let l = 0; l < LANES; l++) {
+      const x = playfield.x + l * playfield.laneW;
+      const isHeld = keyboard[l];
+      const flashAge = nowSec() - laneFlash[l];
+      const flash = Math.max(0, 1 - flashAge * 5);
+      ctx.fillStyle = `rgba(255,255,255,${isHeld ? 0.06 : 0.03})`;
+      ctx.fillRect(x + 2, playfield.y, playfield.laneW - 4, playfield.h);
+
+      ctx.fillStyle = LCOL[l];
+      ctx.globalAlpha = 0.05 + flash * 0.15;
+      ctx.fillRect(x + playfield.laneW/2 - 2, playfield.y, 4, playfield.h);
+      ctx.globalAlpha = 1;
     }
 
-    if(selected && selected.r===r && selected.c===c) sq.classList.add('selected');
+    // hit line
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.fillRect(playfield.x, playfield.hitY, playfield.w, 2);
 
-    if(legalMoves.some(m=>m.r===r && m.c===c)){
-      sq.classList.add('move-target');
-      const isCap = !!board[r][c] && board[r][c].color !== (turn);
-      if(isCap) sq.classList.add('capture');
-      const lm = legalMoves.find(m=>m.r===r && m.c===c);
-      if(lm && lm.enPassant && !board[r][c]) sq.classList.add('capture');
+    // notes
+    if(started){
+      const approachPxPerSec = playfield.h / approach;
+      const NOTE_RATIO = 0.88;  
+      const NOTE_MARGIN = 6;     
+      const noteW = Math.max(24, Math.min(playfield.laneW - NOTE_MARGIN*2, playfield.laneW * NOTE_RATIO));
+      const noteH = 14;  
+
+      for (let l = 0; l < LANES; l++) {
+        const arr = chart.laneNotes[l];
+        const idx = laneIndex[l];
+        const startIdx = Math.max(0, idx - 2);
+        for (let i = startIdx; i < arr.length; i++) {
+          const n = arr[i];
+          if (n.judged && (nowSec() - (n.hitTime || 0)) > 1.0) continue;
+
+          const dt = n.time - t;
+          if (dt < -0.6 && n.judged) continue;
+          if (dt > approach + 0.2) break;
+
+          const y = playfield.hitY - Math.max(0, (dt * approachPxPerSec));
+          const x = playfield.x + l * playfield.laneW + (playfield.laneW - noteW) / 2;
+
+          const alpha = n.judged ? (n.hit ? 0.25 : 0.2) : 1.0;
+          ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+          roundRect(ctx, x, y - noteH, noteW, noteH, 8, LCOL[l], true);
+
+          ctx.globalAlpha = 0.8 * alpha;
+          roundRect(ctx, x, y - noteH, noteW, noteH, 8, 'rgba(255,255,255,0.18)', false, 2);
+
+          ctx.globalAlpha = 1.0;
+
+        }
+      }
     }
 
-    const wK = getKingPos(board,'w'), bK = getKingPos(board,'b');
-    if(wK && wK.r===r && wK.c===c && isInCheck(board,'w', enPassantTarget)) sq.classList.add('highlight-check');
-    if(bK && bK.r===r && bK.c===c && isInCheck(board,'b', enPassantTarget)) sq.classList.add('highlight-check');
+    drawKeycaps();
 
-    sq.addEventListener('click', ()=> onSquareClick(r,c));
-    boardElem.appendChild(sq);
+    // progress
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.fillRect(playfield.x, playfield.y - 6, playfield.w, 4);
+    const progress = Math.min(1, t / chart.duration);
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.fillRect(playfield.x, playfield.y - 6, playfield.w * progress, 4);
+  }
+
+  function drawKeycaps() {
+    const baseY = playfield.hitY + 12;
+    const capW = playfield.laneW - 12;
+    const capH = 32;
+    for (let l = 0; l < LANES; l++) {
+      const x = playfield.x + l * playfield.laneW + (playfield.laneW - capW)/2;
+      const pressed = keyboard[l];
+      const c = ['#ff4b4b', '#ffd93d', '#4cd964', '#5ac8fa'][l];
+      const bg = pressed ? c : 'rgba(255,255,255,0.06)';
+      roundRect(ctx, x, baseY, capW, capH, 9, bg, true);
+      roundRect(ctx, x, baseY, capW, capH, 9, 'rgba(255,255,255,0.15)', false, 1.5);
+
+      ctx.fillStyle = pressed ? '#0b0f14' : '#eaf2ff';
+      ctx.font = 'bold 16px system-ui';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(['D','F','J','K'][l], x + capW/2, baseY + capH/2);
+    }
+  }
+
+  function roundRect(ctx, x, y, w, h, r, color, fill = true, lw = 2) {
+    const rr = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
+    if (fill) { ctx.fillStyle = color; ctx.fill(); }
+    else { ctx.lineWidth = lw; ctx.strokeStyle = color; ctx.stroke(); }
+  }
+
+  // Main loop
+  function loop() {
+    const t = songTime();
+    if (started && !paused) {
+      updateMisses(t);
+      updateAutoplay(t);
+    }
+    drawFrame(t);
+
+    if (started && !finished && t >= chart.duration) {
+      finished = true;
+      stopMusic();
+      showResult();
+    }
+    requestAnimationFrame(loop);
+  }
+
+  function showResult() {
+    overlay.style.display = 'flex';
+    rScore.textContent = score.toLocaleString('id-ID');
+    rCombo.textContent = maxCombo;
+    rP.textContent = counts.Perfect;
+    rGT.textContent = counts.Great;
+    rGD.textContent = counts.Good;
+    rM.textContent = counts.Miss;
+    const acc = maxScore ? (score / maxScore) * 100 : 0;
+    rAcc.textContent = acc.toFixed(2) + '%';
+  }
+  function hideOverlay() { overlay.style.display = 'none'; }
+
+  // Start/Pause/Restart controls
+  function startGame() {
+    resetGame();
+    ensureAudio();
+    audioCtx.resume?.();
+
+    started = true;
+    paused = false;
+    finished = false;
+
+    if (musicBuffer) {
+      musicPlayhead = 0;
+      startMusic();
+    } else {
+      startTime = nowSec();
+    }
+  }
+  function togglePause() {
+    if (!started || finished) return;
+    if (!paused) {
+      paused = true;
+      pauseAt = nowSec();
+      if (musicBuffer) pauseMusic();
+    } else {
+      paused = false;
+      if (musicBuffer) startMusic();
+      else startTime += nowSec() - pauseAt;
+    }
+  }
+  function restartGame() {
+    ensureAudio();
+    stopMusic();
+    startGame();
+  }
+
+  startBtn.addEventListener('click', () => { if (!started || finished) startGame(); });
+  pauseBtn.addEventListener('click', togglePause);
+  restartBtn.addEventListener('click', restartGame);
+
+  againBtn.addEventListener('click', () => { hideOverlay(); restartGame(); });
+  closeBtn.addEventListener('click', hideOverlay);
+
+  // Keyboard input
+  window.addEventListener('keydown', (e) => {
+    if (e.repeat) return;
+    if (e.code === 'Space') { e.preventDefault(); togglePause(); return; }
+    if (e.code === 'KeyR') { e.preventDefault(); restartBtn.click(); return; }
+    if (e.code === 'KeyM') { e.preventDefault();
+      ensureAudio();
+      muted = !muted;
+      masterGain.gain.value = muted ? 0 : 1;
+      return;
+    }
+
+    const lane = KEYS.indexOf(e.code);
+    if (lane >= 0) {
+      keyboard[lane] = true;
+      if (started && !paused && !finished) tryHit(lane, songTime());
+    }
+  });
+  window.addEventListener('keyup', (e) => {
+    const lane = KEYS.indexOf(e.code);
+    if (lane >= 0) keyboard[lane] = false;
   });
 
-  turnBadge.textContent = (turn==='w' ? 'White to move' : 'Black to move');
-  checkBadge.textContent = isInCheck(board, turn, enPassantTarget) ? 'CHECK!' : '';
-}
-
-// --- Interaction ---
-function onSquareClick(r,c){
-  const piece = board[r][c];
-
-  // if selected and clicked legal move -> execute
-  const lm = legalMoves.find(m => m.r===r && m.c===c);
-  if(selected && lm){
-    doMove(selected.r, selected.c, r, c, lm);
-    selected = null; legalMoves = [];
-    updateUI();
-    return;
-  }
-
-  // select own piece
-  if(piece && piece.color === turn){
-    selected = {r,c};
-    legalMoves = generateMovesForPiece(board, r, c, false, enPassantTarget);
-    if(legalMoves.length===0) statusText.textContent = 'Tidak ada langkah legal untuk bidak ini.';
-    else statusText.textContent = `Selected ${piece.type.toUpperCase()} ${coordToAlgebraic(r,c)} — ${legalMoves.length} move(s)`;
-    updateUI();
-    return;
-  }
-
-  // deselect
-  selected = null; legalMoves = [];
-  updateUI();
-}
-
-// --- Move execution ---
-function doMove(fr,fc,tr,tc, moveMeta){
-  const piece = board[fr][fc];
-  if(!piece) return;
-
-  // history snapshot BEFORE move
-  const historyEntry = {
-    boardBefore: cloneBoard(board),
-    enPassantBefore: enPassantTarget ? {...enPassantTarget} : null,
-    move: {from:{r:fr,c:fc}, to:{r:tr,c:tc}, meta: moveMeta ? {...moveMeta} : null}
-  };
-
-  let notation = '';
-
-  if(moveMeta && moveMeta.enPassant){
-    // en-passant: remove captured pawn behind landing square
-    const capRow = tr + (piece.color === 'w' ? 1 : -1);
-    const captured = board[capRow][tc];
-    board[capRow][tc] = null;
-    board[tr][tc] = piece;
-    board[fr][fc] = null;
-    piece.hasMoved = true;
-    enPassantTarget = null; // clear after capture
-    notation = `${String.fromCharCode(97+fc)}x${coordToAlgebraic(tr,tc)} e.p.`;
-    history.push(historyEntry);
-    appendMoveLog(notation);
-    finalizeAfterMove();
-    return;
-  }
-
-  if(moveMeta && moveMeta.castle){
-    // castle
-    board[tr][tc] = piece;
-    board[fr][fc] = null;
-    if(moveMeta.castle === 'king'){
-      const rookFromC = fc + 3;
-      const rookToC = fc + 1;
-      const rook = board[fr][rookFromC];
-      board[fr][rookToC] = rook;
-      board[fr][rookFromC] = null;
-      if(rook) rook.hasMoved = true;
-      notation = 'O-O';
-    } else {
-      const rookFromC = fc - 4;
-      const rookToC = fc - 1;
-      const rook = board[fr][rookFromC];
-      board[fr][rookToC] = rook;
-      board[fr][rookFromC] = null;
-      if(rook) rook.hasMoved = true;
-      notation = 'O-O-O';
+  // Touch input (mobile)
+  touchAreas.addEventListener('touchstart', (e) => {
+    if (!started) return;
+    for (const t of e.changedTouches) {
+      const target = document.elementFromPoint(t.clientX, t.clientY);
+      const lane = parseInt(target?.getAttribute?.('data-lane'), 10);
+      if (!isNaN(lane)) {
+        keyboard[lane] = true;
+        tryHit(lane, songTime());
+      }
     }
-    piece.hasMoved = true;
-    enPassantTarget = null;
-    history.push(historyEntry);
-    appendMoveLog(notation);
-    finalizeAfterMove();
-    return;
-  }
-
-  // normal or capture
-  const target = board[tr][tc];
-  const isCapture = !!target;
-  board[tr][tc] = piece;
-  board[fr][fc] = null;
-
-  // pawn double-step sets enPassantTarget for opponent
-  if(piece.type === 'p' && Math.abs(tr - fr) === 2){
-    enPassantTarget = {r: Math.floor((tr + fr)/2), c: tc};
-  } else {
-    enPassantTarget = null;
-  }
-
-  // promotion
-  if(piece.type === 'p' && ((piece.color === 'w' && tr === 0) || (piece.color === 'b' && tr === 7))){
-    piece.hasMoved = true;
-    updateUI();
-    promptPromotion(piece.color, tr, tc, (newType)=>{
-      board[tr][tc] = {type: newType, color: piece.color, hasMoved:true};
-      notation = getMoveNotation(piece, fr,fc,tr,tc, isCapture, moveMeta) + `=${newType.toUpperCase()}`;
-      history.push(historyEntry);
-      appendMoveLog(notation);
-      finalizeAfterMove();
-    });
-    return; // wait for promo choice
-  } else {
-    piece.hasMoved = true;
-    notation = getMoveNotation(piece, fr,fc,tr,tc, isCapture, moveMeta);
-  }
-
-  history.push(historyEntry);
-  appendMoveLog(notation);
-  finalizeAfterMove();
-}
-
-// finalize move: switch turn, detect endgame, update UI
-function finalizeAfterMove(){
-  turn = turn === 'w' ? 'b' : 'w';
-
-  const anyLegal = playerHasAnyLegalMoves(turn);
-  if(!anyLegal){
-    if(isInCheck(board, turn, enPassantTarget)){
-      statusText.textContent = `Checkmate — ${(turn==='w'?'White':'Black')} is checkmated.`;
-      appendMoveLog('*** Checkmate');
-    } else {
-      statusText.textContent = `Stalemate — Draw.`;
-      appendMoveLog('*** Stalemate');
+    e.preventDefault();
+  }, { passive: false });
+  touchAreas.addEventListener('touchend', (e) => {
+    for (const t of e.changedTouches) {
+      const target = document.elementFromPoint(t.clientX, t.clientY);
+      const lane = parseInt(target?.getAttribute?.('data-lane'), 10);
+      if (!isNaN(lane)) keyboard[lane] = false;
     }
-  } else {
-    if(isInCheck(board, turn, enPassantTarget)){
-      statusText.textContent = `${turn==='w' ? 'White' : 'Black'} is in CHECK.`;
-    } else {
-      statusText.textContent = 'Move completed.';
-    }
-  }
+    e.preventDefault();
+  }, { passive: false });
 
-  if(turn === 'w') moveNumber++;
-  selected = null; legalMoves = [];
-  updateUI();
-}
-
-// simple SAN-ish notation
-function getMoveNotation(piece, fr,fc,tr,tc, capture=false, meta=null){
-  if(meta && meta.castle){
-    return meta.castle === 'king' ? 'O-O' : 'O-O-O';
-  }
-  if(piece.type === 'p'){
-    return (capture ? `${String.fromCharCode(97+fc)}x` : '') + coordToAlgebraic(tr,tc);
-  } else {
-    const ch = piece.type.toUpperCase();
-    return `${ch}${capture ? 'x' : '-'}${coordToAlgebraic(tr,tc)}`;
-  }
-}
-
-function appendMoveLog(text){
-  const el = document.createElement('div');
-  el.textContent = `${text}`;
-  moveLog.appendChild(el);
-  moveLog.scrollTop = moveLog.scrollHeight;
-}
-
-function playerHasAnyLegalMoves(color){
-  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
-    const p = board[r][c];
-    if(p && p.color===color){
-      const ms = generateMovesForPiece(board, r, c, false, enPassantTarget);
-      if(ms.length>0) return true;
-    }
-  }
-  return false;
-}
-
-// Promotion UI
-function promptPromotion(color, r, c, callback){
-  promoOptions.innerHTML = '';
-  const pieces = ['q','r','b','n'];
-  pieces.forEach(pt=>{
-    const btn = document.createElement('button');
-    btn.className = 'promo-button';
-    btn.innerHTML = `${PIECE_SYMBOLS[pt][color]}<div style="font-size:12px; margin-top:4px;">${pt.toUpperCase()}</div>`;
-    btn.addEventListener('click', ()=>{
-      promoModal.style.display = 'none';
-      callback(pt);
-    });
-    promoOptions.appendChild(btn);
+  // Sliders / toggles
+  speedSlider.addEventListener('input', () => {
+    approach = approachBase / Math.max(0.8, parseFloat(speedSlider.value));
+    if (!started) drawFrame(0);
   });
-  promoModal.style.display = 'flex';
-}
+  autoplayToggle.addEventListener('change', (e) => { autoplay = e.target.checked; });
 
-// Undo
-function undo(){
-  if(history.length === 0) { statusText.textContent = 'Nothing to undo.'; return; }
-  const last = history.pop();
-  board = cloneBoard(last.boardBefore);
-  enPassantTarget = last.enPassantBefore ? {...last.enPassantBefore} : null;
-  // flip turn back
-  turn = turn === 'w' ? 'b' : 'w';
-  statusText.textContent = 'Undo performed.';
-  updateUI();
-  if(moveLog.lastChild) moveLog.removeChild(moveLog.lastChild);
-}
+  // File handling
+  audioFile.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) loadMusicFile(file);
+  });
+  clearAudioBtn.addEventListener('click', () => {
+    stopMusic();
+    musicBuffer = null;
+    musicPlayhead = 0;
+    updateAudioStatus();
+  });
 
-// UI events
-resetBtn.addEventListener('click', ()=> resetBoard());
-flipBtn.addEventListener('click', ()=>{ flipped = !flipped; updateUI(); });
-undoBtn.addEventListener('click', ()=> undo());
-window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape'){ selected = null; legalMoves = []; updateUI(); } });
+  // Init
+  updateAudioStatus();
+  resetGame();
+  loop();
 
-// init
-resetBoard();
-
+})();
 </script>
 </body>
 </html>

@@ -42,18 +42,21 @@
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Sesuai ejaan yang benar</p>
               @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
+
             <div>
               <label for="division" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Divisi</label>
               <input type="text" id="division" name="division" value="{{ old('division') }}" required
                      class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"/>
               @error('division') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
+
             <div>
               <label for="company" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Perusahaan</label>
               <input type="text" id="company" name="company" value="{{ old('company') }}" required
                      class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"/>
               @error('company') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
+
             <div>
               <label for="background_image" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Upload Background Image</label>
               <input type="file" id="background_image" name="background_image" accept="image/*"
@@ -61,6 +64,7 @@
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">JPG/PNG direkomendasikan. Maks 2MB.</p>
               @error('background_image') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
+
             <div class="mb-6">
               <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Tanggal Mulai</label>
               <div class="mt-1 relative">
@@ -85,11 +89,27 @@
               @error('end_date') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            <div class="md:col-span-2">
+            <div class="md:col-span-1">
               <label for="city" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Kota</label>
               <input type="text" id="city" name="city" value="{{ old('city') }}" required
-                     class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"/>
+                    class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"/>
               @error('city') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="md:col-span-1">
+              <label for="brand" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Brand <span class="text-xs text-gray-500">(mis. MJ)</span></label>
+              <input type="text" id="brand" name="brand" value="{{ old('brand') }}" required
+                     class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"/>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Gunakan singkatan huruf/angka, uppercase disarankan.</p>
+              @error('brand') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="md:col-span-2">
+              <label for="serial_number" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nomor Seri Sertifikat</label>
+              <input type="text" id="serial_number" name="serial_number" value="{{ old('serial_number') }}" readonly
+              class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"/>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Otomatis mengikuti format: NNN/SERT/DIV/COMP.BRAND/ROMAWI/TAHUN.</p>
+              @error('serial_number') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
           </div>
         </div>
@@ -106,13 +126,15 @@
               <input type="file" id="logo1" name="logo1" accept="image/*" required
                      class="mt-1 block w-full cursor-pointer rounded-lg border border-gray-300 bg-gray-50 text-sm text-gray-900 file:mr-4 file:rounded-l-md file:border-0 file:bg-blue-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:file:bg-gray-700 dark:file:text-gray-200"/>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG transparan direkomendasikan. Maks 2MB.</p>
+              <img id="preview_logo1" class="hidden mt-2 max-h-16 rounded" alt="Preview Logo 1">
               @error('logo1') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Logo 2 (Kanan Atas)</label>
-              <input type="file" id="logo2" name="logo2" accept="image/*" required
+              <input type="file" id="logo2" name="logo2" accept="image/*"
                      class="mt-1 block w-full cursor-pointer rounded-lg border border-gray-300 bg-gray-50 text-sm text-gray-900 file:mr-4 file:rounded-l-md file:border-0 file:bg-blue-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:file:bg-gray-700 dark:file:text-gray-200"/>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG transparan direkomendasikan. Maks 2MB.</p>
+              <img id="preview_logo2" class="hidden mt-2 max-h-16 rounded" alt="Preview Logo 2">
               @error('logo2') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
           </div>
@@ -133,7 +155,7 @@
             </div>
             <div>
               <label for="name_signatory2" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nama Penandatangan 2</label>
-              <input type="text" id="name_signatory2" name="name_signatory2" value="{{ old('name_signatory2') }}" required
+              <input type="text" id="name_signatory2" name="name_signatory2" value="{{ old('name_signatory2') }}"
                      class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"/>
               @error('name_signatory2') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
@@ -145,7 +167,7 @@
             </div>
             <div>
               <label for="role2" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Jabatan Penandatangan 2</label>
-              <input type="text" id="role2" name="role2" value="{{ old('role2') }}" required
+              <input type="text" id="role2" name="role2" value="{{ old('role2') }}"
                      class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"/>
               @error('role2') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
@@ -154,13 +176,15 @@
               <input type="file" id="signature_image1" name="signature_image1" accept="image/*" required
                      class="mt-1 block w-full cursor-pointer rounded-lg border border-gray-300 bg-gray-50 text-sm text-gray-900 file:mr-4 file:rounded-l-md file:border-0 file:bg-blue-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:file:bg-gray-700 dark:file:text-gray-200"/>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG transparan direkomendasikan. Maks 2MB.</p>
+              <img id="preview_signature1" class="hidden mt-2 max-h-16 rounded" alt="Preview TTD 1">
               @error('signature_image1') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Tanda Tangan 2</label>
-              <input type="file" id="signature_image2" name="signature_image2" accept="image/*" required
+              <input type="file" id="signature_image2" name="signature_image2" accept="image/*"
                      class="mt-1 block w-full cursor-pointer rounded-lg border border-gray-300 bg-gray-50 text-sm text-gray-900 file:mr-4 file:rounded-l-md file:border-0 file:bg-blue-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:file:bg-gray-700 dark:file:text-gray-200"/>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">PNG transparan direkomendasikan. Maks 2MB.</p>
+              <img id="preview_signature2" class="hidden mt-2 max-h-16 rounded" alt="Preview TTD 2">
               @error('signature_image2') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
           </div>
@@ -173,7 +197,7 @@
             Pratinjau Sertifikat
           </button>
 
-          <button type="submit"
+          <button type="button" id="downloadBtn" onclick="window.location.href='{{ route('certificate.generatePDF') }}';"
                   class="inline-flex items-center rounded-lg bg-gradient-to-r from-indigo-600 to-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow hover:from-indigo-700 hover:to-sky-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
             <i class="fa-regular fa-download mr-2"></i>
             Unduh PDF Sertifikat
@@ -205,14 +229,8 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       const s = localStorage.getItem(LS.start);
       const e = localStorage.getItem(LS.end);
-
-      // Prioritaskan old() dari server. Jika tidak ada, baru gunakan localStorage.
-      if (!startEl.value && s) {
-        startEl.value = s;
-      }
-      if (!endEl.value && e) {
-        endEl.value = e;
-      }
+      if (!startEl.value && s) startEl.value = s;
+      if (!endEl.value && e)   endEl.value   = e;
     } catch (e) { /* ignore */ }
   };
 
@@ -225,54 +243,95 @@ document.addEventListener('DOMContentLoaded', function () {
       startPicker = new Datepicker(startEl, opts);
       endPicker   = new Datepicker(endEl, opts);
     } else {
-      // fallback native
       startEl.type = 'date';
       endEl.type   = 'date';
     }
   };
 
   initDatepicker();
-
-  // Memulihkan data dari localStorage saat halaman dimuat
   restoreDates();
 
-  // Memastikan end_date >= start_date
   const normalize = (v) => v ? new Date(v) : null;
-  
   startEl.addEventListener('change', () => {
     const start = normalize(startEl.value);
     if (!start) { persistDates(); return;}
-
     if (endPicker && typeof endPicker.setOptions === 'function') {
       endPicker.setOptions({ minDate: start });
       const endVal = normalize(endEl.value);
-      if (endVal && endVal < start) {
-        endPicker.setDate(start);
-      }
+      if (endVal && endVal < start) endPicker.setDate(start);
     } else {
-      // native fallback
       endEl.min = startEl.value;
-      if (endEl.value && new Date(endEl.value) < start) {
-        endEl.value = startEl.value;
-      }
+      if (endEl.value && new Date(endEl.value) < start) endEl.value = startEl.value;
     }
-    persistDates(); // Simpan data setelah perubahan
+    persistDates();
   });
+  ['input', 'change'].forEach(evt => endEl.addEventListener(evt, persistDates));
 
-  ['input', 'change'].forEach(evt => {
-    endEl.addEventListener(evt, persistDates);
+  // ==== Preview Serial Number (client-side, non-final) ====
+  function monthToRoman(dateStr){
+    if(!dateStr) return '';
+    const m = new Date(dateStr).getMonth()+1;
+    const map = ['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+    return map[m] || '';
+  }
+  function mapDivisionCode(txt){
+    if(!txt) return '';
+    const exact = {
+      'Pemrogramman FrontEnd dan BackEnd': 'PROG',
+    };
+    const key = txt.trim();
+    if (exact[key]) return exact[key];
+    // fallback: ambil huruf awal tiap kata, maks 6
+    const abbr = key.split(/\s+/).map(w=>w[0]||'').join('');
+    return (abbr || key).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+  }
+  function mapCompanyCode(txt){
+    if(!txt) return '';
+    let t = (txt||'').toUpperCase();
+    t = t.replace(/\b(PT|CV|CO\.?|LTD\.?|INC\.?|TBK|PERSERO)\b\.?/gi,'').trim();
+    t = (t.split(/\s+/)[0]||t).replace(/[^A-Z0-9]/g,'');
+    return t || 'COMP';
+  }
+  function buildSerialPreview(){
+    const division = document.getElementById('division')?.value || '';
+    const company  = document.getElementById('company')?.value  || '';
+    const brand    = document.getElementById('brand')?.value    || '';
+    const endDate  = document.getElementById('end_date')?.value || '';
+
+    const divCode  = mapDivisionCode(division);      // PROG
+    const compCode = mapCompanyCode(company);        // SEVEN
+    const brandUp  = (brand||'').toUpperCase().replace(/[^A-Z0-9]/g,''); // MJ
+    const romawi   = monthToRoman(endDate);          // VIII
+    const tahun    = endDate ? new Date(endDate).getFullYear() : ''; // 2025
+
+    const runDemo  = '000'; // preview; nomor asli akan diisi server
+    const parts = [
+      runDemo, 'SERT', divCode,
+      compCode + (brandUp ? '.'+brandUp : ''),
+      romawi, tahun
+    ].filter(Boolean);
+
+    const serial = parts.join('/');
+    const el = document.getElementById('serial_number');
+    if (el) el.value = serial;
+  }
+  ['division','company','brand','end_date'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', buildSerialPreview);
+      el.addEventListener('change', buildSerialPreview);
+    }
   });
+  document.addEventListener('DOMContentLoaded', buildSerialPreview);
 
-  // Preview image + size/type validation
+  // ==== Preview image + size/type validation ====
   function bindPreview(inputId, imgId) {
     const input = document.getElementById(inputId);
     const img   = document.getElementById(imgId);
     if (!input || !img) return;
-
     input.addEventListener('change', (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
-
       if (!file.type.startsWith('image/')) {
         alert('File harus berupa gambar.');
         input.value = '';
@@ -283,7 +342,6 @@ document.addEventListener('DOMContentLoaded', function () {
         input.value = '';
         return;
       }
-
       img.src = URL.createObjectURL(file);
       img.classList.remove('hidden');
     });
