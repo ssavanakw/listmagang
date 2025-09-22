@@ -134,15 +134,12 @@ Route::prefix('admin')->group(function () {
                 ->whereIn('template', ['certmagangjogjacom','certareakerjacom','certtipisinicom']);
         });
 
-        // ===== Sertifikat Generator Routes =====
-        Route::prefix('certificates')->group(function () {
-            Route::get('/generator', [CertificateGeneratorController::class, 'showForm'])
-            ->name('certificate.form');
-            Route::post('/preview', [CertificateGeneratorController::class, 'generatePreview'])
-            ->name('certificate.generatePreview');
-            Route::post('/generate-pdf', [CertificateGeneratorController::class, 'generatePDF'])
-            ->name('certificate.generatePDF');
+        Route::middleware(['auth'])->group(function () {
+            Route::get('/certificate/form', [CertificateGeneratorController::class, 'showForm'])->name('certificate.form');
+            Route::post('/certificate/preview', [CertificateGeneratorController::class, 'generatePreview'])->name('certificate.generatePreview');
+            Route::get('/certificate/download/{id}', [CertificateGeneratorController::class, 'generatePDF'])->name('certificate.generatePDF');
         });
+
 
         // ===== API JSON untuk tabel
         Route::get('/interns.json', [InternApiController::class, 'index'])->name('admin.interns.api');

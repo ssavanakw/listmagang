@@ -54,13 +54,13 @@ class CertificateGeneratorController extends Controller
         $end   = Carbon::parse($validated['end_date']);
         $durationText = $this->formatDurationId($start, $end);
 
-        // Nomor seri preview (run=0 → 000)
-        $serialPreview = $this->buildSerial(
-            0,
+        // Serial number preview (run=0 → 000)
+        $serial_number = $this->buildSerial(
+            0, // Gantilah ini sesuai dengan run number atau ID yang sesuai
             $validated['division'],
             $validated['company'],
             $validated['brand'],
-            $end
+            Carbon::parse($validated['end_date']) // Menggunakan tanggal akhir
         );
 
         return view('certificates.generator_preview', [
@@ -81,56 +81,39 @@ class CertificateGeneratorController extends Controller
             'name_signatory1'    => $validated['name_signatory1'],
             'name_signatory2'    => $validated['name_signatory2'] ?? null, // boleh null
             'duration_text'      => $durationText,
-            'serial_number'      => $serialPreview,
+            'serial_number'      => $serial_number,
         ]);
     }
 
     // Generate PDF (FINAL) — increment counter per-bulan
-    public function generatePDF(Request $request)
+    public function generatePDF($id)
     {
-        $data = $request->validate([
-            'name'              => 'required|string',
-            'division'          => 'required|string',
-            'company'           => 'required|string',
-            'brand'             => 'required|string|min:2|max:6',
-            'background_image'  => 'required|string',
-            'start_date'        => 'required|date',
-            'end_date'          => 'required|date|after_or_equal:start_date',
-            'city'              => 'required|string',
-            'logo1'             => 'required|string',
-            'logo2'             => 'nullable|string',      // opsional
-            'role1'             => 'required|string',
-            'signature_image1'  => 'required|string',
-            'role2'             => 'nullable|string',      // opsional
-            'signature_image2'  => 'nullable|string',      // opsional
-            'name_signatory1'   => 'required|string',
-            'name_signatory2'   => 'nullable|string',      // opsional
-        ]);
+        // Menemukan sertifikat berdasarkan ID
+        $certificate = IR::findOrFail($id);
 
-        $start = Carbon::parse($data['start_date']);
-        $end   = Carbon::parse($data['end_date']);
-        $data['duration_text'] = $this->formatDurationId($start, $end);
+        // Siapkan data untuk PDF
+        $data = [
+            'certificate' => $certificate,
+            // Tambahkan data lainnya jika diperlukan
+        ];
 
-        // Counter per (tahun, bulan)
-        $year  = (int) $end->format('Y');
-        $month = (int) $end->format('n');
-        $run   = $this->nextRunningNumber($year, $month);
-        $data['serial_number'] = $this->buildSerial($run, $data['division'], $data['company'], $data['brand'], $end);
-
-        // Render HTML
+        // Render HTML untuk PDF
         $html = view('certificates.generator_preview', $data)->render();
 
-        // Generate PDF
+        // Menghasilkan PDF menggunakan Browsershot
         $pdfContent = Browsershot::html($html)
             ->waitUntilNetworkIdle()
             ->setOption('no-sandbox', true)
             ->pdf();
 
+        // Menyimpan PDF ke storage
         $filePath = 'certificates/' . uniqid('cert_') . '.pdf';
         Storage::disk('public')->put($filePath, $pdfContent);
 
+        // Mengunduh file PDF
         return response()->download(storage_path('app/public/' . $filePath));
     }
+
 
     // ---------- PRIVATE HELPERS ----------
 

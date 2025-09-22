@@ -156,6 +156,7 @@
             <div>
               <label for="name_signatory2" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nama Penandatangan 2</label>
               <input type="text" id="name_signatory2" name="name_signatory2" value="{{ old('name_signatory2') }}"
+
                      class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"/>
               @error('name_signatory2') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
             </div>
@@ -197,7 +198,7 @@
             Pratinjau Sertifikat
           </button>
 
-          <button type="button" id="downloadBtn" onclick="window.location.href='{{ route('certificate.generatePDF') }}';"
+          <button type="button" id="downloadBtn" value="serial_number" onclick="window.location.href='{{ route('certificate.generatePDF', ['id' => $serial_number]) }}';"
                   class="inline-flex items-center rounded-lg bg-gradient-to-r from-indigo-600 to-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow hover:from-indigo-700 hover:to-sky-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
             <i class="fa-regular fa-download mr-2"></i>
             Unduh PDF Sertifikat
@@ -207,6 +208,7 @@
     </div>
   </div>
 </div>
+
 @endsection
 
 @push('scripts')
