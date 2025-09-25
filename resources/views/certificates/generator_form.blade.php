@@ -198,7 +198,7 @@
             Pratinjau Sertifikat
           </button>
 
-          <button type="button" id="downloadBtn" value="serial_number" onclick="window.location.href='{{ route('certificate.generatePDF', ['id' => $serial_number]) }}';"
+          <button type="button" id="downloadBtn" value="serial_number"
                   class="inline-flex items-center rounded-lg bg-gradient-to-r from-indigo-600 to-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow hover:from-indigo-700 hover:to-sky-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
             <i class="fa-regular fa-download mr-2"></i>
             Unduh PDF Sertifikat
