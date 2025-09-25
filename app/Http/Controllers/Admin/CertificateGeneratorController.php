@@ -8,6 +8,7 @@ use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
 class CertificateGeneratorController extends Controller
@@ -88,32 +89,46 @@ class CertificateGeneratorController extends Controller
     // Generate PDF (FINAL) — increment counter per-bulan
     public function generatePDF($id)
     {
-        // Menemukan sertifikat berdasarkan ID
+        // Fetch the certificate record from the database
         $certificate = IR::findOrFail($id);
 
-        // Siapkan data untuk PDF
+        // Prepare data for the PDF
         $data = [
             'certificate' => $certificate,
-            // Tambahkan data lainnya jika diperlukan
+            'name'        => $certificate->name,
+            'division'    => $certificate->division,
+            'company'     => $certificate->company,
+            'brand'       => $certificate->brand,
+            'background_image' => $certificate->background_image,
+            'start_date'  => $certificate->start_date,
+            'end_date'    => $certificate->end_date,
+            'city'        => $certificate->city,
+            'logo1'       => $certificate->logo1,
+            'logo2'       => $certificate->logo2,
+            'role1'       => $certificate->role1,
+            'signature_image1' => $certificate->signature_image1,
+            'role2'       => $certificate->role2,
+            'signature_image2' => $certificate->signature_image2,
+            'name_signatory1' => $certificate->name_signatory1,
+            'name_signatory2' => $certificate->name_signatory2,
         ];
 
-        // Render HTML untuk PDF
+        // Render the HTML for the PDF view
         $html = view('certificates.generator_preview', $data)->render();
 
-        // Menghasilkan PDF menggunakan Browsershot
+        // Generate the PDF content using Browsershot
         $pdfContent = Browsershot::html($html)
             ->waitUntilNetworkIdle()
             ->setOption('no-sandbox', true)
             ->pdf();
 
-        // Menyimpan PDF ke storage
+        // Save the PDF file to storage
         $filePath = 'certificates/' . uniqid('cert_') . '.pdf';
         Storage::disk('public')->put($filePath, $pdfContent);
 
-        // Mengunduh file PDF
+        // Return the response to download the PDF
         return response()->download(storage_path('app/public/' . $filePath));
     }
-
 
     // ---------- PRIVATE HELPERS ----------
 

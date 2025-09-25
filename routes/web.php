@@ -139,6 +139,7 @@ Route::prefix('admin')->group(function () {
             Route::post('/certificate/preview', [CertificateGeneratorController::class, 'generatePreview'])->name('certificate.generatePreview');
             Route::get('/certificate/download/{id}', [CertificateGeneratorController::class, 'generatePDF'])->name('certificate.generatePDF');
         });
+        Route::post('/download-pdf', [CertificateGeneratorController::class, 'generatePDF'])->name('download.pdf');
 
 
         // ===== API JSON untuk tabel

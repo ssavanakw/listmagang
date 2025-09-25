@@ -58,7 +58,7 @@
     .sig .role { margin-bottom: 65px; }
     .sig .image { position: absolute; z-index: 3; pointer-events: none; }
     .sig .image img { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0.95; }
-    @media print { body { background: none; } .page { box-shadow: none; }
+    @media print { body { background: none; } .page { box-shadow: none; }}
   </style>
 </head>
 <body>
@@ -99,7 +99,7 @@
       <div class="body">
         <div>
           Telah menyelesaikan magang bidang <strong>{{ $division }}</strong>
-          di {{ $company }} selama <strong>{{ $duration_text }}</strong>.
+          di {{ $company }} selama <strong>{{ $duration_text }}</strong> .
         </div>
         <div>
           Mulai dari
