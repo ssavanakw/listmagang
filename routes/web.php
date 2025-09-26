@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\InternController;        // update status + certi
 use App\Http\Controllers\Admin\InternPageController;    // return view
 use App\Http\Controllers\Admin\InternApiController;     // return JSON
 use App\Http\Controllers\Admin\CertificateGeneratorController;
+use App\Http\Controllers\CertificateController;
 
 /*
 |----------------------------------------------------------------------
@@ -140,6 +141,11 @@ Route::prefix('admin')->group(function () {
             Route::get('/certificate/download/{id}', [CertificateGeneratorController::class, 'generatePDF'])->name('certificate.generatePDF');
         });
         Route::post('/download-pdf', [CertificateGeneratorController::class, 'generatePDF'])->name('download.pdf');
+
+
+
+        Route::resource('certificate', CertificateController::class);
+
 
 
         // ===== API JSON untuk tabel

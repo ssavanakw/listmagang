@@ -33,7 +33,7 @@
         title="Pending"
     />
         <x-sidebar-menu-dashboard 
-        routeName="certificate.form"  
+        routeName="certificate.create"  
         title="Generate Certificates"
     />
 
