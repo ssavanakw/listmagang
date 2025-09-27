@@ -80,7 +80,7 @@
     .sig { position: absolute; bottom: 20px; width: 260px; text-align: center; }
     .sig-left { left: 50%; transform: translateX(-50%); }
     @if($hasRightSig)
-      .sig-left { left: 20%; transform: none; }
+      .sig-left { left: 7%; transform: none; }
     @endif
     .sig-right { right: 20%; transform: translateX(50%); }
     .sig .line { height: 2px; background: #000; margin: 0 0 6px; }
