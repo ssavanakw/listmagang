@@ -8,12 +8,12 @@
   // Helper kecil untuk selected()
   function sel($a, $b){ return (string)$a === (string)$b ? 'selected' : ''; }
 
-  // URL helper aman
-  $bgUrl   = $certificate->background_image ? Storage::url('public/'.$certificate->background_image) : '';
-  $logo1U  = $certificate->logo1 ? Storage::url('public/'.$certificate->logo1) : '';
-  $logo2U  = $certificate->logo2 ? Storage::url('public/'.$certificate->logo2) : '';
-  $ttd1U   = $certificate->signature_image1 ? Storage::url('public/'.$certificate->signature_image1) : '';
-  $ttd2U   = $certificate->signature_image2 ? Storage::url('public/'.$certificate->signature_image2) : '';
+  // URL preview aman (Storage::url sudah otomatis ke /storage/...)
+  $bgUrl   = $certificate->background_image  ? Storage::url($certificate->background_image)  : '';
+  $logo1U  = $certificate->logo1             ? Storage::url($certificate->logo1)             : '';
+  $logo2U  = $certificate->logo2             ? Storage::url($certificate->logo2)             : '';
+  $ttd1U   = $certificate->signature_image1  ? Storage::url($certificate->signature_image1)  : '';
+  $ttd2U   = $certificate->signature_image2  ? Storage::url($certificate->signature_image2)  : '';
 @endphp
 
 <div class="px-4 pt-6 lg:px-8">
@@ -164,8 +164,7 @@
             <!-- Background -->
             <div>
               <label for="background_image" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Pilih Background</label>
-              <select name="background_image" id="background_image" required
-                      class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+              <select id="background_image" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                 <option value="">Pilih Background (prefiks bg_)</option>
                 @foreach ($backgroundFiles as $file)
                   @if(Str::startsWith($file, 'bg_'))
@@ -183,8 +182,7 @@
             <!-- Logo 1 -->
             <div>
               <label for="logo1" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Pilih Logo 1</label>
-              <select name="logo1" id="logo1" required
-                      class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+              <select id="logo1" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                 <option value="">Pilih Logo 1 (prefiks logo_)</option>
                 @foreach ($logoFiles as $file)
                   @if(Str::startsWith($file, 'logo_'))
@@ -202,8 +200,7 @@
             <!-- Logo 2 -->
             <div>
               <label for="logo2" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Pilih Logo 2 (Opsional)</label>
-              <select name="logo2" id="logo2"
-                      class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+              <select id="logo2" class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                 <option value="">- Tanpa Logo 2 -</option>
                 @foreach ($logoFiles as $file)
                   @if(Str::startsWith($file, 'logo_'))
@@ -255,7 +252,7 @@
 
             <div>
               <label for="signature_image1" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Tanda Tangan 1</label>
-              <select name="signature_image1" id="signature_image1" required
+              <select id="signature_image1"
                       class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                 <option value="">Pilih TTD 1 (prefiks ttd_)</option>
                 @foreach ($signatureFiles as $file)
@@ -272,7 +269,7 @@
 
             <div>
               <label for="signature_image2" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Tanda Tangan 2 (Opsional)</label>
-              <select name="signature_image2" id="signature_image2"
+              <select id="signature_image2"
                       class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                 <option value="">- Tanpa TTD 2 -</option>
                 @foreach ($signatureFiles as $file)
@@ -305,10 +302,11 @@
 
 @push('scripts')
 <script>
-  // Flowbite Datepicker init (fallback ke type=date bila tidak ada)
+  // Datepicker (fallback ke input[type=date] kalau lib tidak ada)
   (function(){
     const startEl = document.getElementById('start_date');
     const endEl   = document.getElementById('end_date');
+    if(!startEl || !endEl) return;
 
     let startPicker = null, endPicker = null;
     const initDatepicker = () => {
@@ -337,17 +335,10 @@
       }
     };
     startEl.addEventListener('change', applyMinEnd);
-    // set saat load
     applyMinEnd();
   })();
 
-  // Preview images for dropdown selections (mengambil via /storage/public/...)
-  function storageUrl(subpath){
-    // Laravel Storage::url('public/...') biasanya -> /storage/...
-    // Di server kamu sesuaikan kalau berbeda.
-    return '/storage/public/' + subpath.replace(/^public\//,'');
-  }
-
+  // Preview untuk dropdown gambar (ambil dari /storage/...)
   function bindPreviewSelect(selectId, imgId, baseDir){
     const sel = document.getElementById(selectId);
     const img = document.getElementById(imgId);
@@ -368,5 +359,33 @@
   bindPreviewSelect('logo2','preview_logo2','images/logos');
   bindPreviewSelect('signature_image1','preview_ttd1','images/signature');
   bindPreviewSelect('signature_image2','preview_ttd2','images/signature');
+
+  // Penting: JANGAN kirim field dropdown gambar saat submit
+  // agar edit 1 field (bukan gambar) tetap lolos validasi controller lama (nullable|image).
+  (function () {
+    const form = document.getElementById('certificateForm');
+    if (!form) return;
+
+    form.addEventListener('submit', function () {
+      ['background_image','logo1','logo2','signature_image1','signature_image2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.removeAttribute('name'); // lepaskan agar tidak terkirim sama sekali
+      });
+
+      // NOTE:
+      // Jika nanti controller update() SUDAH kamu ubah agar menerima string filename (starts_with:bg_/logo_/ttd_),
+      // ganti strategi di atas dengan:
+      //
+      // ['background_image','logo1','logo2','signature_image1','signature_image2'].forEach(id => {
+      //   const el = document.getElementById(id);
+      //   if (!el) return;
+      //   const hidden = document.createElement('input');
+      //   hidden.type = 'hidden';
+      //   hidden.name = id;
+      //   hidden.value = el.value || '';
+      //   form.appendChild(hidden);
+      // });
+    });
+  })();
 </script>
 @endpush
