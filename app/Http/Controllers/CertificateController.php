@@ -6,15 +6,81 @@ use App\Models\Certificate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\View;
+use Spatie\Browsershot\Browsershot;
 use Carbon\Carbon;
+
 
 class CertificateController extends Controller
 {
+    public function downloadPdf(Certificate $certificate)
+    {
+        $filename = Str::slug($certificate->serial_number.'_'.$certificate->name, '_').'.pdf';
+
+        $tmpPath  = storage_path('app/tmp/'.$filename);
+        if (!is_dir(dirname($tmpPath))) {
+            mkdir(dirname($tmpPath), 0775, true);
+        }
+
+        $brandMap = [
+            'MJ'  => 'magangjogja',
+            'AK'  => 'areakerja',
+            'RW'  => 'republikweb',
+            'TS'  => 'titipsini',
+            'AP'  => 'ambilpaket',
+            'BK'  => 'bikinkepo',
+            'BC'  => 'bimbelcerdas.com',
+            'LK'  => 'latihankerja.com',
+            'LJT' => 'lowkerjateng.com',
+            'LJG' => 'lowkerjogja.com',
+            'PJ'  => 'pijatjogja.com',
+            'SB'  => 'sayabantu.com',
+            'TV'  => 'titikvisual',
+            'TN'  => 'tuantanah',
+            'TL'  => 'tukanglas.org',
+            'AKI' => 'adakamar.id',
+            'SI'  => 'seven Inc',
+        ];
+
+        $brandText = $brandMap[$certificate->brand] ?? $certificate->brand;
+        $brandSlug = Str::slug($brandText, '-');
+        $nameSlug  = Str::slug($certificate->name, '-');
+        $filename  = "{$brandSlug}-{$nameSlug}.pdf";
+        $pdfTitle  = "{$brandText}-{$certificate->name}";
+
+        $html = View::make('certificates.pdf', [
+            'certificate' => $certificate,
+            'pdfTitle'    => $pdfTitle,
+        ])->render();
+
+        $tmpPath = storage_path('app/tmp/'.$filename);
+        if (!is_dir(dirname($tmpPath))) mkdir(dirname($tmpPath), 0775, true);
+
+        Browsershot::html($html)
+            ->emulateMedia('print')
+            ->format('A4')
+            ->landscape()
+            ->margins(0, 0, 0, 0)
+            ->timeout(180) // detik
+            ->setOption('args', [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+            ])
+            ->savePdf($tmpPath);
+
+        return response()->download($tmpPath, $filename, [
+        'Content-Type' => 'application/pdf',
+        ])->deleteFileAfterSend(true);
+    }
+
+
     public function index()
     {
-        $certificate = Certificate::orderByDesc('id')->first();
-        return view('certificates.index', compact('certificate'));
+        $certificates = Certificate::orderByDesc('id')->get();
+        return view('certificates.index', compact('certificates'));
     }
+
 
     public function create()
     {
@@ -105,7 +171,7 @@ class CertificateController extends Controller
 
             'city'             => ['required','string','max:255'],
             'brand'            => ['required', Rule::in($validBrands)],
-            // serial_number jangan divalidasi dari request, karena auto-generate
+            // serial_number auto-generate
             'name_signatory1'  => ['required','string','max:255'],
             'name_signatory2'  => ['nullable','string','max:255'],
             'role1'            => ['required','string','max:255'],
@@ -121,15 +187,10 @@ class CertificateController extends Controller
         $sig1Path       = "images/signature/{$data['signature_image1']}";
         $sig2Path       = $data['signature_image2'] ? "images/signature/{$data['signature_image2']}" : null;
 
-        // Opsional: pastikan file benar-benar ada di storage
-        foreach ([
-            $backgroundPath, $logo1Path, $sig1Path,
-            $logo2Path, $sig2Path
-        ] as $checkPath) {
+        // Pastikan file ada
+        foreach ([$backgroundPath, $logo1Path, $sig1Path, $logo2Path, $sig2Path] as $checkPath) {
             if ($checkPath && !Storage::exists("public/{$checkPath}")) {
-                return back()
-                    ->withErrors(['file_missing' => "File tidak ditemukan: {$checkPath}"])
-                    ->withInput();
+                return back()->withErrors(['file_missing' => "File tidak ditemukan: {$checkPath}"])->withInput();
             }
         }
 
@@ -137,18 +198,17 @@ class CertificateController extends Controller
         $startDate = Carbon::parse($data['start_date']);
         $endDate   = Carbon::parse($data['end_date']);
 
-        // Map bulan ke romawi berdasarkan END DATE (bulan sertifikat dibuat)
+        // Map bulan ke romawi berdasarkan END DATE
         $roman = [1=>'I',2=>'II',3=>'III',4=>'IV',5=>'V',6=>'VI',7=>'VII',8=>'VIII',9=>'IX',10=>'X',11=>'XI',12=>'XII'];
         $monthRoman = $roman[$endDate->month];
         $year       = $endDate->year;
 
-        // Company code: ambil kata pertama, buang PT/CV/co/ltd/inc/tbk/persero, uppercase alnum
-        $companyCode = $this->companyCode($data['company']); // contoh: "SEVEN"
+        // Codes
+        $companyCode  = $this->companyCode($data['company']); // contoh: "SEVEN"
+        $brandCode    = strtoupper($data['brand']);
+        $divisionCode = strtoupper($data['division']);
 
-        // Brand sudah berupa kode dari dropdown (MJ, AK, dst.)
-        $brandCode = strtoupper($data['brand']);
-
-        // Ambil running number 3 digit per bulan-tahun (reset tiap bulan)
+        // Running number 3 digit per bulan-tahun (reset tiap bulan)
         $last = Certificate::whereYear('created_at', $endDate->year)
                 ->whereMonth('created_at', $endDate->month)
                 ->orderByDesc('id')
@@ -160,8 +220,8 @@ class CertificateController extends Controller
         }
         $seqStr = str_pad($seq, 3, '0', STR_PAD_LEFT);
 
-        // Serial format: NNN/SERT/COMP.BRAND/ROMAWI/TAHUN
-        $serial = "{$seqStr}/SERT/{$companyCode}.{$brandCode}/{$monthRoman}/{$year}";
+        // >>> Serial format BARU: NNN/SERT/DIV/COMP.BRAND/ROMAWI/TAHUN
+        $serial = "{$seqStr}/SERT/{$divisionCode}/{$companyCode}.{$brandCode}/{$monthRoman}/{$year}";
 
         // Simpan
         Certificate::create([
@@ -187,6 +247,8 @@ class CertificateController extends Controller
         return redirect()->route('certificate.index')->with('success', 'Sertifikat berhasil dibuat');
     }
 
+
+
     /**
      * Normalisasi kode company dari nama perusahaan.
      * - Buang PT/CV/CO/LTD/INC/TBK/PERSERO
@@ -206,16 +268,85 @@ class CertificateController extends Controller
 
     public function show($id)
     {
-        // Menampilkan detail sertifikat
         $certificate = Certificate::findOrFail($id);
         return view('certificates.show', compact('certificate'));
     }
 
-    public function edit($id)
+    public function edit(Certificate $certificate)
     {
-        // Menampilkan form untuk mengedit sertifikat
-        $certificate = Certificate::findOrFail($id);
-        return view('certificates.edit', compact('certificate'));
+        // Ambil file dari storage (hanya nama file) + filter prefix
+        $backgroundFiles = collect(Storage::files('public/images/backgrounds'))
+            ->map(fn ($f) => basename($f))
+            ->filter(fn ($f) => Str::startsWith($f, 'bg_'))
+            ->values();
+
+        $logoFiles = collect(Storage::files('public/images/logos'))
+            ->map(fn ($f) => basename($f))
+            ->filter(fn ($f) => Str::startsWith($f, 'logo_'))
+            ->values();
+
+        $signatureFiles = collect(Storage::files('public/images/signature'))
+            ->map(fn ($f) => basename($f))
+            ->filter(fn ($f) => Str::startsWith($f, 'ttd_'))
+            ->values();
+
+        // Pastikan nilai yang tersimpan tetap ada di opsi (kalau file-nya sudah pindah/hilang dari folder)
+        $savedBg   = basename($certificate->background_image ?? '');
+        $savedL1   = basename($certificate->logo1 ?? '');
+        $savedL2   = basename($certificate->logo2 ?? '');
+        $savedTtd1 = basename($certificate->signature_image1 ?? '');
+        $savedTtd2 = basename($certificate->signature_image2 ?? '');
+
+        if ($savedBg && !$backgroundFiles->contains($savedBg))   $backgroundFiles->prepend($savedBg);
+        if ($savedL1 && !$logoFiles->contains($savedL1))         $logoFiles->prepend($savedL1);
+        if ($savedL2 && $savedL2 !== '' && !$logoFiles->contains($savedL2)) $logoFiles->prepend($savedL2);
+        if ($savedTtd1 && !$signatureFiles->contains($savedTtd1)) $signatureFiles->prepend($savedTtd1);
+        if ($savedTtd2 && $savedTtd2 !== '' && !$signatureFiles->contains($savedTtd2)) $signatureFiles->prepend($savedTtd2);
+
+        // Divisi (kode => label)
+        $divisions = [
+            'ADM'  => 'Administrasi',
+            'UIUX' => 'UI/UX Designer',
+            'PROG' => 'Programmer (Front end / Back end)',
+            'HR'   => 'Human Resource',
+            'SMM'  => 'Social Media Specialist',
+            'PV'   => 'Photographer / Videographer',
+            'CW'   => 'Content Writer',
+            'MS'   => 'Marketing & Sales',
+            'CD'   => 'Content Creative (Desain Grafis)',
+            'DM'   => 'Digital Marketing',
+            'PR'   => 'Marcom/Public Relations',
+            'TC'   => 'Tik Tok Creator',
+            'CP'   => 'Content Planner',
+            'PM'   => 'Project Manager',
+            'LAS'  => 'Las',
+            'ANIM' => 'Animasi',
+        ];
+
+        // Brand (kode => label)
+        $brands = [
+            'MJ'  => 'Magangjogja',
+            'AK'  => 'Areakerja',
+            'RW'  => 'Republikweb',
+            'TS'  => 'Titipsini',
+            'AP'  => 'Ambilpaket',
+            'BK'  => 'Bikinkepo',
+            'BC'  => 'Bimbelcerdas.com',
+            'LK'  => 'Latihankerja.com',
+            'LJT' => 'Lowkerjateng.com',
+            'LJG' => 'Lowkerjogja.com',
+            'PJ'  => 'Pijatjogja.com',
+            'SB'  => 'Sayabantu.com',
+            'TV'  => 'Titikvisual',
+            'TN'  => 'Tuantanah',
+            'TL'  => 'Tukanglas.org',
+            'AKI' => 'Adakamar.id',
+            'SI'  => 'Seven Inc',
+        ];
+
+        return view('certificates.edit', compact(
+            'certificate', 'backgroundFiles', 'logoFiles', 'signatureFiles', 'divisions', 'brands'
+        ));
     }
 
     private function getBrandCode($brand)
@@ -310,6 +441,57 @@ class CertificateController extends Controller
 
         return redirect()->route('certificate.index')->with('success', 'Sertifikat berhasil diupdate');
     }
+
+    /**
+     * Upload helper umum: validasi mime/size, auto-rename dengan prefix, simpan ke disk public
+     */
+    private function uploadCommon(Request $request, string $prefix, string $subdir)
+    {
+        $request->validate([
+            'file' => ['required','file','mimes:png,jpg,jpeg,webp','max:2048'], // max 2MB
+        ]);
+
+        $file = $request->file('file');
+        $ext  = strtolower($file->getClientOriginalExtension());
+
+        // Ambil nama dasar tanpa ekstensi, lalu slug pakai underscore
+        $base = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $slug = Str::slug($base, '_');
+        // Buang prefix jika user sudah menamai dengan bg_/logo_/ttd_
+        $slug = preg_replace('/^(bg_|logo_|ttd_)/i', '', $slug);
+
+        $timestamp = now()->format('Ymd_His');
+        $filename  = $prefix.$slug.'_'.$timestamp.'.'.$ext;
+
+        $dir = "public/images/{$subdir}"; // contoh: public/images/backgrounds
+        // Pastikan folder ada (umumnya sudah ada pada disk public). Jika belum, buat.
+        if (!Storage::exists($dir)) {
+            Storage::makeDirectory($dir);
+        }
+
+        $file->storeAs($dir, $filename);
+
+        return back()->with('success', "File diunggah: {$filename}");
+    }
+
+    /** Upload Background → simpan ke storage/app/public/images/backgrounds, prefix bg_ */
+    public function uploadBackground(Request $request)
+    {
+        return $this->uploadCommon($request, 'bg_', 'backgrounds');
+    }
+
+    /** Upload Logo → simpan ke storage/app/public/images/logos, prefix logo_ */
+    public function uploadLogo(Request $request)
+    {
+        return $this->uploadCommon($request, 'logo_', 'logos');
+    }
+
+    /** Upload Tanda Tangan → simpan ke storage/app/public/images/signature, prefix ttd_ */
+    public function uploadSignature(Request $request)
+    {
+        return $this->uploadCommon($request, 'ttd_', 'signature');
+    }
+
 
     public function destroy($id)
     {

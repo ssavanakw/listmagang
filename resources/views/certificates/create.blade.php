@@ -241,9 +241,16 @@
         </div>
 
         <div class="mt-8 flex items-center justify-end gap-3">
+
+          <a href="{{ route('certificate.index') }}"
+            class="inline-flex items-center rounded-lg bg-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-800 shadow hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+            <i class="fa-solid fa-arrow-left mr-2"></i>
+            Kembali ke Daftar Sertifikat
+          </a>
+
           <button type="submit" class="inline-flex items-center rounded-lg bg-gradient-to-r from-indigo-600 to-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow hover:from-indigo-700 hover:to-sky-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
-            <i class="fa-regular fa-eye mr-2"></i>
-            Pratinjau Sertifikat
+            <i class="fa-regular"></i>
+            Submit
           </button>
         </div>
       </form>

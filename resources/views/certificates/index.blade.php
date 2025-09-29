@@ -1,183 +1,331 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sertifikat Magang</title>
-  @php
-    use Illuminate\Support\Facades\Storage;
-    use Carbon\Carbon;
+@extends('layouts.dashboard')
 
-    $cert = $certificate ?? null;
-
-    // URL aset dari storage
-    $bgUrl    = $certificate->background_image  ? Storage::url($certificate->background_image)  : '';
-    $logo1Url = $certificate->logo1             ? Storage::url($certificate->logo1)             : '';
-    $logo2Url = $certificate->logo2             ? Storage::url($certificate->logo2)             : null;
-    $ttd1Url  = $certificate->signature_image1  ? Storage::url($certificate->signature_image1)  : '';
-    $ttd2Url  = $certificate->signature_image2  ? Storage::url($certificate->signature_image2)  : null;
-
-    // Apakah kolom kanan (penandatangan 2) perlu ditampilkan
-    $hasRightSig = $ttd2Url || !empty($certificate->name_signatory2) || !empty($certificate->role2);
-
-    // Map kode divisi -> label
-    $divisionLabels = [
-      'ADM'=>'Administrasi','UIUX'=>'UI/UX Designer','PROG'=>'Programmer (Front end / Back end)','HR'=>'Human Resource',
-      'SMM'=>'Social Media Specialist','PV'=>'Photographer / Videographer','CW'=>'Content Writer','MS'=>'Marketing & Sales',
-      'CD'=>'Content Creative (Desain Grafis)','DM'=>'Digital Marketing','PR'=>'Marcom/Public Relations','TC'=>'Tik Tok Creator',
-      'CP'=>'Content Planner','PM'=>'Project Manager','LAS'=>'Las','ANIM'=>'Animasi',
-    ];
-    $divisionLabel = $divisionLabels[$certificate->division] ?? $certificate->division;
-
-    // Durasi (X bulan Y hari)
-    $start = Carbon::parse($certificate->start_date);
-    $end   = Carbon::parse($certificate->end_date);
-    $months = $start->diffInMonths($end);
-    $pivot  = $start->copy()->addMonths($months);
-    $days   = $pivot->diffInDays($end);
-    $duration_text = trim(($months ? $months.' bulan ' : '').($days ? $days.' hari' : ''));
-    if ($duration_text === '') $duration_text = '0 hari';
-  @endphp
-
-  <style>
-    @page { size: 1123px 794px; margin: 0; }
-    html, body { height: 100%; }
-    * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    :root {
-      --page-w: 1123px; --page-h: 794px; --text: #000; --dark: #293936; --accent: #BE5640;
-      --serif: "Times New Roman", Times, serif; --script1: "Edwardian Script ITC", "Segoe Script", "Brush Script MT", "Lucida Handwriting", cursive, serif;
-      --script2: "Segoe Script", "Brush Script MT", "Lucida Handwriting", cursive, serif;
-    }
-    body { margin: 0; display: flex; align-items: center; justify-content: center; background: #f0f0f0; }
-    .page { position: relative; width: var(--page-w); height: var(--page-h); overflow: hidden; background: url('{{ $bgUrl }}') center/cover no-repeat; }
-    .content { position: absolute; inset: 0; padding: 60px 72px; display: grid; grid-template-rows: auto auto 1fr auto; }
-
-    .logos { position: relative; width: 100%; height: 120px; }
-    .logo-left { position: absolute; top: -20px; left: 2%; height: 100%; display: flex; align-items: center; }
-    @if(empty($logo2Url))
-      .logo-left { left: 50%; transform: translateX(-50%); }
-    @endif
-    .logo-right { position: absolute; top: 10px; right: 20px; height: 100%; display: flex; align-items: center; }
-    .logo-left img { max-height: 90px; max-width: 250px; object-fit: contain; }
-    .logo-right img { max-height: 120px; max-width: 300px; object-fit: contain; }
-
-    .headings { text-align: center; margin-top: 0; }
-    .title { font: italic 700 72px var(--script2); color: var(--dark); line-height: 1; margin: 0 0 8px; }
-    .subtitle { font: 400 22px var(--serif); color: var(--text); margin: 0 0 10px; }
-
-    .name-wrap { text-align: center; margin-top: 14px; }
-    .name { display: inline-block; font: italic 72px var(--script1); color: var(--text); line-height: 1.1; white-space: nowrap; }
-    .name-line { width: 80%; max-width: 780px; height: 2px; background: #000; margin: 1px auto 0; }
-
-    .body { margin-top: 8px; text-align: center; font: 400 20px var(--serif); color: var(--text); display: grid; gap: 10px; justify-items: center; }
-    .body > div:last-child { margin-top: 16px; }
-
-    .serial { position: relative; margin: 12px auto 0; padding: 6px 12px; font: 600 16px var(--serif); color: var(--dark);
-              background: rgba(255,255,255,0.72); border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; letter-spacing: .2px;
-              box-shadow: 0 2px 6px rgba(0,0,0,0.06); display: inline-block; }
-
-    .signatures { position: relative; width: 100%; height: 230px; margin-top: -40px; font: 400 18px var(--serif); color: var(--text); }
-    .sig { position: absolute; bottom: 20px; width: 260px; text-align: center; }
-    .sig-left { left: 50%; transform: translateX(-50%); }
-    @if($hasRightSig)
-      .sig-left { left: 7%; transform: none; }
-    @endif
-    .sig-right { right: 20%; transform: translateX(50%); }
-    .sig .line { height: 2px; background: #000; margin: 0 0 6px; }
-    .sig .name { font: 600 18px "Times New Roman", Times, serif; letter-spacing: .2px; }
-    .sig .role { margin-bottom: 65px; }
-    .sig .image { position: absolute; z-index: 3; pointer-events: none; }
-    .sig .image img { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0.95; }
-
-    @media print { body { background: none; } .page { box-shadow: none; }}
-  </style>
-</head>
-<body>
-  <div class="page">
-    <div class="content">
-
-      <!-- LOGOS -->
-      <div class="logos">
-        <div class="logo-left">
-          @if($logo1Url)
-            <img src="{{ $logo1Url }}" alt="Logo 1" />
-          @endif
-        </div>
-        <div class="logo-right">
-          @if($logo2Url)
-            <img src="{{ $logo2Url }}" alt="Logo 2" />
-          @endif
-        </div>
-      </div>
-
-      <!-- TITLES & SERIAL -->
-      <div class="headings">
-        <div class="title">Sertifikat</div>
-        <div><p><b>NO: {{ $certificate->serial_number ?? '000/SERT/—/—/—/—' }}</b></p></div>
-        <div class="subtitle">Diberikan kepada:</div>
-      </div>
-
-      <!-- RECIPIENT NAME -->
-      <div class="name-wrap">
-        <span class="name">{{ $certificate->name }}</span>
-        <div class="name-line" aria-hidden="true"></div>
-      </div>
-
-      <!-- BODY TEXT -->
-      <div class="body">
+@section('content')
+<div class="container mx-auto px-4 py-8">
+    {{-- Header --}}
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          Telah menyelesaikan magang bidang <strong>{{ $divisionLabel }}</strong>
-          di {{ $certificate->company }} selama <strong>{{ $duration_text }}</strong>.
+            <h1 class="text-3xl font-bold tracking-tight">Sertifikat</h1>
+            <p class="text-sm text-gray-500">Total: <span class="font-semibold">{{ $certificates->count() }}</span> item</p>
         </div>
-        <div>
-          Mulai dari
-          <strong>{{ Carbon::parse($certificate->start_date)->locale('id')->translatedFormat('j F Y') }}</strong>
-          sampai dengan
-          <strong>{{ Carbon::parse($certificate->end_date)->locale('id')->translatedFormat('j F Y') }}</strong>
+        <div class="flex flex-wrap gap-2">
+            {{-- Buat Sertifikat --}}
+            <a href="{{ route('certificate.create') }}"
+            class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 5c.552 0 1 .448 1 1v5h5c.552 0 1 .448 1 1s-.448 1-1 1h-5v5c0 .552-.448 1-1 1s-1-.448-1-1v-5H6c-.552 0-1-.448-1-1s.448-1 1-1h5V6c0-.552.448-1 1-1z"/>
+                </svg>
+                Buat Sertifikat
+            </a>
+
+            {{-- Upload Background --}}
+            <button type="button" onclick="openModal('bg')"
+                class="inline-flex items-center gap-2 bg-white text-indigo-600 border border-indigo-600 px-4 py-2 rounded-lg shadow-sm 
+                    hover:bg-indigo-50 hover:border-indigo-700 hover:text-indigo-700 transition">
+                Upload Background
+            </button>
+
+            {{-- Upload Logo --}}
+            <button type="button" onclick="openModal('logo')"
+                class="inline-flex items-center gap-2 bg-white text-purple-600 border border-purple-600 px-4 py-2 rounded-lg shadow-sm 
+                    hover:bg-purple-50 hover:border-purple-700 hover:text-purple-700 transition">
+                Upload Logo
+            </button>
+
+            {{-- Upload Tanda Tangan --}}
+            <button type="button" onclick="openModal('ttd')"
+                class="inline-flex items-center gap-2 bg-white text-emerald-600 border border-emerald-600 px-4 py-2 rounded-lg shadow-sm 
+                    hover:bg-emerald-50 hover:border-emerald-700 hover:text-emerald-700 transition">
+                Upload Tanda Tangan
+            </button>
         </div>
-        <div>
-          <strong>{{ $certificate->city }}</strong>,
-          <strong>{{ Carbon::parse($certificate->end_date)->locale('id')->translatedFormat('j F Y') }}</strong>
-        </div>
-      </div>
-
-      <!-- SIGNATURES -->
-      <div class="signatures">
-        <!-- Left (wajib) -->
-        <div class="sig sig-left">
-          @if(!empty($certificate->role1))
-            <div class="role">{{ $certificate->role1 }}</div>
-          @endif
-          @if($ttd1Url)
-            <div class="image" style="top:-10px; left:-24px; width:300px; height:140px;">
-              <img src="{{ $ttd1Url }}" alt="Tanda tangan 1" />
-            </div>
-          @endif
-          <div class="line" aria-hidden="true"></div>
-          <div class="name">{{ $certificate->name_signatory1 }}</div>
-        </div>
-
-        <!-- Right (opsional) -->
-        @if($hasRightSig)
-          <div class="sig sig-right">
-            @if(!empty($certificate->role2))
-              <div class="role">{{ $certificate->role2 }}</div>
-            @endif
-
-            @if($ttd2Url)
-              <div class="image" style="top:-16px; left:-27px; width:300px; height:160px;">
-                <img src="{{ $ttd2Url }}" alt="Tanda tangan 2" />
-              </div>
-            @endif
-
-            @if(!empty($certificate->name_signatory2))
-              <div class="line" aria-hidden="true"></div>
-              <div class="name">{{ $certificate->name_signatory2 }}</div>
-            @endif
-          </div>
-        @endif
-      </div>
     </div>
-  </div>
-</body>
-</html>
+
+    {{-- Alerts --}}
+    @if(session('success'))
+        <div class="flex items-start gap-3 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mt-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M10.97 2.72a1.75 1.75 0 0 1 2.06 0l7.25 5.24c.45.32.72.84.72 1.39v8.68c0 .96-.78 1.75-1.75 1.75H5.75A1.75 1.75 0 0 1 4 18.03V9.35c0-.55.27-1.07.72-1.39l7.25-5.24zM12 4.39 5.5 9v9.03h13V9L12 4.39z"/></svg>
+            <div class="flex-1">{{ session('success') }}</div>
+            <button onclick="this.parentElement.remove()" class="text-green-700/70 hover:text-green-900">✕</button>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-4">
+            <ul class="list-disc pl-5 space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    {{-- Toolbar: search & filter (client-side) --}}
+    <div class="bg-white border rounded-xl p-4 mb-6 shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-gray-500 mb-1">Cari</label>
+                <input id="searchInput" type="text" placeholder="Cari nama, company, serial..." class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring focus:ring-blue-100" oninput="filterRows()">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Brand</label>
+                <select id="brandFilter" class="w-full border rounded-lg px-3 py-2" onchange="filterRows()">
+                    <option value="">Semua</option>
+                    @php $brands = collect($certificates)->pluck('brand')->filter()->unique()->values(); @endphp
+                    @foreach($brands as $b)
+                        <option value="{{ $b }}">{{ $b }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Divisi</label>
+                <select id="divisionFilter" class="w-full border rounded-lg px-3 py-2" onchange="filterRows()">
+                    <option value="">Semua</option>
+                    @php $divs = collect($certificates)->pluck('division')->filter()->unique()->values(); @endphp
+                    @foreach($divs as $d)
+                        <option value="{{ $d }}">{{ $d }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+    </div>
+
+    {{-- Table (desktop) --}}
+    <div class="hidden md:block bg-white border rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="px-4 py-3 text-left">No</th>
+                        <th class="px-4 py-3 text-left">Nama</th>
+                        <th class="px-4 py-3 text-left">Divisi</th>
+                        <th class="px-4 py-3 text-left">Company</th>
+                        <th class="px-4 py-3 text-left">Brand</th>
+                        <th class="px-4 py-3 text-left">Serial</th>
+                        <th class="px-4 py-3 text-left">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="certTable">
+                    @forelse($certificates as $cert)
+                    <tr class="border-t hover:bg-gray-50 transition" data-brand="{{ $cert->brand }}" data-division="{{ $cert->division }}" data-search="{{ Str::lower($cert->name.' '.$cert->company.' '.$cert->serial_number) }}">
+                        <td class="px-4 py-3 align-top">{{ $loop->iteration }}</td>
+                        <td class="px-4 py-3 align-top">
+                            <div class="font-medium">{{ $cert->name }}</div>
+                            <div class="text-xs text-gray-500">{{ $cert->company }}</div>
+                        </td>
+                        <td class="px-4 py-3 align-top">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-200">{{ $cert->division }}</span>
+                        </td>
+                        <td class="px-4 py-3 align-top">{{ $cert->company }}</td>
+                        <td class="px-4 py-3 align-top">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-amber-50 text-amber-700 border border-amber-200">{{ $cert->brand }}</span>
+                        </td>
+                        <td class="px-4 py-3 align-top">
+                            <div class="flex items-center gap-2">
+                                <code class="text-xs bg-gray-100 px-2 py-1 rounded">{{ $cert->serial_number }}</code>
+                                <button type="button" class="text-gray-500 hover:text-gray-700" onclick="copySerial('{{ $cert->serial_number }}', this)" title="Copy serial">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M8 3a2 2 0 0 0-2 2v10h2V5h8V3H8zm4 4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6zm0 2h6v10h-6V9z"/></svg>
+                                </button>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 align-top">
+                            <div class="flex flex-wrap gap-2">
+                                <a href="{{ route('certificate.show', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 rounded border text-blue-700 border-blue-200 hover:bg-blue-50">Preview</a>
+                                <a href="{{ route('certificate.edit', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 rounded border text-green-700 border-green-200 hover:bg-green-50">Edit</a>
+                                <form action="{{ route('certificate.destroy', $cert->id) }}" method="POST" onsubmit="return confirm('Yakin hapus sertifikat ini?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 rounded border text-red-700 border-red-200 hover:bg-red-50">Hapus</button>
+                                </form>
+                                <a href="{{ route('certificate.pdf', $cert->id) }}"
+                                    class="inline-flex items-center px-3 py-1.5 rounded border text-amber-700 border-amber-200 hover:bg-amber-50">
+                                    {{-- ikon download opsional --}}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 3a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4.007 4.007a1 1 0 01-1.414 0L7.279 11.707a1 1 0 111.414-1.414L11 12.586V4a1 1 0 011-1zm-7 14a1 1 0 100 2h14a1 1 0 100-2H5z"/>
+                                    </svg>
+                                    Download PDF
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center">
+                            <div class="flex flex-col items-center gap-2 text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2a2 2 0 0 0-2 2v14l4-2 4 2 4-2 4 2V4a2 2 0 0 0-2-2H6z"/></svg>
+                                Belum ada sertifikat
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Cards (mobile) --}}
+    <div class="md:hidden space-y-3" id="certCards">
+        @forelse($certificates as $cert)
+        <div class="border rounded-xl bg-white shadow-sm p-4" data-brand="{{ $cert->brand }}" data-division="{{ $cert->division }}" data-search="{{ Str::lower($cert->name.' '.$cert->company.' '.$cert->serial_number) }}">
+            <div class="flex items-start justify-between">
+                <div>
+                    <div class="font-semibold">{{ $cert->name }}</div>
+                    <div class="text-xs text-gray-500">{{ $cert->company }}</div>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-amber-50 text-amber-700 border border-amber-200">{{ $cert->brand }}</span>
+            </div>
+            <div class="mt-2 flex items-center gap-2 text-xs">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">{{ $cert->division }}</span>
+                <code class="bg-gray-100 px-2 py-1 rounded">{{ $cert->serial_number }}</code>
+                <button type="button" class="text-gray-500" onclick="copySerial('{{ $cert->serial_number }}', this)">Copy</button>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-2">
+                <a href="{{ route('certificate.show', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 rounded border text-blue-700 border-blue-200 hover:bg-blue-50">Preview</a>
+                <a href="{{ route('certificate.edit', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 rounded border text-green-700 border-green-200 hover:bg-green-50">Edit</a>
+                <form action="{{ route('certificate.destroy', $cert->id) }}" method="POST" onsubmit="return confirm('Yakin hapus sertifikat ini?')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="inline-flex items-center px-3 py-1.5 rounded border text-red-700 border-red-200 hover:bg-red-50">Hapus</button>
+                </form>
+                <a href="{{ route('certificate.pdf', $cert->id) }}"
+                    class="inline-flex items-center px-3 py-1.5 rounded border text-amber-700 border-amber-200 hover:bg-amber-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 3a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4.007 4.007a1 1 0 01-1.414 0L7.279 11.707a1 1 0 111.414-1.414L11 12.586V4a1 1 0 011-1zm-7 14a1 1 0 100 2h14a1 1 0 100-2H5z"/>
+                    </svg>
+                    Download PDF
+                </a>
+            </div>
+        </div>
+        @empty
+        <div class="text-center text-gray-500">Belum ada sertifikat</div>
+        @endforelse
+    </div>
+</div>
+
+{{-- ===================== MODALS ===================== --}}
+<div id="modal-bg" class="hidden fixed inset-0 z-50 items-center justify-center">
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal('bg')"></div>
+    <div class="relative bg-white w-full max-w-lg mx-4 rounded-xl shadow-xl p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Upload Background</h2>
+            <button class="text-gray-500 hover:text-gray-700" onclick="closeModal('bg')">✕</button>
+        </div>
+        <form action="{{ route('uploads.backgrounds.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-sm font-medium mb-1">File Gambar (.png/.jpg/.jpeg/.webp)</label>
+                <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required class="block w-full border rounded px-3 py-2">
+            </div>
+            <div class="text-xs text-gray-600">
+                Disimpan ke: <code>storage/app/public/images/backgrounds/</code><br>
+                Otomatis dinamai ulang: <code>bg_{{'{'}}slug{{'}'}}_YYYYmmdd_HHMMSS.ext</code><br>
+                Maks 2 MB.
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeModal('bg')" class="px-4 py-2 rounded border">Batal</button>
+                <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">Upload</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modal-logo" class="hidden fixed inset-0 z-50 items-center justify-center">
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal('logo')"></div>
+    <div class="relative bg-white w-full max-w-lg mx-4 rounded-xl shadow-xl p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Upload Logo</h2>
+            <button class="text-gray-500 hover:text-gray-700" onclick="closeModal('logo')">✕</button>
+        </div>
+        <form action="{{ route('uploads.logos.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-sm font-medium mb-1">File Gambar (.png/.jpg/.jpeg/.webp)</label>
+                <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required class="block w-full border rounded px-3 py-2">
+            </div>
+            <div class="text-xs text-gray-600">
+                Disimpan ke: <code>storage/app/public/images/logos/</code><br>
+                Otomatis dinamai ulang: <code>logo_{{'{'}}slug{{'}'}}_YYYYmmdd_HHMMSS.ext</code><br>
+                Maks 2 MB.
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeModal('logo')" class="px-4 py-2 rounded border">Batal</button>
+                <button type="submit" class="px-4 py-2 rounded bg-purple-600 text-white hover:bg-purple-700">Upload</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modal-ttd" class="hidden fixed inset-0 z-50 items-center justify-center">
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal('ttd')"></div>
+    <div class="relative bg-white w-full max-w-lg mx-4 rounded-xl shadow-xl p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Upload Tanda Tangan</h2>
+            <button class="text-gray-500 hover:text-gray-700" onclick="closeModal('ttd')">✕</button>
+        </div>
+        <form action="{{ route('uploads.signatures.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-sm font-medium mb-1">File Gambar (.png/.jpg/.jpeg/.webp)</label>
+                <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required class="block w-full border rounded px-3 py-2">
+            </div>
+            <div class="text-xs text-gray-600">
+                Disimpan ke: <code>storage/app/public/images/signature/</code><br>
+                Otomatis dinamai ulang: <code>ttd_{{'{'}}slug{{'}'}}_YYYYmmdd_HHMMSS.ext</code><br>
+                Maks 2 MB.
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="closeModal('ttd')" class="px-4 py-2 rounded border">Batal</button>
+                <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">Upload</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ================ SCRIPTS ================ --}}
+<script>
+function openModal(kind){
+    const id = kind === 'bg' ? 'modal-bg' : kind === 'logo' ? 'modal-logo' : 'modal-ttd';
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.classList.remove('hidden');
+    el.classList.add('flex');
+}
+function closeModal(kind){
+    const id = kind === 'bg' ? 'modal-bg' : kind === 'logo' ? 'modal-logo' : 'modal-ttd';
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.classList.add('hidden');
+    el.classList.remove('flex');
+}
+
+function filterRows(){
+    const q = (document.getElementById('searchInput').value || '').toLowerCase();
+    const b = (document.getElementById('brandFilter').value || '').toLowerCase();
+    const d = (document.getElementById('divisionFilter').value || '').toLowerCase();
+
+    const rows = document.querySelectorAll('#certTable tr');
+    rows.forEach(r => {
+        const ds = (r.getAttribute('data-search') || '').toLowerCase();
+        const rb = (r.getAttribute('data-brand') || '').toLowerCase();
+        const rd = (r.getAttribute('data-division') || '').toLowerCase();
+        const ok = (!q || ds.includes(q)) && (!b || rb === b) && (!d || rd === d);
+        r.style.display = ok ? '' : 'none';
+    });
+
+    const cards = document.querySelectorAll('#certCards > div[data-search]');
+    cards.forEach(c => {
+        const ds = (c.getAttribute('data-search') || '').toLowerCase();
+        const rb = (c.getAttribute('data-brand') || '').toLowerCase();
+        const rd = (c.getAttribute('data-division') || '').toLowerCase();
+        const ok = (!q || ds.includes(q)) && (!b || rb === b) && (!d || rd === d);
+        c.style.display = ok ? '' : 'none';
+    });
+}
+
+function copySerial(text, btn){
+    navigator.clipboard.writeText(text).then(() => {
+        const old = btn.innerHTML;
+        btn.innerHTML = '✔';
+        setTimeout(() => btn.innerHTML = old, 1000);
+    });
+}
+</script>
+@endsection
