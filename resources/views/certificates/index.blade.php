@@ -5,7 +5,7 @@
     {{-- Header --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-3xl font-bold tracking-tight">Sertifikat</h1>
+            <h1 class="text-3xl font-bold tracking-tight">Certificates</h1>
             <p class="text-sm text-gray-500">Total: <span class="font-semibold">{{ $certificates->count() }}</span> item</p>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -15,7 +15,12 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 5c.552 0 1 .448 1 1v5h5c.552 0 1 .448 1 1s-.448 1-1 1h-5v5c0 .552-.448 1-1 1s-1-.448-1-1v-5H6c-.552 0-1-.448-1-1s.448-1 1-1h5V6c0-.552.448-1 1-1z"/>
                 </svg>
-                Buat Sertifikat
+                Buat Sertifikat Magang
+            </a>
+
+            <a href="{{ route('certificate.external.create') }}"
+                class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700">
+                Buat Sertifikat Non Magang
             </a>
 
             {{-- Upload Background --}}
@@ -211,7 +216,7 @@
         <form action="{{ route('uploads.backgrounds.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div>
-                <label class="block text-sm font-medium mb-1">File Gambar (.png/.jpg/.jpeg/.webp)</label>
+                <label class="block text-sm font-medium mb-1">Format File Gambar (bg_(Nama File Gambar).png/.jpg/.jpeg/.webp)</label>
                 <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required class="block w-full border rounded px-3 py-2">
             </div>
             <div class="text-xs text-gray-600">
@@ -237,7 +242,7 @@
         <form action="{{ route('uploads.logos.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div>
-                <label class="block text-sm font-medium mb-1">File Gambar (.png/.jpg/.jpeg/.webp)</label>
+                <label class="block text-sm font-medium mb-1">Format File Gambar (logo_(Nama File Gambar).png/.jpg/.jpeg/.webp)</label>
                 <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required class="block w-full border rounded px-3 py-2">
             </div>
             <div class="text-xs text-gray-600">
@@ -263,7 +268,7 @@
         <form action="{{ route('uploads.signatures.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div>
-                <label class="block text-sm font-medium mb-1">File Gambar (.png/.jpg/.jpeg/.webp)</label>
+                <label class="block text-sm font-medium mb-1">Format File Gambar (ttd_(Nama File Gambar).png/.jpg/.jpeg/.webp)</label>
                 <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required class="block w-full border rounded px-3 py-2">
             </div>
             <div class="text-xs text-gray-600">

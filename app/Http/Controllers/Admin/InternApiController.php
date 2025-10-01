@@ -345,6 +345,117 @@ class InternApiController extends Controller
         ]);
     }
 
+    /**
+ * GET /admin/interns/search
+ * Hasil untuk Select2 (AJAX): { results: [{id, text, division}] }
+ * - Pencarian by fullname/email/phone_number/student_id
+ * - Default hanya status 'completed' (bisa override ?completed=0)
+ * - 'division' diambil dari mapping internship_interest -> KODE DIV
+ */
+    public function search(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+        $onlyCompleted = $request->has('completed')
+            ? filter_var($request->get('completed'), FILTER_VALIDATE_BOOLEAN)
+            : true;
+
+        $builder = IR::query();
+
+        if ($onlyCompleted) {
+            $statusCompleted = defined(IR::class.'::STATUS_COMPLETED') ? IR::STATUS_COMPLETED : 'completed';
+            $builder->where('internship_status', $statusCompleted);
+        }
+
+        if ($q !== '') {
+            $builder->where(function ($w) use ($q) {
+                $w->where('fullname', 'like', "%{$q}%")
+                ->orWhere('email', 'like', "%{$q}%")
+                ->orWhere('phone_number', 'like', "%{$q}%")
+                ->orWhere('student_id', 'like', "%{$q}%");
+            });
+        }
+
+        // Map interest → kode divisi (sesuaikan jika perlu)
+        $interestToDivision = [
+            'administration'            => 'ADM',
+            'administrasi'              => 'ADM',
+
+            'uiux'                      => 'UIUX',
+            'ui-ux'                     => 'UIUX',
+            'ui/ux'                     => 'UIUX',
+
+            'programmer'                => 'PROG',
+            'programmer (front end / backend)' => 'PROG',
+
+            'hr'                        => 'HR',
+            'human resources (hr)'      => 'HR',
+
+            'social-media-specialist'   => 'SMM',
+            'spesialis media sosial'    => 'SMM',
+
+            'photographer'              => 'PV',
+            'videographer'              => 'PV',
+            'fotografer'                => 'PV',
+            'videografer'               => 'PV',
+
+            'content-writer'            => 'CW',
+            'penulis konten'            => 'CW',
+
+            'marketing-and-sales'       => 'MS',
+            'penjualan & pemasaran'     => 'MS',
+            'penjualan dan pemasaran'   => 'MS',
+
+            'graphic-designer'          => 'CD',
+            'desainer grafis'           => 'CD',
+
+            'digital-marketing'         => 'DM',
+            'pemasaran digital'         => 'DM',
+
+            'public-relation'           => 'PR',
+            'public relations (marcomm)'=> 'PR',
+            'hubungan masyarakat (marcomm)' => 'PR',
+
+            'tiktok-creator'            => 'TC',
+            'kreator tiktok'            => 'TC',
+
+            'content-planner'           => 'CP',
+            'perencana konten'          => 'CP',
+
+            'project-manager'           => 'PM',
+            'manajer proyek'            => 'PM',
+
+            'welding'                   => 'LAS',
+            'pengelasan'                => 'LAS',
+
+            'animation'                 => 'ANIM',
+            'animasi'                   => 'ANIM',
+        ];
+
+        $items = $builder->orderBy('fullname')->limit(20)->get();
+
+        $results = $items->map(function (IR $r) use ($interestToDivision) {
+            // Normalisasi interest ke key map
+            $rawInterest = (string) ($r->internship_interest ?? '');
+            $key = Str::of($rawInterest)->lower()->replace('/', '-')->toString();
+
+            $division = $interestToDivision[$key] ?? null;
+
+            $text = $r->fullname;
+            if ($division) {
+                $text .= " ({$division})";
+            }
+
+            return [
+                'id'       => $r->id,
+                'text'     => $text,
+                'division' => $division, // bisa dipakai auto-set divisi di FE
+            ];
+        });
+
+        return response()->json(['results' => $results]);
+    }
+
+
 
 
     /**

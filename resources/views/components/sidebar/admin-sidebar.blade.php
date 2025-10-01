@@ -34,7 +34,7 @@
     />
         <x-sidebar-menu-dashboard 
         routeName="certificate.index"  
-        title="Generate Certificates"
+        title="Certificates"
     />
 
     {{-- Logout --}}
