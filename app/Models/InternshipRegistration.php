@@ -21,6 +21,7 @@ class InternshipRegistration extends Model
     public const STATUS_PENDING   = 'pending';
 
     protected $fillable = [
+        'user_id',
         'fullname', 'born_date', 'student_id', 'email', 'gender', 'phone_number',
         'institution_name', 'study_program', 'faculty', 'current_city',
         'internship_reason', 'internship_type', 'internship_arrangement',
@@ -191,4 +192,14 @@ class InternshipRegistration extends Model
             'pending'   => static::status(self::STATUS_PENDING)->count(),
         ];
     }
+
+    // app/Models/InternshipRegistration.php
+
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
+    }
+
+
+
 }

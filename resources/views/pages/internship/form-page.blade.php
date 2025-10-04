@@ -420,7 +420,7 @@
           <!-- Status keluarga -->
           <div>
             <h3 class="{{ $label }}">Apakah Anda sudah berkeluarga?</h3>
-            <ul class="{{ $group }}">
+            <ul class="{{ $group }}"> 
               <li class="border-b border-zinc-200">
                 <label for="family-yes" class="{{ $item }}">
                   <input id="family-yes" type="radio" value="Ya" name="family_status" class="{{ $radio }}" />

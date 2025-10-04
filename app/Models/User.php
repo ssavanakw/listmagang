@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'is_online',
     ];
 
     /**
@@ -41,4 +43,10 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function internshipRegistration()
+    {
+        // sesuaikan namespace modelmu
+        return $this->hasOne(\App\Models\InternshipRegistration::class, 'user_id');
+    }
 }

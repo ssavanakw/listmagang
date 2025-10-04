@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-0 py-6">
     {{-- Header --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
@@ -10,7 +10,7 @@
         </div>
         <div class="flex flex-wrap gap-2">
             {{-- Buat Sertifikat --}}
-            <a href="{{ route('certificate.create') }}"
+            <a href="{{ route('admin.certificate.create') }}"
             class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 5c.552 0 1 .448 1 1v5h5c.552 0 1 .448 1 1s-.448 1-1 1h-5v5c0 .552-.448 1-1 1s-1-.448-1-1v-5H6c-.552 0-1-.448-1-1s.448-1 1-1h5V6c0-.552.448-1 1-1z"/>
@@ -18,7 +18,7 @@
                 Buat Sertifikat Magang
             </a>
 
-            <a href="{{ route('certificate.external.create') }}"
+            <a href="{{ route('admin.certificate.external.create') }}"
                 class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700">
                 Buat Sertifikat Non Magang
             </a>
@@ -135,13 +135,13 @@
                         </td>
                         <td class="px-4 py-3 align-top">
                             <div class="flex flex-wrap gap-2">
-                                <a href="{{ route('certificate.show', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 rounded border text-blue-700 border-blue-200 hover:bg-blue-50">Preview</a>
-                                <a href="{{ route('certificate.edit', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 rounded border text-green-700 border-green-200 hover:bg-green-50">Edit</a>
-                                <form action="{{ route('certificate.destroy', $cert->id) }}" method="POST" onsubmit="return confirm('Yakin hapus sertifikat ini?')">
+                                <a href="{{ route('admin.certificate.show', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 rounded border text-blue-700 border-blue-200 hover:bg-blue-50">Preview</a>
+                                <a href="{{ route('admin.certificate.edit', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 rounded border text-green-700 border-green-200 hover:bg-green-50">Edit</a>
+                                <form action="{{ route('admin.certificate.destroy', $cert->id) }}" method="POST" onsubmit="return confirm('Yakin hapus sertifikat ini?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="inline-flex items-center px-3 py-1.5 rounded border text-red-700 border-red-200 hover:bg-red-50">Hapus</button>
                                 </form>
-                                <a href="{{ route('certificate.pdf', $cert->id) }}"
+                                <a href="{{ route('admin.certificate.pdf', $cert->id) }}"
                                     class="inline-flex items-center px-3 py-1.5 rounded border text-amber-700 border-amber-200 hover:bg-amber-50">
                                     {{-- ikon download opsional --}}
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 24 24" fill="currentColor">
@@ -184,13 +184,13 @@
                 <button type="button" class="text-gray-500" onclick="copySerial('{{ $cert->serial_number }}', this)">Copy</button>
             </div>
             <div class="mt-3 flex flex-wrap gap-2">
-                <a href="{{ route('certificate.show', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 rounded border text-blue-700 border-blue-200 hover:bg-blue-50">Preview</a>
-                <a href="{{ route('certificate.edit', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 rounded border text-green-700 border-green-200 hover:bg-green-50">Edit</a>
-                <form action="{{ route('certificate.destroy', $cert->id) }}" method="POST" onsubmit="return confirm('Yakin hapus sertifikat ini?')">
+                <a href="{{ route('admin.certificate.show', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 rounded border text-blue-700 border-blue-200 hover:bg-blue-50">Preview</a>
+                <a href="{{ route('admin.certificate.edit', $cert->id) }}" class="inline-flex items-center px-3 py-1.5 rounded border text-green-700 border-green-200 hover:bg-green-50">Edit</a>
+                <form action="{{ route('admin.certificate.destroy', $cert->id) }}" method="POST" onsubmit="return confirm('Yakin hapus sertifikat ini?')">
                     @csrf @method('DELETE')
                     <button type="submit" class="inline-flex items-center px-3 py-1.5 rounded border text-red-700 border-red-200 hover:bg-red-50">Hapus</button>
                 </form>
-                <a href="{{ route('certificate.pdf', $cert->id) }}"
+                <a href="{{ route('admin.certificate.pdf', $cert->id) }}"
                     class="inline-flex items-center px-3 py-1.5 rounded border text-amber-700 border-amber-200 hover:bg-amber-50">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 3a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4.007 4.007a1 1 0 01-1.414 0L7.279 11.707a1 1 0 111.414-1.414L11 12.586V4a1 1 0 011-1zm-7 14a1 1 0 100 2h14a1 1 0 100-2H5z"/>
@@ -213,7 +213,7 @@
             <h2 class="text-lg font-semibold">Upload Background</h2>
             <button class="text-gray-500 hover:text-gray-700" onclick="closeModal('bg')">✕</button>
         </div>
-        <form action="{{ route('uploads.backgrounds.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+        <form action="{{ route('admin.uploads.backgrounds.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div>
                 <label class="block text-sm font-medium mb-1">Format File Gambar (bg_(Nama File Gambar).png/.jpg/.jpeg/.webp)</label>
@@ -239,7 +239,7 @@
             <h2 class="text-lg font-semibold">Upload Logo</h2>
             <button class="text-gray-500 hover:text-gray-700" onclick="closeModal('logo')">✕</button>
         </div>
-        <form action="{{ route('uploads.logos.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+        <form action="{{ route('admin.uploads.logos.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div>
                 <label class="block text-sm font-medium mb-1">Format File Gambar (logo_(Nama File Gambar).png/.jpg/.jpeg/.webp)</label>
@@ -265,7 +265,7 @@
             <h2 class="text-lg font-semibold">Upload Tanda Tangan</h2>
             <button class="text-gray-500 hover:text-gray-700" onclick="closeModal('ttd')">✕</button>
         </div>
-        <form action="{{ route('uploads.signatures.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+        <form action="{{ route('admin.uploads.signatures.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div>
                 <label class="block text-sm font-medium mb-1">Format File Gambar (ttd_(Nama File Gambar).png/.jpg/.jpeg/.webp)</label>

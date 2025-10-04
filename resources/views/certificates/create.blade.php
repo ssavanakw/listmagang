@@ -27,7 +27,7 @@
 
     <!-- Form for creating a new certificate -->
     <div class="rounded-2xl bg-white p-6 shadow ring-1 ring-gray-200/60 dark:bg-gray-800 dark:ring-gray-700 sm:p-8">
-      <form method="POST" action="{{ route('certificate.store') }}" enctype="multipart/form-data" id="certificateForm">
+      <form method="POST" action="{{ route('admin.certificate.store') }}" enctype="multipart/form-data" id="certificateForm">
         @csrf
 
         <!-- Data Pribadi -->
@@ -242,7 +242,7 @@
 
         <div class="mt-8 flex items-center justify-end gap-3">
 
-          <a href="{{ route('certificate.index') }}"
+          <a href="{{ route('admin.certificate.index') }}"
             class="inline-flex items-center rounded-lg bg-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-800 shadow hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
             <i class="fa-solid fa-arrow-left mr-2"></i>
             Kembali ke Daftar Sertifikat

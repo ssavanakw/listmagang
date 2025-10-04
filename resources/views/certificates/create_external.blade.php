@@ -7,7 +7,7 @@
       <h1 class="text-2xl font-bold">Sertifikat Peserta Eksternal</h1>
       <p class="text-gray-500 text-sm">Buat sertifikat massal untuk peserta di luar pemagang. Divisi otomatis: <b>EXT</b>.</p>
     </div>
-    <a href="{{ route('certificate.index') }}" class="px-3 py-2 rounded border hover:bg-gray-50">Kembali</a>
+    <a href="{{ route('admin.certificate.index') }}" class="px-3 py-2 rounded border hover:bg-gray-50">Kembali</a>
   </div>
 
   @if($errors->any())
@@ -18,7 +18,7 @@
     </div>
   @endif
 
-  <form action="{{ route('certificate.external.store') }}" method="POST" class="space-y-6">
+  <form action="{{ route('admin.certificate.external.store') }}" method="POST" class="space-y-6">
     @csrf
 
     {{-- Info umum --}}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
+  <title>Register</title>
   @vite(['resources/css/app.css','resources/js/app.js'])
 
   {{-- Auto dark sesuai sistem (Tailwind darkMode: "class") --}}
@@ -22,16 +22,8 @@
                 bg-white/90 dark:bg-gray-900/85 backdrop-blur p-6 sm:p-8">
 
       <h2 class="mb-6 text-2xl font-bold text-center text-gray-900 dark:text-gray-100">
-        Login
+        Register
       </h2>
-
-      @if(session('success'))
-        <div class="mb-4 px-4 py-3 rounded-lg border
-                    bg-green-50 text-green-700 border-green-200
-                    dark:bg-green-950/40 dark:text-green-200 dark:border-green-900/50">
-          {{ session('success') }}
-        </div>
-      @endif
 
       @if(session('error'))
         <div class="mb-4 px-4 py-3 rounded-lg border
@@ -41,8 +33,19 @@
         </div>
       @endif
 
-      <form action="{{ route('user.login.submit') }}" method="POST" class="space-y-4">
+      <form action="{{ route('user.register.submit') }}" method="POST" class="space-y-4">
         @csrf
+
+        <!-- Name -->
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-800 dark:text-gray-200">Name</label>
+          <input type="text" id="name" name="name" required autocomplete="name"
+                 placeholder="Your Name"
+                 class="mt-1 w-full px-4 py-2 rounded-lg border
+                        bg-white text-gray-900 placeholder-gray-400
+                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
+                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-emerald-400 dark:focus:border-emerald-400"/>
+        </div>
 
         <!-- Email -->
         <div>
@@ -57,11 +60,8 @@
 
         <!-- Password -->
         <div>
-          <div class="flex items-center justify-between">
-            <label for="password" class="block text-sm font-medium text-gray-800 dark:text-gray-200">Password</label>
-            <button type="button" id="togglePassword" class="text-xs text-emerald-700 hover:underline dark:text-emerald-300">Show</button>
-          </div>
-          <input type="password" id="password" name="password" required autocomplete="current-password"
+          <label for="password" class="block text-sm font-medium text-gray-800 dark:text-gray-200">Password</label>
+          <input type="password" id="password" name="password" required autocomplete="new-password"
                  placeholder="••••••••"
                  class="mt-1 w-full px-4 py-2 rounded-lg border
                         bg-white text-gray-900 placeholder-gray-400
@@ -69,12 +69,15 @@
                         dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-emerald-400 dark:focus:border-emerald-400"/>
         </div>
 
-        <!-- Remember Me -->
-        <div class="flex items-center">
-          <input type="checkbox" id="remember" name="remember"
-                 class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500
-                        dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-emerald-400"/>
-          <label for="remember" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Remember me</label>
+        <!-- Confirm Password -->
+        <div>
+          <label for="password_confirmation" class="block text-sm font-medium text-gray-800 dark:text-gray-200">Confirm Password</label>
+          <input type="password" id="password_confirmation" name="password_confirmation" required autocomplete="new-password"
+                 placeholder="••••••••"
+                 class="mt-1 w-full px-4 py-2 rounded-lg border
+                        bg-white text-gray-900 placeholder-gray-400
+                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
+                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-emerald-400 dark:focus:border-emerald-400"/>
         </div>
 
         <!-- Submit -->
@@ -83,17 +86,8 @@
                        bg-emerald-600 hover:bg-emerald-700 text-white font-medium
                        py-2.5 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500
                        dark:focus:ring-offset-gray-900">
-          Login
+          Register
         </button>
-
-        <div class="mt-4 text-center">
-          <a href="{{ route('user.register') }}" class="text-sm text-emerald-600 hover:underline dark:text-emerald-300">
-            Don't have an account? Register here
-          </a>
-        </div>
-
-
-
       </form>
 
       <p class="mt-6 text-center text-xs text-emerald-900/80 dark:text-emerald-200/70">
@@ -102,15 +96,5 @@
     </div>
   </div>
 
-  <script>
-    // show/hide password (tetap ada)
-    const pw = document.getElementById('password');
-    const pwBtn = document.getElementById('togglePassword');
-    pwBtn.addEventListener('click', () => {
-      const show = pw.type === 'text';
-      pw.type = show ? 'password' : 'text';
-      pwBtn.textContent = show ? 'Show' : 'Hide';
-    });
-  </script>
 </body>
 </html>

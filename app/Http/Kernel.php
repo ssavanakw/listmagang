@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         // 👉 custom middleware role
         'role' => \App\Http\Middleware\RoleMiddleware::class,
         'prevent-back' => \App\Http\Middleware\PreventBackHistory::class,
+        'update.status.online' => \App\Http\Middleware\UpdateUserStatusOnline::class,
     ];
 }
