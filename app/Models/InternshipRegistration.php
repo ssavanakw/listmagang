@@ -47,6 +47,9 @@ class InternshipRegistration extends Model
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'born_date'  => 'date',
+        'start_date' => 'date',
+        'end_date'   => 'date',
     ];
 
     /* ============================================================
