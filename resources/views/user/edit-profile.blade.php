@@ -23,15 +23,10 @@
 @endphp
 
 @section('content')
-<div class="container mx-auto px-4 pt-6">
+<div class="container mx-auto px-4 pt-6 bg-emerald-300">
   <div class="max-w-6xl mx-auto">
-    <div class="mb-6 flex items-center justify-between">
-      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Edit Profil Magang</h2>
-
-      <a href="{{ route('user.dashboard') }}"
-         class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 shadow">
-        ⬅️ Ke Beranda
-      </a>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Edit Profil</h2>
     </div>
 
     {{-- Alerts --}}

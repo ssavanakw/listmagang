@@ -52,7 +52,7 @@ class InternshipRegistrationSeeder extends Seeder
         $statusWeighted = [
             IR::STATUS_ACTIVE, IR::STATUS_ACTIVE, IR::STATUS_ACTIVE, IR::STATUS_ACTIVE,
             IR::STATUS_COMPLETED, IR::STATUS_COMPLETED, IR::STATUS_COMPLETED,
-            IR::STATUS_NEW, IR::STATUS_NEW,
+            IR::STATUS_WAITING, IR::STATUS_WAITING,
             IR::STATUS_PENDING,
             IR::STATUS_EXITED
         ];

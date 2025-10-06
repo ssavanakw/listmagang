@@ -114,6 +114,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'preve
         Route::get('/completed', [InternPageController::class, 'completed'])->name('completed');
         Route::get('/exited', [InternPageController::class, 'exited'])->name('exited');
         Route::get('/pending', [InternPageController::class, 'pending'])->name('pending');
+        Route::get('accepted', [InternPageController::class, 'accepted'])->name('accepted');
+        Route::get('rejected', [InternPageController::class, 'rejected'])->name('rejected');
 
         // Update status & data
         Route::patch('/{intern}/status', [InternController::class, 'updateStatus'])->name('status.update');

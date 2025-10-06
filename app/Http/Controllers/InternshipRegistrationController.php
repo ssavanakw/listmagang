@@ -210,7 +210,7 @@ class InternshipRegistrationController extends Controller
         }
 
         // Status awal & relasi user
-        $data['internship_status'] = IR::STATUS_NEW;
+        $data['internship_status'] = IR::STATUS_WAITING;
         $data['user_id'] = $userId;
 
         // Simpan

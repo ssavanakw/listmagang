@@ -1,155 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <title>3D Card Interaktif dengan Bevel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Layout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
+  <script src="https://kit.fontawesome.com/a2d9d5f1e2.js" crossorigin="anonymous"></script>
+
   <style>
-    body { margin: 0; overflow: hidden; background: #111; }
-    canvas { display: block; }
-  </style>
+  [data-dropdown-toggle] + div {
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: all 0.2s ease;
+  }
+  [data-dropdown-toggle].active + div {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
 </head>
-<body>
-  <!-- Three.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-  <!-- OrbitControls -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
 
-  <script>
-    // ====== Scene & Camera ======
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 0, 5);
+  <!-- ===== NAVBAR ===== -->
+  <nav class="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 shadow">
+    <div class="flex justify-between items-center px-6 py-3">
+      <div class="font-semibold text-lg">My Dashboard</div>
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    document.body.appendChild(renderer.domElement);
+      <div class="flex items-center gap-4">
+        <!-- Notifikasi -->
+        <button id="notifBtn" data-dropdown-toggle="notifDropdown" class="relative text-gray-600 dark:text-gray-200">
+          <i class="fa-regular fa-bell text-xl"></i>
+          <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">3</span>
+        </button>
 
-    // ====== Lighting ======
-    const light = new THREE.PointLight(0xffffff, 1.2);
-    light.position.set(5, 5, 5);
-    scene.add(light);
-    scene.add(new THREE.AmbientLight(0x404040, 1));
+        <!-- Dropdown Notifikasi -->
+        <div id="notifDropdown" class="hidden absolute right-6 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+          <div class="px-4 py-2 font-semibold border-b dark:border-gray-700">Notifikasi</div>
+          <ul class="max-h-64 overflow-y-auto">
+            <li class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">📦 Barang baru ditambahkan</li>
+            <li class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">⚠️ Stok menipis di gudang</li>
+            <li class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">✅ Transaksi keluar berhasil</li>
+            <li class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">🕒 Jadwal pengiriman hari ini</li>
+          </ul>
+          <div class="px-4 py-2 text-center">
+            <a href="#" class="text-blue-600 hover:underline text-sm">Lihat semua notifikasi</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
 
-    // ====== Rounded Rectangle Path (bevel) ======
-    function createRoundedRectShape(width, height, radius) {
-      const shape = new THREE.Shape();
-      const x = -width / 2;
-      const y = -height / 2;
-      shape.moveTo(x + radius, y);
-      shape.lineTo(x + width - radius, y);
-      shape.quadraticCurveTo(x + width, y, x + width, y + radius);
-      shape.lineTo(x + width, y + height - radius);
-      shape.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-      shape.lineTo(x + radius, y + height);
-      shape.quadraticCurveTo(x, y + height, x, y + height - radius);
-      shape.lineTo(x, y + radius);
-      shape.quadraticCurveTo(x, y, x + radius, y);
-      return shape;
-    }
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="fixed top-0 left-0 h-full w-56 bg-white dark:bg-gray-800 shadow-md pt-16">
+    <ul class="space-y-2 p-4">
+      <li><a href="#" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">🏠 Dashboard</a></li>
+      <li><a href="#" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">📦 Produk</a></li>
+      <li><a href="#" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">📊 Laporan</a></li>
+      <li><a href="#" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">⚙️ Pengaturan</a></li>
+    </ul>
+  </aside>
 
-    const cardWidth = 3.5;
-    const cardHeight = 2;
-    const shape = createRoundedRectShape(cardWidth, cardHeight, 0.15);
-
-    const extrudeSettings = {
-      steps: 1,
-      depth: 0.15,
-      bevelEnabled: true,
-      bevelThickness: 0.01,
-      bevelSize: 0.04,
-      bevelSegments: 20
-    };
-
-    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-
-    // ====== Canvas Texture ======
-    const canvas = document.createElement('canvas');
-    canvas.width = 1024 * 5;
-    canvas.height = 512 * 5;
-    const ctx = canvas.getContext('2d');
-
-    function drawTextCard() {
-      // ===== Background =====
-      ctx.fillStyle = '#0d2721';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // ===== Logo kanan atas =====
-      ctx.fillStyle = '#ffff00';
-      ctx.font = 'bold 400px Arial';
-      ctx.textAlign = 'right';
-      ctx.fillText('magangjogja.com', canvas.width - 60, 500);
-
-      // ===== Nama di tengah + garis bawah =====
-      const nama = 'SURYA PRATAMA';
-      ctx.fillStyle = '#ffff00';
-      ctx.font = 'bold 70px Poppins, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(nama, canvas.width / 2, 250);
-
-      // Garis bawah otomatis sesuai panjang teks
-      const textWidth = ctx.measureText(nama).width / 2;
-      ctx.strokeStyle = '#ffff00';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(canvas.width / 2 - textWidth - 30, 270);
-      ctx.lineTo(canvas.width / 2 + textWidth + 30, 270);
-      ctx.stroke();
-
-      // ===== ID dan Angkatan =====
-      ctx.fillStyle = '#ffff00';
-      ctx.font = '40px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('ID: 230045  •  ANGKATAN: 2025', canvas.width / 2, 340);
-
-      // ===== Kampus/Asal Sekolah =====
-      ctx.font = '36px Arial';
-      ctx.fillText('POLITEKNIK NEGERI SEMARANG', canvas.width / 2, 400);
-    }
-
-    drawTextCard();
-
-    const texture = new THREE.CanvasTexture(canvas);
-    const frontMaterial = new THREE.MeshStandardMaterial({ map: texture });
-
-    // ====== Card Material ======
-    const sideMaterial = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
-    const materials = [frontMaterial, sideMaterial];
-
-    const card = new THREE.Mesh(geometry, materials);
-    card.rotation.y = Math.PI; // arah depan
-    scene.add(card);
-
-    // ====== Controls ======
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.enablePan = false;
-    controls.minDistance = 3;
-    controls.maxDistance = 8;
-
-    // ====== Hover Interaksi ======
-    document.addEventListener("mousemove", (e) => {
-      const x = (e.clientX / window.innerWidth) * 2 - 1;
-      const y = -(e.clientY / window.innerHeight) * 2 + 1;
-      card.rotation.x = y * 0.3;
-      card.rotation.y = x * 0.3;
-    });
-
-    // ====== Animasi ======
-    function animate() {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    // ====== Resize ======
-    window.addEventListener("resize", () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-  </script>
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="ml-56 pt-16 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+      <h1 class="text-2xl font-semibold mb-4">Selamat datang di Dashboard!</h1>
+      <p>Ini area konten utama. Klik ikon 🔔 di kanan atas untuk melihat dropdown notifikasi seperti sketsa kamu.</p>
+    </div>
+  </main>
+<script>
+  // Tambahkan efek animasi saat toggle Flowbite dipakai
+  document.querySelectorAll('[data-dropdown-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => btn.classList.toggle('active'));
+  });
+</script>
 </body>
 </html>

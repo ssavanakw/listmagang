@@ -36,7 +36,7 @@
           <p class="mb-2 text-sm font-medium text-gray-100">Pendaftar Baru</p>
           <i class="fas fa-user-plus text-gray-100 text-2xl"></i>
         </div>
-        <p class="text-4xl font-bold text-gray-100">{{ $counts['new'] ?? 0 }}</p>
+        <p class="text-4xl font-bold text-gray-100">{{ $counts['waiting'] ?? 0 }}</p>
       </a>
 
       <!-- Pemagang Aktif -->

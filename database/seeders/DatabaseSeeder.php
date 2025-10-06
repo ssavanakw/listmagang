@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
         InternshipRegistrationSeeder::class,
         AdminUserSeeder::class,
+        BackfillPemagangRoleSeeder::class,
         ]);
 
     }

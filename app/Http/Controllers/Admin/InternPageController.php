@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Models\InternshipRegistration as IR;
 
 class InternPageController extends Controller
@@ -72,4 +73,33 @@ class InternPageController extends Controller
             'scope'   => 'pending',
         ]);
     }
+
+    public function accepted()
+    {
+        $interns = IR::where('internship_status', IR::STATUS_ACCEPTED)
+            ->orderByDesc('updated_at')
+            ->get();
+
+        return view('interns.index', [
+            'interns' => $interns,
+            'title'   => 'Pemagang Diterima',
+            'scope'   => 'accepted',
+        ]);
+    }
+
+    public function rejected()
+    {
+        $interns = IR::where('internship_status', IR::STATUS_REJECTED)
+            ->orderByDesc('updated_at')
+            ->get();
+
+        return view('interns.index', [
+            'interns' => $interns,
+            'title'   => 'Pendaftar Ditolak',
+            'scope'   => 'rejected',
+        ]);
+    }
+
+
+
 }

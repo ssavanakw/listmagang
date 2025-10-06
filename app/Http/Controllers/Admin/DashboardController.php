@@ -12,7 +12,7 @@ class DashboardController extends Controller
     {
         // Ringkasan hitungan (berdasarkan workflow status)
         $counts = [
-            'new'       => IR::where('internship_status', IR::STATUS_NEW)->count(),
+            'waiting'   => IR::where('internship_status', IR::STATUS_WAITING)->count(),
             'active'    => IR::where('internship_status', IR::STATUS_ACTIVE)->count(),
             'completed' => IR::where('internship_status', IR::STATUS_COMPLETED)->count(),
             'exited'    => IR::where('internship_status', IR::STATUS_EXITED)->count(),

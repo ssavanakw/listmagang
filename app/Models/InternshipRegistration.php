@@ -14,11 +14,13 @@ class InternshipRegistration extends Model
     protected $table = 'internship_registrations';
 
     // ===== Workflow status (dipakai filter/menu) =====
-    public const STATUS_NEW       = 'new';
-    public const STATUS_ACTIVE    = 'active';
-    public const STATUS_COMPLETED = 'completed';
-    public const STATUS_EXITED    = 'exited';
-    public const STATUS_PENDING   = 'pending';
+    public const STATUS_WAITING     = 'waiting';
+    public const STATUS_ACTIVE      = 'active';
+    public const STATUS_COMPLETED   = 'completed';
+    public const STATUS_EXITED      = 'exited';
+    public const STATUS_PENDING     = 'pending';
+    public const STATUS_ACCEPTED    = 'accepted';  
+    public const STATUS_REJECTED    = 'rejected';   
 
     protected $fillable = [
         'user_id',
@@ -136,11 +138,13 @@ class InternshipRegistration extends Model
         return $query->where('internship_status', $status);
     }
 
-    public function scopeIsNew($query)     { return $query->status(self::STATUS_NEW); }
+    public function scopeIsNew($query)     { return $query->status(self::STATUS_WAITING); }
     public function scopeActive($query)    { return $query->status(self::STATUS_ACTIVE); }
     public function scopeCompleted($query) { return $query->status(self::STATUS_COMPLETED); }
     public function scopeExited($query)    { return $query->status(self::STATUS_EXITED); }
     public function scopePending($query)   { return $query->status(self::STATUS_PENDING); }
+    public function scopeAccepted($query)  { return $query->status(self::STATUS_ACCEPTED); }
+    public function scopeRejected($query)  { return $query->status(self::STATUS_REJECTED); }
 
     /* ============================================================
      |  Helpers untuk UI (label & badge)
@@ -148,22 +152,26 @@ class InternshipRegistration extends Model
     public function getStatusLabelAttribute(): string
     {
         return [
-            self::STATUS_NEW       => 'Pendaftar Baru',
-            self::STATUS_ACTIVE    => 'Aktif',
-            self::STATUS_COMPLETED => 'Selesai',
-            self::STATUS_EXITED    => 'Keluar',
-            self::STATUS_PENDING   => 'Pending',
+            self::STATUS_WAITING    => 'Menunggu',
+            self::STATUS_ACTIVE     => 'Aktif',
+            self::STATUS_COMPLETED  => 'Selesai',
+            self::STATUS_EXITED     => 'Keluar',
+            self::STATUS_PENDING    => 'Pending',
+            self::STATUS_ACCEPTED   => 'Diterima',
+            self::STATUS_REJECTED   => 'Ditolak',
         ][$this->internship_status] ?? ucfirst((string) $this->internship_status);
     }
 
     public function getStatusBadgeClassAttribute(): string
     {
         return [
-            self::STATUS_NEW       => 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200',
-            self::STATUS_ACTIVE    => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
-            self::STATUS_COMPLETED => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200',
-            self::STATUS_EXITED    => 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200',
-            self::STATUS_PENDING   => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+            self::STATUS_WAITING    => 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200',
+            self::STATUS_ACTIVE     => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+            self::STATUS_COMPLETED  => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200',
+            self::STATUS_EXITED     => 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200',
+            self::STATUS_PENDING    => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+            self::STATUS_ACCEPTED   => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200',
+            self::STATUS_REJECTED   => 'bg-gray-200 text-gray-700 dark:bg-gray-800/60 dark:text-gray-200',
         ][$this->internship_status] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
     }
 
@@ -188,11 +196,13 @@ class InternshipRegistration extends Model
     public static function countsByStatus(): array
     {
         return [
-            'new'       => static::status(self::STATUS_NEW)->count(),
+            'waiting'   => static::status(self::STATUS_WAITING)->count(),
             'active'    => static::status(self::STATUS_ACTIVE)->count(),
             'completed' => static::status(self::STATUS_COMPLETED)->count(),
             'exited'    => static::status(self::STATUS_EXITED)->count(),
             'pending'   => static::status(self::STATUS_PENDING)->count(),
+            'accepted'  => static::status(self::STATUS_ACCEPTED)->count(),
+            'rejected'  => static::status(self::STATUS_REJECTED)->count(),
         ];
     }
 

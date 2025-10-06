@@ -11,6 +11,8 @@
             'admin.interns.completed' => 'completed',
             'admin.interns.exited'    => 'exited',
             'admin.interns.pending'   => 'pending',
+            'admin.interns.accepted'  => 'accepted',
+            'admin.interns.rejected'  => 'rejected',
         ];
         if ($route && isset($mapRouteScope[$route])) {
             $scope = $mapRouteScope[$route];
@@ -95,6 +97,14 @@
                 <a href="{{ route('admin.interns.pending') }}"
                    class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'pending' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Pending
+                </a>
+                <a href="{{ route('admin.interns.accepted') }}"
+                    class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'accepted' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
+                    Diterima
+                </a>
+                <a href="{{ route('admin.interns.rejected') }}"
+                    class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'rejected' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
+                    Ditolak
                 </a>
             </div>
         </div>
@@ -191,7 +201,7 @@
                 $certTemplates = [
                     'certmagangjogjacom' => 'Magangjogja.com',
                     'certareakerjacom'   => 'AreaKerja.com',
-                    'certitipsinicom'    => 'Titipsini.com',
+                    'certtitipsinicom'    => 'Titipsini.com',
                 ];
 
                 // helper format tanggal
@@ -290,12 +300,29 @@
                                 @break
 
                             @case('internship_status')
+                                @php
+                                    // Map kelas badge (sinkron dengan Model & JS)
+                                    $statusBadge = [
+                                        'waiting'       => ['Menunggu', 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200'],
+                                        'active'    => ['Aktif',          'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200'],
+                                        'completed' => ['Selesai',        'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200'],
+                                        'exited'    => ['Keluar',         'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200'],
+                                        'pending'   => ['Pending',        'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'],
+                                        'accepted'  => ['Diterima',       'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'],
+                                        'rejected'  => ['Ditolak',        'bg-gray-200 text-gray-700 dark:bg-gray-800/60 dark:text-gray-200'],
+                                    ];
+                                    $st = strtolower($intern->internship_status ?? 'waiting');
+                                    $label = $statusBadge[$st][0] ?? ucfirst($st);
+                                    $cls   = $statusBadge[$st][1] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+                                @endphp
                                 <td class="px-3 py-3 whitespace-nowrap">
-                                    <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-200">
-                                        {{ ucfirst($intern->internship_status) }}
+                                    <span id="badge-{{ $intern->id }}"
+                                        class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $cls }}">
+                                        {{ $label }}
                                     </span>
                                 </td>
-                                @break
+                            @break
+
 
                             @case('certificate')
                                 <td class="px-3 py-3 whitespace-nowrap">
@@ -449,8 +476,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ====== Status map (badge + label) ======
         const statusMap = {
-            new: {
-                label: 'Pendaftar Baru',
+            waiting: {
+                label: 'Menunggu',
                 cls: 'bg-teal-100 text-teal-800 dark:bg-teal-600/20 dark:text-teal-300'
             },
             active: {
@@ -468,7 +495,15 @@ document.addEventListener('DOMContentLoaded', () => {
             pending: {
                 label: 'Pending',
                 cls: 'bg-amber-100 text-amber-800 dark:bg-amber-600/20 dark:text-amber-300'
+            },accepted:  { 
+                label: 'Diterima',       
+                cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-700/20 dark:text-emerald-200' 
             },
+            rejected:  { 
+                label: 'Ditolak',        
+                cls: 'bg-gray-200 text-gray-700 dark:bg-gray-700/40 dark:text-gray-200' 
+            },
+
         };
 
         // ====== Advanced Column Search ======
@@ -891,7 +926,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function buildStatusCell(item) {
-            const cur = item.internship_status || 'new';
+            const cur = item.internship_status || 'waiting';
             const badge = statusMap[cur] || {
                 label: cur,
                 cls: 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200'

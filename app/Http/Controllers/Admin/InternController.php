@@ -345,14 +345,40 @@ class InternController extends Controller
         return response()->json(['message' => 'Data berhasil dihapus'], 200);
     }
 
+    // ===== helper: tetapkan / cabut role "pemagang" sesuai status & kondisi =====
+    private function syncPemagangRole(IR $intern): void
+    {
+        $user = $intern->user;
+        if (!$user) return;
+
+        // syarat role "pemagang": user sudah submit (punya record IR) & status "accepted"
+        if ($intern->internship_status === IR::STATUS_ACCEPTED) {
+            // beri role pemagang (jaga idempotensi)
+            if (mb_strtolower($user->role ?? '') !== 'pemagang') {
+                $user->role = 'pemagang';
+                $user->save();
+            }
+        } else {
+            // kebijakan saat status berubah dari accepted ke selainnya:
+            // Kalau mau cabut role, tentukan fallback (mis: 'user').
+            // Kalau TIDAK mau dicabut (tetap pemagang), hapus blok ini.
+            if (mb_strtolower($user->role ?? '') === 'pemagang') {
+                $user->role = 'user'; // sesuaikan fallback default project kamu
+                $user->save();
+            }
+        }
+    }
+
+
     public function updateStatus(Request $request, IR $intern)
     {
         $validated = $request->validate([
-            'internship_status' => 'required|in:new,active,completed,exited,pending',
+            'internship_status' => 'required|in:waiting,active,completed,exited,pending,accepted,rejected',
         ]);
 
         $intern->internship_status = $validated['internship_status'];
         $intern->save();
+        $this->syncPemagangRole($intern);
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json(['ok' => true]);
@@ -369,15 +395,32 @@ class InternController extends Controller
         $validated = $request->validate([
             'ids'               => 'required|array|min:1',
             'ids.*'             => 'integer|exists:internship_registrations,id',
-            'internship_status' => 'required|in:new,active,completed,exited,pending',
+            'internship_status' => 'required|in:waiting,active,completed,exited,pending,accepted,rejected',
         ]);
 
         $affected = 0;
 
         DB::transaction(function () use ($validated, &$affected) {
-            $affected = IR::whereIn('id', $validated['ids'])
-                ->update(['internship_status' => $validated['internship_status']]);
-        });
+        // Kunci baris agar aman saat paralel update
+        $interns = IR::whereIn('id', $validated['ids'])
+            ->lockForUpdate()
+            ->get();
+
+        foreach ($interns as $intern) {
+            // skip kalau status sudah sama (hemat write)
+            if ($intern->internship_status === $validated['internship_status']) {
+                continue;
+            }
+
+            $intern->internship_status = $validated['internship_status'];
+            $intern->save();
+
+            // sinkronisasi role "pemagang" berdasar status terbaru
+            $this->syncPemagangRole($intern);
+
+            $affected++;
+        }
+    });
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json(['ok' => true, 'affected' => $affected]);

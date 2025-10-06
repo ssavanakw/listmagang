@@ -123,6 +123,16 @@ class InternApiController extends Controller
         'yes' => 'Ya', 'y' => 'Ya', '1' => 'Ya', 'true' => 'Ya', 'ya' => 'Ya',
         'no'  => 'Tidak', 'n' => 'Tidak', '0' => 'Tidak', 'false' => 'Tidak', 'tidak' => 'Tidak',
     ];
+    
+    private array $mapFamilyStatus = [
+        'not_provided' => '-',
+        'single'       => 'Belum menikah',
+        'married'      => 'Sudah menikah',
+        'other'        => 'Lainnya',
+        // kompat lama (kalau ada data yes/no)
+        'yes' => 'Sudah menikah', 'ya' => 'Sudah menikah', '1' => 'Sudah menikah', 'true' => 'Sudah menikah',
+        'no'  => 'Belum menikah', 'tidak' => 'Belum menikah', '0' => 'Belum menikah', 'false' => 'Belum menikah',
+    ];
 
     /** Humanize slug → “Corel Photoshop” */
     private function humanizeSlug(string $val): string
@@ -268,14 +278,17 @@ class InternApiController extends Controller
         // Cek apakah pencarian aktif
         $isSearching = $req->filled('q');
 
-        // Jika ada pencarian, ambil semua data (tanpa pagination), jika tidak, gunakan pagination
         if ($isSearching) {
-            $interns = $q->get();
+            // Tanpa pagination
+            $collection = $q->get();
+            $list = $collection->all(); // array of IR
         } else {
-            $interns = $q->paginate($perPage)->appends($req->query());
+            // Dengan pagination
+            $paginator = $q->paginate($perPage)->appends($req->query());
+            $list = $paginator->items(); // array of IR
         }
 
-        // Map data → tambah certificate_pdf_url (Browsershot) + aman-kan hanya untuk completed
+        // Map data → rows
         $statusCompleted = defined(IR::class.'::STATUS_COMPLETED') ? IR::STATUS_COMPLETED : 'completed';
 
         $rows = array_map(function (IR $r) use ($statusCompleted) {
@@ -316,7 +329,7 @@ class InternApiController extends Controller
                 'internship_info_other' => $r->internship_info_other,
                 'current_activities' => $r->current_activities,
                 'boarding_info' => $this->labelize($this->mapYesNo, $r->boarding_info),
-                'family_status' => $this->labelize($this->mapYesNo, $r->family_status),
+                'family_status' => $this->labelize($this->mapFamilyStatus, $r->family_status), // ⬅ pakai mapFamilyStatus (lihat Patch 2)
                 'parent_wa_contact' => $r->parent_wa_contact,
                 'social_media_instagram' => $r->social_media_instagram,
                 'cv_ktp_portofolio_pdf' => $r->cv_ktp_portofolio_pdf ? asset('storage/'.$r->cv_ktp_portofolio_pdf) : null,
@@ -326,23 +339,44 @@ class InternApiController extends Controller
                 'certificate_pdf_url' => $canCert ? route('admin.interns.certificate.pdf', $r) : null,
                 'status_update_url' => route('admin.interns.status.update', $r),
             ];
-        }, $interns->items());
+        }, $list);
+
+        // Meta & links respons
+        if ($isSearching) {
+            $total = count($list);
+            $meta = [
+                'current_page' => 1,
+                'per_page'     => $total,
+                'total'        => $total,
+                'last_page'    => 1,
+            ];
+            $links = [
+                'first' => null,
+                'prev'  => null,
+                'next'  => null,
+                'last'  => null,
+            ];
+        } else {
+            $meta = [
+                'current_page' => $paginator->currentPage(),
+                'per_page'     => $paginator->perPage(),
+                'total'        => $paginator->total(),
+                'last_page'    => $paginator->lastPage(),
+            ];
+            $links = [
+                'first' => $paginator->url(1),
+                'prev'  => $paginator->previousPageUrl(),
+                'next'  => $paginator->nextPageUrl(),
+                'last'  => $paginator->url($paginator->lastPage()),
+            ];
+        }
 
         return response()->json([
-            'data' => $rows,
-            'meta' => [
-                'current_page' => $interns->currentPage(),
-                'per_page'     => $interns->perPage(),
-                'total'        => $interns->total(),
-                'last_page'    => $interns->lastPage(),
-            ],
-            'links' => [
-                'first' => $interns->url(1),
-                'prev'  => $interns->previousPageUrl(),
-                'next'  => $interns->nextPageUrl(),
-                'last'  => $interns->url($interns->lastPage()),
-            ],
+            'data'  => $rows,
+            'meta'  => $meta,
+            'links' => $links,
         ]);
+
     }
 
     /**
