@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\InternshipRegistration as IR;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str; 
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
@@ -16,34 +17,21 @@ class InternshipRegistrationController extends Controller
      * Jika terdapat nama yang sama, tambahkan penomoran di belakang nama.
      * Return: path relatif pada disk 'public', mis: "uploads/cv-budi(1).pdf"
      */
-    private function storeWithOriginalName($file, string $directory = 'uploads'): string
+    private function storeWithOriginalName(\Illuminate\Http\UploadedFile $file, string $dir): string
     {
-        $nameOnly  = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $extension = $file->getClientOriginalExtension();
+        $disk = 'public';
+        $original = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $ext = $file->getClientOriginalExtension();
+        $safe = Str::slug($original, '_');
 
-        // bersihkan nama agar aman untuk filesystem
-        $base = preg_replace('/[^A-Za-z0-9_\- ]+/', '', $nameOnly);
-        $base = preg_replace('/\s+/', ' ', trim($base));
-        $base = str_replace(' ', '-', $base);
-
-        // fallback kalau jadi kosong
-        if ($base === '') $base = 'file';
-
-        $filename = "{$base}.{$extension}";
-        $path     = "{$directory}/{$filename}";
-        $i = 1;
-
-        // tambah (n) jika sudah ada
-        while (Storage::disk('public')->exists($path)) {
-            $filename = "{$base}({$i}).{$extension}";
-            $path     = "{$directory}/{$filename}";
+        $i = 0;
+        do {
+            $name = $i === 0 ? "{$safe}.{$ext}" : "{$safe}({$i}).{$ext}";
+            $path = "{$dir}/{$name}";
             $i++;
-        }
+        } while (Storage::disk($disk)->exists($path));
 
-        // simpan
-        $file->storeAs($directory, $filename, 'public');
-
-        return $path;
+        return $file->storeAs($dir, $name, $disk);
     }
 
     /**
@@ -232,6 +220,9 @@ class InternshipRegistrationController extends Controller
 
     public function updateProfile(Request $request)
     {
+        $user   = $request->user();
+        $intern = optional($user)->internshipRegistration;
+
         $validated = $request->validate([
             'fullname'                    => 'required|string|max:255',
             'born_date'                   => 'required|string|max:255',
@@ -252,49 +243,120 @@ class InternshipRegistrationController extends Controller
             'internship_interest'         => 'required|string|max:255',
             'internship_interest_other'   => 'nullable|string|max:255',
 
-            // ⬇︎ TAMBAHAN FIELD BARU
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'owned_tools' => 'nullable|string',
-            'internship_info_sources' => 'nullable|string',
-            'family_status' => 'nullable|string|in:not_provided,single,married,other',
+            // Tambahan field (sinkron dengan form)
+            'design_software'                 => 'nullable|string|max:255',
+            'video_software'                  => 'nullable|string|max:255',
+            'programming_languages'           => 'nullable|string|max:255',
+            'digital_marketing_type'          => 'nullable|string|max:255',
+            'digital_marketing_type_other'    => 'nullable|string|max:255',
 
-            // File validation
-            'cv_ktp_portofolio_pdf'       => 'nullable|file|mimes:pdf|max:10240',             // 10MB
-            'portofolio_visual'           => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240', // ijinkan pdf juga
-            // Additional fields validation here...
+            'laptop_equipment'          => 'nullable|string|max:20',   // Ya/Tidak
+            'owned_tools'               => 'nullable|array',
+            'owned_tools.*'             => 'nullable|string|max:100',
+            'owned_tools_other'         => 'nullable|string|max:255',
+
+            'internship_info_sources'   => 'nullable|array',
+            'internship_info_sources.*' => 'nullable|string|max:100',
+            'internship_info_other'     => 'nullable|string|max:255',
+
+            'current_activities'        => 'nullable|string|max:255',
+            'boarding_info'             => 'nullable|string|max:20',   // Ya/Tidak
+            'family_status'             => 'sometimes|string|in:Ya,Tidak', // hanya jika dikirim
+            'parent_wa_contact'         => 'nullable|string|max:100',
+            'social_media_instagram'    => 'nullable|string|max:100',
+
+            'start_date' => 'nullable', // parse manual
+            'end_date'   => 'nullable', // parse manual
+
+            // Files
+            'cv_ktp_portofolio_pdf'     => 'nullable|file|mimes:pdf|max:10240',
+            'portofolio_visual'         => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
 
-        // Normalisasi tanggal: born_date/start_date/end_date → Y-m-d (aman kalau gagal parse)
-        foreach (['born_date', 'start_date', 'end_date'] as $fld) {
-            if (!empty($validated[$fld])) {
+        // ——— Normalisasi tanggal → Y-m-d (aman bila gagal parse)
+        foreach (['born_date','start_date','end_date'] as $fld) {
+            if ($request->filled($fld)) {
                 try {
-                    $validated[$fld] = \Carbon\Carbon::parse($validated[$fld])->format('Y-m-d');
+                    $validated[$fld] = \Carbon\Carbon::parse($request->input($fld))->format('Y-m-d');
                 } catch (\Throwable $e) {
                     // biarkan nilai aslinya jika gagal parse
                 }
             }
         }
+        // Cek end_date >= start_date bila keduanya valid
+        if (!empty($validated['start_date']) && !empty($validated['end_date'])) {
+            try {
+                if (\Carbon\Carbon::parse($validated['end_date'])->lt(\Carbon\Carbon::parse($validated['start_date']))) {
+                    return back()
+                        ->withErrors(['end_date' => 'Tanggal selesai harus setelah atau sama dengan tanggal mulai.'])
+                        ->withInput();
+                }
+            } catch (\Throwable $e) {}
+        }
 
-        // Handle file upload (pakai nama asli + penomoran, sama seperti store())
+        // ——— Normalisasi Ya/Tidak (dan JANGAN tulis NULL ke DB)
+        $yn = function ($v) {
+            $v = \Illuminate\Support\Str::lower(trim((string) $v));
+            if (in_array($v, ['ya','y','yes','1','true']))   return 'Ya';
+            if (in_array($v, ['tidak','no','n','0','false'])) return 'Tidak';
+            return null;
+        };
+        if (($v = $yn($request->input('laptop_equipment'))) !== null) $validated['laptop_equipment'] = $v; else unset($validated['laptop_equipment']);
+        if (($v = $yn($request->input('boarding_info')))    !== null) $validated['boarding_info']    = $v; else unset($validated['boarding_info']);
+        if (($v = $yn($request->input('family_status')))    !== null) $validated['family_status']    = $v; else unset($validated['family_status']);
+
+        // ——— Checkbox arrays → simpan CSV
+        $owned = $request->input('owned_tools');
+        if (is_array($owned)) {
+            $validated['owned_tools'] = implode(', ',
+                array_values(array_filter(array_map('trim', $owned), fn($x) => $x !== ''))
+            );
+        } elseif (is_string($owned) && $owned !== '') {
+            $validated['owned_tools'] = $owned;
+        }
+
+        $infos = $request->input('internship_info_sources');
+        if (is_array($infos)) {
+            $validated['internship_info_sources'] = implode(', ',
+                array_values(array_filter(array_map('trim', $infos), fn($x) => $x !== ''))
+            );
+        } elseif (is_string($infos) && $infos !== '') {
+            $validated['internship_info_sources'] = $infos;
+        }
+
+        // ——— Upload file (nama asli + penomoran)
         if ($request->hasFile('cv_ktp_portofolio_pdf')) {
             $validated['cv_ktp_portofolio_pdf'] = $this->storeWithOriginalName(
-                $request->file('cv_ktp_portofolio_pdf'),
-                'uploads'
+                $request->file('cv_ktp_portofolio_pdf'), 'uploads'
             );
         }
         if ($request->hasFile('portofolio_visual')) {
             $validated['portofolio_visual'] = $this->storeWithOriginalName(
-                $request->file('portofolio_visual'),
-                'uploads'
+                $request->file('portofolio_visual'), 'uploads'
             );
         }
 
-        $intern = auth()->user()->internshipRegistration;
-        $intern->update($validated);
+        // ——— Pastikan record milik user ada; kalau belum, buat dengan status awal "waiting"
+        if (!$intern) {
+            $intern = new \App\Models\InternshipRegistration();
+            $intern->user_id = $user->id;
+            $intern->internship_status = defined(\App\Models\InternshipRegistration::class.'::STATUS_WAITING')
+                ? \App\Models\InternshipRegistration::STATUS_WAITING
+                : 'waiting';
+        }
 
-        return redirect()->route('user.dashboard')->with('success', 'Profil berhasil diperbarui!');
+        // Jangan izinkan override status dari form
+        unset($validated['internship_status']);
+
+        // Simpan
+        $intern->fill($validated);
+        $intern->save();
+
+        return redirect()
+            ->route('user.editProfile')
+            ->with('success', 'Profil berhasil diperbarui!');
     }
+
 
 
 }
