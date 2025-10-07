@@ -9,12 +9,11 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-
     // Show registration form
     public function showRegisterForm()
     {
         if (auth()->check()) {
-        return redirect()->route('user.dashboard'); // Redirect ke dashboard atau halaman lain
+            return redirect()->route('user.dashboard'); // Redirect ke dashboard user jika sudah login
         }
         return view('auth.admin-register');
     }
@@ -40,17 +39,16 @@ class AuthController extends Controller
         // Login after successful registration
         Auth::login($user);
 
-        // Jika role admin → dashboard admin, kalau user → internship.form
+        // Redirect to user dashboard if the user has 'user' role, or to internship form
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard')
                 ->with('success', 'Registrasi berhasil! Selamat datang Admin.');
         }
 
+        // Redirect to internship form for new user
         return redirect()->route('internship.form')
             ->with('success', 'Registrasi berhasil! Silakan lengkapi form pendaftaran.');
     }
-
-
 
     /**
      * Tampilkan form login admin
@@ -58,7 +56,7 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         if (auth()->check()) {
-        return redirect()->route('user.dashboard'); // Redirect ke dashboard atau halaman lain
+            return redirect()->route('user.dashboard'); // Redirect ke dashboard user jika sudah login
         }
         return view('auth.admin-login');
     }
@@ -68,23 +66,25 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        // Validate the login form data
         $credentials = $request->validate([
             'email' => ['required','email'],
             'password' => ['required'],
         ]);
 
+        // Attempt to log the user in
         if (auth()->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+            // Redirect based on the user role
             return auth()->user()->role === 'admin'
                 ? redirect()->route('admin.dashboard.index')     // admin
                 : redirect()->route('user.dashboard');     // user
         }
 
+        // If login fails, return back with error
         return back()->with('error', 'Email atau password salah!')->onlyInput('email');
     }
-
-
 
     /**
      * Logout admin
@@ -93,9 +93,11 @@ class AuthController extends Controller
     {
         Auth::logout();
 
+        // Invalidate session to prevent session hijacking
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        // Redirect back to login page after logout
         return redirect()->route('user.login')->with('success', 'Berhasil logout.');
     }
 }

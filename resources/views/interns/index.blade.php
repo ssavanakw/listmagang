@@ -144,236 +144,250 @@
 
         {{-- Table --}}
         <div id="tableWrap" class="overflow-x-auto" data-base="{{ url('/admin/interns') }}">
-        <table id="tabel-pemagang" class="w-max min-w-full text-left text-sm text-gray-700 dark:text-gray-200">
-            <thead class="sticky bg-gray-50 text-xs uppercase tracking-wider text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-            @php
-                // daftar kolom
-                $fields = [
-                    'fullname'                   => 'NAMA LENGKAP',
-                    'born_date'                  => 'TANGGAL LAHIR',
-                    'student_id'                 => 'NIM / NIS',
-                    'email'                      => 'EMAIL',
-                    'gender'                     => 'GENDER',
-                    'phone_number'               => 'TELEPON',
-                    'institution_name'           => 'INSTITUSI',
-                    'study_program'              => 'PRODI',
-                    'faculty'                    => 'FAKULTAS',
-                    'current_city'               => 'KOTA',
-                    'internship_reason'          => 'ALASAN MAGANG',
-                    'internship_type'            => 'JENIS MAGANG',
-                    'internship_arrangement'     => 'TIPE MAGANG',
-                    'current_status'             => 'STATUS SAAT INI',
-                    'english_book_ability'       => 'BACA B.INGGRIS',
-                    'supervisor_contact'         => 'KONTAK PEMBIMBING',
-                    'internship_interest'        => 'BIDANG MINAT',
-                    'internship_interest_other'  => 'MINAT LAIN',
-                    'design_software'            => 'SOFTWARE DESAIN',
-                    'video_software'             => 'SOFTWARE VIDEO',
-                    'programming_languages'      => 'BAHASA PEMROGRAMAN',
-                    'digital_marketing_type'     => 'DIGITAL MARKETING',
-                    'digital_marketing_type_other'=> 'MARKETING LAIN',
-                    'laptop_equipment'           => 'PUNYA LAPTOP',
-                    'owned_tools'                => 'ALAT DIMILIKI',
-                    'owned_tools_other'          => 'ALAT LAIN',
-                    'start_date'                 => 'MULAI',
-                    'end_date'                   => 'SELESAI',
-                    'internship_info_sources'    => 'SUMBER INFO',
-                    'internship_info_other'      => 'INFO LAIN',
-                    'current_activities'         => 'AKTIVITAS SAAT INI',
-                    'boarding_info'              => 'INFO KOST',
-                    'family_status'              => 'SUDAH BERKELUARGA',
-                    'parent_wa_contact'          => 'KONTAK ORANG TUA',
-                    'social_media_instagram'     => 'INSTAGRAM',
-                    'cv_ktp_portofolio_pdf'      => 'FILE PDF',
-                    'portofolio_visual'          => 'FILE VISUAL',
-                    'created_at'                 => 'DIBUAT',
-                    'internship_status'          => 'STATUS',
-                ];
-                if (($scope ?? '') === 'completed') {
-                    $fields['certificate'] = 'SERTIFIKAT';
-                }
-
-                // tipe input per kolom
-                $dateFields   = ['born_date', 'start_date', 'end_date', 'created_at'];
-                $selectFields = ['gender','internship_type','internship_arrangement','current_status','english_book_ability','laptop_equipment','family_status','internship_status'];
-
-                // daftar template sertifikat
-                $certTemplates = [
-                    'certmagangjogjacom' => 'Magangjogja.com',
-                    'certareakerjacom'   => 'AreaKerja.com',
-                    'certtitipsinicom'    => 'Titipsini.com',
-                ];
-
-                // helper format tanggal
-                $fmt = function($d){
-                    if (!$d) return '-';
-                    try { return \Carbon\Carbon::parse($d)->locale('id')->translatedFormat('d M Y'); }
-                    catch (\Throwable $e) { return $d; }
-                };
-            @endphp
-
-            {{-- Header kolom --}}
-            <tr class="divide-x divide-gray-200 dark:divide-gray-600">
-                <th class="whitespace-nowrap px-3 py-3 font-semibold">No</th>
-                @foreach ($fields as $label)
-                    <th class="whitespace-nowrap px-3 py-3 font-semibold">{{ $label }}</th>
-                @endforeach
-                <th class="whitespace-nowrap px-3 py-3 font-semibold">AKSI</th>
-            </tr>
-
-            {{-- Baris filter --}}
-            <tr class="divide-x divide-gray-200 bg-white dark:divide-gray-600 dark:bg-gray-800">
-                <th class="px-2 py-2"></th>
-                @foreach ($fields as $key => $label)
-                    <th class="px-2 py-2">
-                        @if (in_array($key, $dateFields))
-                            <input type="text" placeholder="Cari…" data-col="{{ $loop->index + 1 }}"
-                                class="w-full rounded-md border-gray-300 text-xs dark:bg-gray-700" />
-                        @elseif (in_array($key, $selectFields))
-                            <select data-col="{{ $loop->index + 1 }}"
-                                    class="w-full rounded-md border-gray-300 text-xs dark:bg-gray-700">
-                                <option value="">Semua</option>
-                            </select>
-                        @elseif ($key === 'certificate')
-                            {{-- HANYA SATU SELECT untuk filter sertifikat --}}
-                            <select data-col="{{ $loop->index + 1 }}"
-                                    class="w-full rounded-md border-gray-300 text-xs dark:bg-gray-700">
-                                <option value="">Semua</option>
-                                @foreach ($certTemplates as $tplKey => $tplLabel)
-                                    <option value="{{ $tplLabel }}">{{ $tplLabel }}</option>
-                                @endforeach
-                            </select>
-                        @else
-                            <input type="text" placeholder="Cari…" data-col="{{ $loop->index + 1 }}"
-                                class="w-full rounded-md border-gray-300 text-xs dark:bg-gray-700" />
-                        @endif
-                    </th>
-                @endforeach
-                <th class="px-2 py-2"></th>
-            </tr>
-            </thead>
-
-            <tbody id="rows" class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-            @forelse ($interns as $i => $intern)
+            <table id="tabel-pemagang" class="w-max min-w-full text-left text-sm text-gray-700 dark:text-gray-200">
+                <thead class="sticky bg-gray-50 text-xs uppercase tracking-wider text-gray-600 dark:bg-gray-700 dark:text-gray-300">
                 @php
-                    $defaultTpl = $intern->certificate_template ?? 'certmagangjogjacom';
+                    // daftar kolom
+                    $fields = [
+                        'fullname'                   => 'NAMA LENGKAP',
+                        'born_date'                  => 'TANGGAL LAHIR',
+                        'student_id'                 => 'NIM / NIS',
+                        'email'                      => 'EMAIL',
+                        'gender'                     => 'GENDER',
+                        'phone_number'               => 'TELEPON',
+                        'institution_name'           => 'INSTITUSI',
+                        'study_program'              => 'PRODI',
+                        'faculty'                    => 'FAKULTAS',
+                        'current_city'               => 'KOTA',
+                        'internship_reason'          => 'ALASAN MAGANG',
+                        'internship_type'            => 'JENIS MAGANG',
+                        'internship_arrangement'     => 'TIPE MAGANG',
+                        'current_status'             => 'STATUS SAAT INI',
+                        'english_book_ability'       => 'BACA B.INGGRIS',
+                        'supervisor_contact'         => 'KONTAK PEMBIMBING',
+                        'internship_interest'        => 'BIDANG MINAT',
+                        'internship_interest_other'  => 'MINAT LAIN',
+                        'design_software'            => 'SOFTWARE DESAIN',
+                        'video_software'             => 'SOFTWARE VIDEO',
+                        'programming_languages'      => 'BAHASA PEMROGRAMAN',
+                        'digital_marketing_type'     => 'DIGITAL MARKETING',
+                        'digital_marketing_type_other'=> 'MARKETING LAIN',
+                        'laptop_equipment'           => 'PUNYA LAPTOP',
+                        'owned_tools'                => 'ALAT DIMILIKI',
+                        'owned_tools_other'          => 'ALAT LAIN',
+                        'start_date'                 => 'MULAI',
+                        'end_date'                   => 'SELESAI',
+                        'internship_info_sources'    => 'SUMBER INFO',
+                        'internship_info_other'      => 'INFO LAIN',
+                        'current_activities'         => 'AKTIVITAS SAAT INI',
+                        'boarding_info'              => 'INFO KOST',
+                        'family_status'              => 'SUDAH BERKELUARGA',
+                        'parent_wa_contact'          => 'KONTAK ORANG TUA',
+                        'social_media_instagram'     => 'INSTAGRAM',
+                        'cv_ktp_portofolio_pdf'      => 'FILE PDF',
+                        'portofolio_visual'          => 'FILE VISUAL',
+                        'created_at'                 => 'DIBUAT',
+                        'internship_status'          => 'STATUS',
+                    ];
+                    if (($scope ?? '') === 'completed') {
+                        $fields['certificate'] = 'SERTIFIKAT';
+                    }
+
+                    // tipe input per kolom
+                    $dateFields   = ['born_date', 'start_date', 'end_date', 'created_at'];
+                    $selectFields = ['gender','internship_type','internship_arrangement','current_status','english_book_ability','laptop_equipment','family_status','internship_status'];
+
+                    // daftar template sertifikat
+                    $certTemplates = [
+                        'certmagangjogjacom' => 'Magangjogja.com',
+                        'certareakerjacom'   => 'AreaKerja.com',
+                        'certtitipsinicom'    => 'Titipsini.com',
+                    ];
+
+                    // helper format tanggal
+                    $fmt = function($d){
+                        if (!$d) return '-';
+                        try { return \Carbon\Carbon::parse($d)->locale('id')->translatedFormat('d M Y'); }
+                        catch (\Throwable $e) { return $d; }
+                    };
                 @endphp
-                <tr class="divide-x divide-gray-200 dark:divide-gray-700">
-                    <td class="px-3 py-3 whitespace-nowrap">{{ $loop->iteration }}</td>
 
-                    @foreach ($fields as $key => $label)
-                        @switch($key)
-                            @case('born_date')
-                            @case('start_date')
-                            @case('end_date')
-                            @case('created_at')
-                                <td class="px-3 py-3 whitespace-nowrap">{{ $fmt($intern->{$key}) }}</td>
-                                @break
-
-                            @case('social_media_instagram')
-                                <td class="px-3 py-3 whitespace-nowrap">
-                                    @if ($intern->social_media_instagram)
-                                        <a href="https://instagram.com/{{ ltrim($intern->social_media_instagram, '@') }}"
-                                        class="text-blue-600 hover:underline" target="_blank">
-                                        {{ '@'.ltrim($intern->social_media_instagram, '@') }}
-                                        </a>
-                                    @else - @endif
-                                </td>
-                                @break
-
-                            @case('cv_ktp_portofolio_pdf')
-                                <td class="px-3 py-3 whitespace-nowrap">
-                                    @if ($intern->cv_ktp_portofolio_pdf)
-                                        <a href="{{ asset('storage/'.$intern->cv_ktp_portofolio_pdf) }}" target="_blank"
-                                        class="text-blue-600 hover:underline">Lihat</a>
-                                    @else - @endif
-                                </td>
-                                @break
-
-                            @case('portofolio_visual')
-                                <td class="px-3 py-3 whitespace-nowrap">
-                                    @if ($intern->portofolio_visual)
-                                        <a href="{{ asset('storage/'.$intern->portofolio_visual) }}" target="_blank"
-                                        class="text-blue-600 hover:underline">Lihat</a>
-                                    @else - @endif
-                                </td>
-                                @break
-
-                            @case('internship_status')
-                                @php
-                                    // Map kelas badge (sinkron dengan Model & JS)
-                                    $statusBadge = [
-                                        'waiting'       => ['Menunggu', 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200'],
-                                        'active'    => ['Aktif',          'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200'],
-                                        'completed' => ['Selesai',        'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200'],
-                                        'exited'    => ['Keluar',         'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200'],
-                                        'pending'   => ['Pending',        'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'],
-                                        'accepted'  => ['Diterima',       'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'],
-                                        'rejected'  => ['Ditolak',        'bg-gray-200 text-gray-700 dark:bg-gray-800/60 dark:text-gray-200'],
-                                    ];
-                                    $st = strtolower($intern->internship_status ?? 'waiting');
-                                    $label = $statusBadge[$st][0] ?? ucfirst($st);
-                                    $cls   = $statusBadge[$st][1] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
-                                @endphp
-                                <td class="px-3 py-3 whitespace-nowrap">
-                                    <span id="badge-{{ $intern->id }}"
-                                        class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $cls }}">
-                                        {{ $label }}
-                                    </span>
-                                </td>
-                            @break
-
-
-                            @case('certificate')
-                                <td class="px-3 py-3 whitespace-nowrap">
-                                    <div class="flex items-center gap-2">
-                                        {{-- Dropdown pilihan template sertifikat --}}
-                                        <select class="cert-tpl form-select rounded-md border-gray-300 text-xs dark:bg-gray-700"
-                                                data-intern="{{ $intern->id }}"
-                                                style="min-width: 160px;">
-                                            @foreach($certTemplates as $tplKey => $tplLabel)
-                                                <option value="{{ $tplKey }}" {{ $defaultTpl === $tplKey ? 'selected' : '' }}>
-                                                    {{ $tplLabel }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-
-                                        {{-- 1 tombol download --}}
-                                        <button type="button"
-                                                class="btn btn-sm btn-primary js-download-cert"
-                                                data-intern="{{ $intern->id }}">
-                                            Download PDF
-                                        </button>
-                                    </div>
-                                </td>
-                            @break
-
-                            @default
-                                <td class="px-3 py-3 whitespace-nowrap">{{ $intern->{$key} ?? '-' }}</td>
-                        @endswitch
+                {{-- Header kolom --}}
+                <tr class="divide-x divide-gray-200 dark:divide-gray-600">
+                    <th class="whitespace-nowrap px-3 py-3 font-semibold">No</th>
+                    @foreach ($fields as $label)
+                        <th class="whitespace-nowrap px-3 py-3 font-semibold">{{ $label }}</th>
                     @endforeach
+                    <th class="whitespace-nowrap px-3 py-3 font-semibold">AKSI</th>
+                </tr>
 
-                    {{-- AKSI --}}
-                    <td class="px-3 py-3 whitespace-nowrap">
-                        <div class="flex items-center gap-2">
-                            <a href="{{ route('admin.interns.certificate', $intern->id) }}" class="btn btn-xs btn-info">Detail</a>
-                            <a href="{{ route('admin.interns.update', $intern->id) }}" class="btn btn-xs btn-warning">Edit</a>
-                            <form action="{{ route('admin.interns.destroy', $intern->id) }}" method="POST" onsubmit="return confirm('Hapus data ini?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-xs btn-danger">Hapus</button>
-                            </form>
-                        </div>
-                    </td>
+                {{-- Baris filter --}}
+                <tr class="divide-x divide-gray-200 bg-white dark:divide-gray-600 dark:bg-gray-800">
+                    <th class="px-2 py-2"></th>
+                    @foreach ($fields as $key => $label)
+                        <th class="px-2 py-2">
+                            @if (in_array($key, $dateFields))
+                                <input type="text" placeholder="Cari…" data-col="{{ $loop->index + 1 }}"
+                                    class="w-full rounded-md border-gray-300 text-xs dark:bg-gray-700" />
+                            @elseif (in_array($key, $selectFields))
+                                <select data-col="{{ $loop->index + 1 }}"
+                                        class="w-full rounded-md border-gray-300 text-xs dark:bg-gray-700">
+                                    <option value="">Semua</option>
+                                </select>
+                            @elseif ($key === 'certificate')
+                                {{-- HANYA SATU SELECT untuk filter sertifikat --}}
+                                <select data-col="{{ $loop->index + 1 }}"
+                                        class="w-full rounded-md border-gray-300 text-xs dark:bg-gray-700">
+                                    <option value="">Semua</option>
+                                    @foreach ($certTemplates as $tplKey => $tplLabel)
+                                        <option value="{{ $tplLabel }}">{{ $tplLabel }}</option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <input type="text" placeholder="Cari…" data-col="{{ $loop->index + 1 }}"
+                                    class="w-full rounded-md border-gray-300 text-xs dark:bg-gray-700" />
+                            @endif
+                        </th>
+                    @endforeach
+                    <th class="px-2 py-2"></th>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
-                        Tidak ada data.
-                    </td>
-                </tr>
-            @endforelse
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody id="rows" class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                @forelse ($interns as $i => $intern)
+                    @php
+                        $defaultTpl = $intern->certificate_template ?? 'certmagangjogjacom';
+                    @endphp
+                    <tr class="divide-x divide-gray-200 dark:divide-gray-700">
+                        <td class="px-3 py-3 whitespace-nowrap">{{ $loop->iteration }}</td>
+
+                        @foreach ($fields as $key => $label)
+                            @switch($key)
+                                @case('born_date')
+                                @case('start_date')
+                                @case('end_date')
+                                @case('created_at')
+                                    <td class="px-3 py-3 whitespace-nowrap">{{ $fmt($intern->{$key}) }}</td>
+                                    @break
+
+                                @case('social_media_instagram')
+                                    <td class="px-3 py-3 whitespace-nowrap">
+                                        @if ($intern->social_media_instagram)
+                                            <a href="https://instagram.com/{{ ltrim($intern->social_media_instagram, '@') }}"
+                                            class="text-blue-600 hover:underline" target="_blank">
+                                            {{ '@'.ltrim($intern->social_media_instagram, '@') }}
+                                            </a>
+                                        @else - @endif
+                                    </td>
+                                    @break
+
+                                @case('cv_ktp_portofolio_pdf')
+                                    <td class="px-3 py-3 whitespace-nowrap">
+                                        @if ($intern->cv_ktp_portofolio_pdf)
+                                            <a href="{{ asset('storage/'.$intern->cv_ktp_portofolio_pdf) }}" target="_blank"
+                                            class="text-blue-600 hover:underline">Lihat</a>
+                                        @else - @endif
+                                    </td>
+                                    @break
+
+                                @case('portofolio_visual')
+                                    <td class="px-3 py-3 whitespace-nowrap">
+                                        @if ($intern->portofolio_visual)
+                                            <a href="{{ asset('storage/'.$intern->portofolio_visual) }}" target="_blank"
+                                            class="text-blue-600 hover:underline">Lihat</a>
+                                        @else - @endif
+                                    </td>
+                                    @break
+
+                                @case('internship_status')
+                                    @php
+                                        $statusBadge = [
+                                            'waiting'   => ['Menunggu', 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200'],
+                                            'active'    => ['Aktif',    'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200'],
+                                            'completed' => ['Selesai',  'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200'],
+                                            'exited'    => ['Keluar',   'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200'],
+                                            'pending'   => ['Pending',  'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'],
+                                            'accepted'  => ['Diterima', 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'],
+                                            'rejected'  => ['Ditolak',  'bg-gray-200 text-gray-700 dark:bg-gray-800/60 dark:text-gray-200'],
+                                        ];
+                                        $st = strtolower($intern->internship_status ?? 'waiting');
+                                        $label = $statusBadge[$st][0] ?? ucfirst($st);
+                                        $cls   = $statusBadge[$st][1] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+
+                                        $statusOptions = ['waiting','active','completed','exited','pending','accepted','rejected'];
+                                    @endphp
+                                    <td class="px-3 py-3 whitespace-nowrap">
+                                        <div class="flex items-center gap-2">
+                                            <span id="badge-{{ $intern->id }}"
+                                                class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $cls }}">
+                                                {{ $label }}
+                                            </span>
+
+                                            <select class="js-status-select rounded-md border-gray-300 text-xs dark:bg-gray-700"
+                                                    data-url="{{ route('admin.interns.status.update', $intern->id) }}"
+                                                    data-id="{{ $intern->id }}">
+                                                @foreach($statusOptions as $opt)
+                                                    <option value="{{ $opt }}" {{ $st === $opt ? 'selected' : '' }}>
+                                                        {{ ucfirst($opt) }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </td>
+                                @break
+
+
+
+                                @case('certificate')
+                                    <td class="px-3 py-3 whitespace-nowrap">
+                                        <div class="flex items-center gap-2">
+                                            {{-- Dropdown pilihan template sertifikat --}}
+                                            <select class="cert-tpl form-select rounded-md border-gray-300 text-xs dark:bg-gray-700"
+                                                    data-intern="{{ $intern->id }}"
+                                                    style="min-width: 160px;">
+                                                @foreach($certTemplates as $tplKey => $tplLabel)
+                                                    <option value="{{ $tplKey }}" {{ $defaultTpl === $tplKey ? 'selected' : '' }}>
+                                                        {{ $tplLabel }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+
+                                            {{-- 1 tombol download --}}
+                                            <button type="button"
+                                                    class="btn btn-sm btn-primary js-download-cert"
+                                                    data-intern="{{ $intern->id }}">
+                                                Download PDF
+                                            </button>
+                                        </div>
+                                    </td>
+                                @break
+
+                                @default
+                                    <td class="px-3 py-3 whitespace-nowrap">{{ $intern->{$key} ?? '-' }}</td>
+                            @endswitch
+                        @endforeach
+
+                        {{-- AKSI --}}
+                        <td class="px-3 py-3 whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('admin.interns.certificate', $intern->id) }}" class="btn btn-xs btn-info">Detail</a>
+                                <a href="{{ route('admin.interns.update', $intern->id) }}" class="btn btn-xs btn-warning">Edit</a>
+                                <form action="{{ route('admin.interns.destroy', $intern->id) }}" method="POST" onsubmit="return confirm('Hapus data ini?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-xs btn-danger">Hapus</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
+                            Tidak ada data.
+                        </td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
         </div>
 
         {{-- JS handler Download/Preview --}}
@@ -451,852 +465,933 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-        // ====== Clamp scroll kanan hanya di tabel ======
-        const wrap = document.getElementById('tableWrap');
-        if (wrap) {
-            wrap.scrollLeft = 0;
-            wrap.addEventListener('scroll', () => {
-                const max = wrap.scrollWidth - wrap.clientWidth;
-                if (wrap.scrollLeft > max) wrap.scrollLeft = max;
-                if (wrap.scrollLeft < 0) wrap.scrollLeft = 0;
-            }, {
-                passive: true
-            });
-        }
+    // ====== Clamp scroll kanan hanya di tabel ======
+    const wrap = document.getElementById('tableWrap');
+    if (wrap) {
+        wrap.scrollLeft = 0;
+        wrap.addEventListener('scroll', () => {
+            const max = wrap.scrollWidth - wrap.clientWidth;
+            if (wrap.scrollLeft > max) wrap.scrollLeft = max;
+            if (wrap.scrollLeft < 0) wrap.scrollLeft = 0;
+        }, {
+            passive: true
+        });
+    }
 
-        const ADMIN_INTERNS_BASE = @json(url('/admin/interns'));
-        const API_URL = @json(route('admin.interns.api'));
-        const SCOPE = @json($scope ?? 'all');
-        const csrf = document.querySelector('meta[name="csrf-token"]') ?.getAttribute('content') || '';
+    const ADMIN_INTERNS_BASE = @json(url('/admin/interns'));
+    const API_URL = @json(route('admin.interns.api'));
+    const SCOPE = @json($scope ?? 'all');
+    const csrf = document.querySelector('meta[name="csrf-token"]') ?.getAttribute('content') || '';
 
-        const rowsEl = document.getElementById('rows');
-        const pagerEl = document.getElementById('pager');
-        const searchForm = document.getElementById('searchForm');
-        const qInput = document.getElementById('q');
+    const rowsEl = document.getElementById('rows');
+    const pagerEl = document.getElementById('pager');
+    const searchForm = document.getElementById('searchForm');
+    const qInput = document.getElementById('q');
 
-        // ====== Status map (badge + label) ======
-        const statusMap = {
-            waiting: {
-                label: 'Menunggu',
-                cls: 'bg-teal-100 text-teal-800 dark:bg-teal-600/20 dark:text-teal-300'
-            },
-            active: {
-                label: 'Aktif',
-                cls: 'bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-300'
-            },
-            completed: {
-                label: 'Selesai',
-                cls: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-600/20 dark:text-indigo-300'
-            },
-            exited: {
-                label: 'Keluar',
-                cls: 'bg-rose-100 text-rose-800 dark:bg-rose-600/20 dark:text-rose-300'
-            },
-            pending: {
-                label: 'Pending',
-                cls: 'bg-amber-100 text-amber-800 dark:bg-amber-600/20 dark:text-amber-300'
-            },accepted:  { 
-                label: 'Diterima',       
-                cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-700/20 dark:text-emerald-200' 
-            },
-            rejected:  { 
-                label: 'Ditolak',        
-                cls: 'bg-gray-200 text-gray-700 dark:bg-gray-700/40 dark:text-gray-200' 
-            },
+    // ====== Status map (badge + label) ======
+    const statusMap = {
+        waiting: {
+            label: 'Menunggu',
+            cls: 'bg-teal-100 text-teal-800 dark:bg-teal-600/20 dark:text-teal-300'
+        },
+        active: {
+            label: 'Aktif',
+            cls: 'bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-300'
+        },
+        completed: {
+            label: 'Selesai',
+            cls: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-600/20 dark:text-indigo-300'
+        },
+        exited: {
+            label: 'Keluar',
+            cls: 'bg-rose-100 text-rose-800 dark:bg-rose-600/20 dark:text-rose-300'
+        },
+        pending: {
+            label: 'Pending',
+            cls: 'bg-amber-100 text-amber-800 dark:bg-amber-600/20 dark:text-amber-300'
+        },accepted:  { 
+            label: 'Diterima',       
+            cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-700/20 dark:text-emerald-200' 
+        },
+        rejected:  { 
+            label: 'Ditolak',        
+            cls: 'bg-gray-200 text-gray-700 dark:bg-gray-700/40 dark:text-gray-200' 
+        },
 
-        };
+    };
 
-        // ====== Advanced Column Search ======
-        const columnFilter = {};
-        const TABLE_ID = 'tabel-pemagang';
-        const WRAP_ID = 'tableWrap';
+    // ====== Advanced Column Search ======
+    const columnFilter = {};
+    const TABLE_ID = 'tabel-pemagang';
+    const WRAP_ID = 'tableWrap';
 
-        const dateCols = new Set(['born_date', 'start_date', 'end_date', 'created_at']);
-        const selectCols = new Set([
-            'gender', 'internship_type', 'internship_arrangement',
-            'current_status', 'english_book_ability', 'laptop_equipment',
-            'family_status', 'internship_status'
-        ]);
+    const dateCols = new Set(['born_date', 'start_date', 'end_date', 'created_at']);
+    const selectCols = new Set([
+        'gender', 'internship_type', 'internship_arrangement',
+        'current_status', 'english_book_ability', 'laptop_equipment',
+        'family_status', 'internship_status'
+    ]);
 
-        // urutan kolom sesuai Blade $fields (tetap sinkron!)
-        const fieldOrder = [
-            'fullname', 'born_date', 'student_id', 'email', 'gender', 'phone_number', 'institution_name', 'study_program',
-            'faculty', 'current_city', 'internship_reason', 'internship_type', 'internship_arrangement', 'current_status',
-            'english_book_ability', 'supervisor_contact', 'internship_interest', 'internship_interest_other', 'design_software',
-            'video_software', 'programming_languages', 'digital_marketing_type', 'digital_marketing_type_other', 'laptop_equipment',
-            'owned_tools', 'owned_tools_other', 'start_date', 'end_date', 'internship_info_sources', 'internship_info_other',
-            'current_activities', 'boarding_info', 'family_status', 'parent_wa_contact', 'social_media_instagram', 'cv_ktp_portofolio_pdf',
-            'portofolio_visual', 'created_at', 'internship_status'
+    // urutan kolom sesuai Blade $fields (tetap sinkron!)
+    const fieldOrder = [
+        'fullname', 'born_date', 'student_id', 'email', 'gender', 'phone_number', 'institution_name', 'study_program',
+        'faculty', 'current_city', 'internship_reason', 'internship_type', 'internship_arrangement', 'current_status',
+        'english_book_ability', 'supervisor_contact', 'internship_interest', 'internship_interest_other', 'design_software',
+        'video_software', 'programming_languages', 'digital_marketing_type', 'digital_marketing_type_other', 'laptop_equipment',
+        'owned_tools', 'owned_tools_other', 'start_date', 'end_date', 'internship_info_sources', 'internship_info_other',
+        'current_activities', 'boarding_info', 'family_status', 'parent_wa_contact', 'social_media_instagram', 'cv_ktp_portofolio_pdf',
+        'portofolio_visual', 'created_at', 'internship_status'
 
-        ];
+    ];
 
-        // buat baris input filter tepat di bawah header
-        function buildAdvancedSearchRow() {
-            const table = document.getElementById('tableWrap');
-            if (!table) return;
-            const thead = table.querySelector('thead');
-            const headRows = thead ?.querySelectorAll('tr');
-            if (!thead || !headRows ?.length) return;
+    // buat baris input filter tepat di bawah header
+    function buildAdvancedSearchRow() {
+        const table = document.getElementById('tableWrap');
+        if (!table) return;
+        const thead = table.querySelector('thead');
+        const headRows = thead ?.querySelectorAll('tr');
+        if (!thead || !headRows ?.length) return;
 
-            // jika sudah ada, jangan duplikasi
-            if (thead.querySelector('tr[data-filter-row]')) return;
+        // jika sudah ada, jangan duplikasi
+        if (thead.querySelector('tr[data-filter-row]')) return;
 
-            const headerCols = headRows[0].children.length; // termasuk kolom "No"
-            const tr = document.createElement('tr');
-            tr.setAttribute('data-filter-row', '');
-            tr.className = 'divide-x divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800';
+        const headerCols = headRows[0].children.length; // termasuk kolom "No"
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-filter-row', '');
+        tr.className = 'divide-x divide-gray-200 dark:divide-gray-600 bg-white dark:bg-gray-800';
 
-            for (let i = 0; i < headerCols; i++) {
-                const th = document.createElement('th');
-                th.className = 'px-2 py-2';
+        for (let i = 0; i < headerCols; i++) {
+            const th = document.createElement('th');
+            th.className = 'px-2 py-2';
 
-                if (i === 0) { // kolom No: kosong
-                    tr.appendChild(th);
-                    continue;
-                }
-
-                const fieldKey = fieldOrder[i - 1]; // offset karena kolom No
-                if (!fieldKey) {
-                    tr.appendChild(th);
-                    continue;
-                }
-
-                if (dateCols.has(fieldKey)) {
-                    th.innerHTML = `
-                        <input type="text" placeholder="Cari…"
-                            data-col="${i}"
-                            class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>`;
-                    columnFilter[i] = {
-                        kind: 'text',
-                        q: ''
-                    }; // <— bukan 'date-range' lagi
-                } else if (selectCols.has(fieldKey)) {
-                    th.innerHTML = `
-                        <select data-col="${i}"
-                            class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs">
-                            <option value="">Semua</option>
-                        </select>`;
-                    columnFilter[i] = {
-                        kind: 'select',
-                        q: ''
-                    };
-                } else {
-                    th.innerHTML = `
-                        <input type="text" placeholder="Cari…"
-                            data-col="${i}"
-                            class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>`;
-                    columnFilter[i] = {
-                        kind: 'text',
-                        q: ''
-                    };
-                }
+            if (i === 0) { // kolom No: kosong
                 tr.appendChild(th);
+                continue;
             }
-            thead.appendChild(tr);
 
-            bindFilterInputs();
-            hydrateSelectOptions();
+            const fieldKey = fieldOrder[i - 1]; // offset karena kolom No
+            if (!fieldKey) {
+                tr.appendChild(th);
+                continue;
+            }
+
+            if (dateCols.has(fieldKey)) {
+                th.innerHTML = `
+                    <input type="text" placeholder="Cari…"
+                        data-col="${i}"
+                        class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>`;
+                columnFilter[i] = {
+                    kind: 'text',
+                    q: ''
+                }; // <— bukan 'date-range' lagi
+            } else if (selectCols.has(fieldKey)) {
+                th.innerHTML = `
+                    <select data-col="${i}"
+                        class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs">
+                        <option value="">Semua</option>
+                    </select>`;
+                columnFilter[i] = {
+                    kind: 'select',
+                    q: ''
+                };
+            } else {
+                th.innerHTML = `
+                    <input type="text" placeholder="Cari…"
+                        data-col="${i}"
+                        class="w-full rounded-md border-gray-300 dark:bg-gray-700 text-xs"/>`;
+                columnFilter[i] = {
+                    kind: 'text',
+                    q: ''
+                };
+            }
+            tr.appendChild(th);
         }
+        thead.appendChild(tr);
 
-        function getFilterTextFromCell(cell) {
-            if (!cell) return '';
+        bindFilterInputs();
+        hydrateSelectOptions();
+    }
 
-            // Prioritas: pakai elemen penanda bila ada (badge status, dsb.)
-            const marker = cell.querySelector('[data-filter-value], [id^="badge-"], .filter-value');
-            if (marker) return (marker.textContent || '').trim();
+    function getFilterTextFromCell(cell) {
+        if (!cell) return '';
 
-            // Fallback: clone lalu buang elemen interaktif
-            const clone = cell.cloneNode(true);
-            clone.querySelectorAll('select, option, form, button, input, textarea').forEach(n => n.remove());
+        // Prioritas: pakai elemen penanda bila ada (badge status, dsb.)
+        const marker = cell.querySelector('[data-filter-value], [id^="badge-"], .filter-value');
+        if (marker) return (marker.textContent || '').trim();
 
-            return (clone.textContent || '')
-                .trim()
-                .replace(/\s+/g, ' '); // normalisasi spasi
+        // Fallback: clone lalu buang elemen interaktif
+        const clone = cell.cloneNode(true);
+        clone.querySelectorAll('select, option, form, button, input, textarea').forEach(n => n.remove());
+
+        return (clone.textContent || '')
+            .trim()
+            .replace(/\s+/g, ' '); // normalisasi spasi
+    }
+
+    function hydrateSelectOptions() {
+        const table = document.getElementById(TABLE_ID);
+        const tbody = table ?.tBodies ?.[0];
+        if (!tbody) return;
+
+        const rows = [...tbody.rows]; // semua baris yang sedang dirender
+
+        table.querySelectorAll('thead select[data-col]').forEach(sel => {
+            const keep = sel.value; // simpan pilihan user
+
+            // hapus opsi lama (kecuali "Semua")
+            sel.querySelectorAll('option:not(:first-child)').forEach(o => o.remove());
+
+            const col = +sel.dataset.col;
+            const vals = new Set(
+                rows.map(r => getFilterTextFromCell(r.cells[col]))
+                .filter(v => v && v !== '-') // kosong & placeholder di-skip
+            );
+
+            [...vals].sort((a, b) => a.localeCompare(b, 'id')).forEach(v => {
+                const o = document.createElement('option');
+                o.value = v;
+                o.textContent = v;
+                sel.appendChild(o);
+            });
+
+            // kembalikan pilihan sebelumnya bila masih valid
+            if (keep && [...sel.options].some(o => o.value === keep)) sel.value = keep;
+        });
+    }
+
+
+
+    function rowMatchByFilters(tr) {
+        const tds = [...tr.cells];
+        for (const key in columnFilter) {
+            const i = +key;
+            const cfg = columnFilter[key];
+            const raw = getFilterTextFromCell(tds[i]);
+
+            if (cfg.kind === 'text') {
+                if (cfg.q && !raw.toLowerCase().includes(cfg.q.toLowerCase())) return false;
+            } else if (cfg.kind === 'select') {
+                if (cfg.q && raw !== cfg.q) return false;
+            }
         }
+        return true;
+    }
 
-        function hydrateSelectOptions() {
+    // ====== TERAPKAN FILTER KE TABEL ======
+    const applyColumnFilters = (() => {
+        const run = () => {
             const table = document.getElementById(TABLE_ID);
             const tbody = table ?.tBodies ?.[0];
             if (!tbody) return;
 
-            const rows = [...tbody.rows]; // semua baris yang sedang dirender
-
-            table.querySelectorAll('thead select[data-col]').forEach(sel => {
-                const keep = sel.value; // simpan pilihan user
-
-                // hapus opsi lama (kecuali "Semua")
-                sel.querySelectorAll('option:not(:first-child)').forEach(o => o.remove());
-
-                const col = +sel.dataset.col;
-                const vals = new Set(
-                    rows.map(r => getFilterTextFromCell(r.cells[col]))
-                    .filter(v => v && v !== '-') // kosong & placeholder di-skip
-                );
-
-                [...vals].sort((a, b) => a.localeCompare(b, 'id')).forEach(v => {
-                    const o = document.createElement('option');
-                    o.value = v;
-                    o.textContent = v;
-                    sel.appendChild(o);
-                });
-
-                // kembalikan pilihan sebelumnya bila masih valid
-                if (keep && [...sel.options].some(o => o.value === keep)) sel.value = keep;
+            [...tbody.rows].forEach(tr => {
+                tr.style.display = rowMatchByFilters(tr) ? '' : 'none';
             });
+        };
+        return debounce(run, 120);
+    })();
+
+    function bindFilterInputs() {
+        const table = document.getElementById(TABLE_ID);
+        if (!table) return;
+
+        // input teks per kolom (termasuk kolom tanggal yang sekarang string)
+        table.querySelectorAll('thead input[data-col]').forEach(inp => {
+            const col = +inp.dataset.col;
+            if (!columnFilter[col]) columnFilter[col] = {
+                kind: 'text',
+                q: ''
+            };
+            inp.addEventListener('input', e => {
+                columnFilter[col].q = e.target.value;
+                applyColumnFilters();
+            });
+        });
+
+        // select per kolom
+        table.querySelectorAll('thead select[data-col]').forEach(sel => {
+            const col = +sel.dataset.col;
+            if (!columnFilter[col]) columnFilter[col] = {
+                kind: 'select',
+                q: ''
+            };
+            sel.addEventListener('change', e => {
+                columnFilter[col].q = e.target.value;
+                applyColumnFilters();
+            });
+        });
+    }
+
+
+
+
+    // ====== Localized label maps (ID) ======
+    const interestMapID = {
+        'project-manager': 'Manajer Proyek',
+        'administration': 'Administrasi',
+        'hr': 'Sumber Daya Manusia (HR)',
+        'uiux': 'UI/UX',
+        'programmer': 'Programmer (Front End / Backend)',
+        'photographer': 'Fotografer',
+        'videographer': 'Videografer',
+        'graphic-designer': 'Desainer Grafis',
+        'social-media-specialist': 'Spesialis Media Sosial',
+        'content-writer': 'Penulis Konten',
+        'content-planner': 'Perencana Konten',
+        'marketing-and-sales': 'Penjualan & Pemasaran',
+        'public-relation': 'Hubungan Masyarakat (Marcomm)',
+        'digital-marketing': 'Pemasaran Digital',
+        'tiktok-creator': 'Kreator TikTok',
+        'welding': 'Pengelasan',
+        'customer-service': 'Layanan Pelanggan',
+    };
+
+    const genderMapID = {
+        'male': 'Laki-laki',
+        'laki-laki': 'Laki-laki',
+        'pria': 'Laki-laki',
+        'm': 'Laki-laki',
+        'female': 'Perempuan',
+        'perempuan': 'Perempuan',
+        'wanita': 'Perempuan',
+        'f': 'Perempuan'
+    };
+
+    const statusNowMapID = {
+        'Fresh Graduate': 'Lulusan Baru',
+        'Student': 'Mahasiswa/Pelajar',
+        'Employee': 'Karyawan',
+        'Unemployed': 'Tidak Bekerja',
+    };
+
+    const arrangementMapID = { // TIPE MAGANG (cara kerja)
+        'onsite': 'WFO',
+        'hybrid': 'HYBRID',
+        'remote': 'WFH'
+    };
+
+    const typeMapID = { // JENIS MAGANG (skema)
+        'campus': 'Magang Kampus',
+        'mandiri': 'Magang Mandiri',
+        'pkl': 'PKL',
+        'kampus-merdeka': 'Kampus Merdeka',
+        'mbkm': 'Kampus Merdeka'
+    };
+
+    const yesNoMapID = {
+        'yes': 'Ya',
+        'y': 'Ya',
+        'true': 'Ya',
+        '1': 'Ya',
+        'ya': 'Ya',
+        'no': 'Tidak',
+        'n': 'Tidak',
+        'false': 'Tidak',
+        '0': 'Tidak',
+        'tidak': 'Tidak'
+    };
+
+    // ====== Helpers ======
+    const fmtStr = (s) => (s && String(s).trim() !== '' ? String(s) : '-');
+
+    // labelizer generik dengan fallback string polos
+    const labelize = (map, val) => {
+        if (val == null) return '-';
+        const key = String(val).toLowerCase();
+        for (const k in map) {
+            if (k.toLowerCase() === key) return map[k];
+        }
+        return String(val); // fallback tampilkan apa adanya
+    };
+
+    function interestLabelID(slug) {
+        if (!slug) return '-';
+        const key = String(slug).toLowerCase();
+        return interestMapID[key] ?? String(slug).replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    // created_at dari server → tetap format tanggal
+    const fmtDate = (s) => {
+        if (!s) return '-';
+        const d = new Date(s);
+        if (isNaN(d)) return String(s);
+        return d.toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+    };
+
+    // ====== Toast helpers ======
+    const toastStack = document.getElementById('toastStack');
+
+    function pushToast(message, type = 'success') {
+        const base = 'flex items-center gap-2 rounded-lg border px-3 py-2 text-sm shadow-sm';
+        const theme = type === 'success' ?
+            'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-700 dark:text-emerald-200' :
+            'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-900/20 dark:border-rose-700 dark:text-rose-200';
+        const el = document.createElement('div');
+        el.className = `${base} ${theme}`;
+        el.innerHTML = `<span>${message}</span>
+                        <button class="ml-2 rounded px-2 py-1 text-xs opacity-70 hover:opacity-100">Tutup</button>`;
+        el.querySelector('button').addEventListener('click', () => el.remove());
+        toastStack.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    }
+
+    // ====== Pending bar state ======
+    const pendingBar = document.getElementById('pendingBar');
+    const pendingCount = document.getElementById('pendingCount');
+    const saveAllBtn = document.getElementById('saveAll');
+    const discardBtn = document.getElementById('discardAll');
+    const pending = new Map(); // key: id, value: {id,name,from,to,url,select,badge}
+
+    function updatePendingBar() {
+        const n = pending.size;
+        pendingCount.textContent = n;
+        pendingBar.classList.toggle('hidden', n === 0);
+        saveAllBtn.disabled = n === 0;
+    }
+
+    function markSelect(sel, active) {
+        sel.classList.toggle('ring-2', active);
+        sel.classList.toggle('ring-amber-400', active);
+        sel.classList.toggle('bg-amber-50', active);
+    }
+
+    // ubah tampilan badge status setelah sukses
+    function applyBadge(badgeEl, newVal) {
+        const m = statusMap[newVal] || {
+            label: newVal,
+            cls: 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200'
+        };
+        badgeEl.className = `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${m.cls}`;
+        badgeEl.textContent = m.label;
+    }
+
+    async function patchForm(url, fields) {
+        const fd = new FormData();
+        fd.append('_method', 'PATCH');
+        for (const [k, v] of Object.entries(fields)) fd.append(k, v);
+        const res = await fetch(url, {
+            method: 'POST',
+            body: fd,
+            headers: {
+                'X-CSRF-TOKEN': csrf,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        });
+        if (!res.ok) {
+            const t = await res.text().catch(() => '');
+            throw new Error(t || `HTTP ${res.status}`);
+        }
+        return res;
+    }
+
+    function buildActionCell(it) {
+        return `
+            <div class="flex gap-2">
+                <button type="button" class="rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600 js-detail"
+                    data-id="${it.id}">
+                    Detail
+                </button>
+                <button type="button" class="rounded bg-amber-600 px-2 py-1 text-xs text-white hover:bg-amber-700 js-edit"
+                    data-id="${it.id}">
+                    Edit
+                </button>
+                <button type="button" class="rounded bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600 js-delete"
+                    data-id="${it.id}">
+                    Hapus
+                </button>
+            </div>`;
+    }
+
+    // ====== Konstanta pilihan template yang muncul di dropdown ======
+    const CERT_OPTIONS = [
+    { value: 'certmagangjogjacom', label: 'Magangjogja.com' },
+    { value: 'certareakerjacom',   label: 'AreaKerja.com'   },
+    { value: 'certtitipsinicom',    label: 'Titipsini.com'    },
+    ];
+
+    // ====== Helper membuat isi cell "SERTIFIKAT" (dropdown + 1 tombol) ======
+    function buildCertCell(it) {
+    const selected = it.certificate_template || 'certmagangjogjacom';
+    const options  = CERT_OPTIONS.map(o =>
+        `<option value="${o.value}" ${o.value === selected ? 'selected' : ''}>${o.label}</option>`
+    ).join('');
+
+    const base = document.getElementById('tableWrap')?.dataset?.base || '/admin/interns';
+
+    return `
+        <div class="flex items-center gap-2">
+        <select class="cert-tpl rounded-md border-gray-300 text-xs dark:bg-gray-700"
+                data-intern="${it.id}" style="min-width: 160px;">
+            ${options}
+        </select>
+
+        <button type="button"
+                class="btn btn-sm btn-primary js-download-cert"
+                data-intern="${it.id}" data-base="${base}">
+            Download
+        </button>
+        </div>
+    `;
+    }
+
+    function buildStatusCell(item) {
+        const cur = item.internship_status || 'waiting';
+        const badge = statusMap[cur] || {
+            label: cur,
+            cls: 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200'
+        };
+        return `
+            <div class="flex min-w-[12rem] items-center justify-between">
+                <span id="badge-${item.id}"
+                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}">
+                    ${badge.label}
+                </span>
+                <form action="${item.status_update_url}" class="inline status-form-row">
+                    <select
+                        class="status-select-row appearance-none rounded-lg border border-gray-300 bg-white px-2 py-1.5 pr-7 text-xs text-gray-700
+                        dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        data-current="${cur}" data-name="${item.fullname || 'pemagang'}" data-id="${item.id}">
+                        ${Object.entries(statusMap).map(([val, obj]) =>
+                            `<option value="${val}" ${val===cur?'selected':''}>${obj.label}</option>`).join('')}
+                    </select>
+                </form>
+            </div>`;
+    }
+
+    function bindStatusListeners() {
+        document.querySelectorAll('.status-select-row').forEach(sel => {
+            sel.onchange = function() {
+                const form = this.closest('form');
+                const url = form.getAttribute('action');
+                const id = Number(this.dataset.id);
+                const name = this.dataset.name || 'pemagang';
+                const from = this.dataset.current;
+                const to = this.value;
+
+                if (to === from) {
+                    if (pending.has(id)) {
+                        pending.delete(id);
+                        markSelect(this, false);
+                        updatePendingBar();
+                    }
+                    return;
+                }
+
+                // simpan state baru ke pending
+                pending.set(id, {
+                    id,
+                    name,
+                    from,
+                    to,
+                    url,
+                    select: this,
+                    badge: document.getElementById(`badge-${id}`)
+                });
+                markSelect(this, true);
+                updatePendingBar();
+            };
+        });
+    }
+
+    function renderRows(payload) {
+        const {
+            data,
+            meta
+        } = payload;
+        const offset = (meta.current_page - 1) * meta.per_page;
+
+        if (!data || data.length === 0) {
+            rowsEl.innerHTML = `
+                <tr>
+                    <td colspan="{{ count($fields) + 2 }}" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                        Belum ada data.
+                    </td>
+                </tr>`;
+            pagerEl.innerHTML = '';
+            return;
         }
 
+        rowsEl.innerHTML = data.map((it, idx) => {
+            window.rowData.set(it.id, it);
+            // ==== (ISI KOLOM TETAP, PERSIS seperti punyamu) ====
+            return `
+                <tr data-row-id="${it.id}"
+                    class="odd:bg-white even:bg-gray-50 hover:bg-gray-100 dark:odd:bg-gray-800 dark:even:bg-gray-800/60 dark:hover:bg-gray-700/60">
+                    <td class="px-3 py-2 text-gray-600 dark:text-gray-300">${offset + idx + 1}</td>
 
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.fullname)}">${fmtStr(it.fullname)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.born_date)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.student_id)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.email)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${labelize(genderMapID, it.gender)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.phone_number)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.institution_name)}">${fmtStr(it.institution_name)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.study_program)}">${fmtStr(it.study_program)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.faculty)}">${fmtStr(it.faculty)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.current_city)}">${fmtStr(it.current_city)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_reason)}">${fmtStr(it.internship_reason)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(typeMapID, it.internship_type)}">${labelize(typeMapID, it.internship_type)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(arrangementMapID, it.internship_arrangement)}">${labelize(arrangementMapID, it.internship_arrangement)}</span></td>
+                    <td class="px-3 py-2 align-top">
+                        <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium ${it.current_status==='Fresh Graduate'
+                            ? 'bg-slate-100 text-slate-800 dark:bg-slate-600/20 dark:text-slate-300'
+                            : (it.current_status==='Student'
+                            ? 'bg-sky-100 text-sky-800 dark:bg-sky-600/20 dark:text-sky-300'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200')}">
+                            ${labelize(statusNowMapID, it.current_status)}
+                        </span>
+                    </td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.english_book_ability)}">${fmtStr(it.english_book_ability)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.supervisor_contact)}">${fmtStr(it.supervisor_contact)}</span></td>
 
-        function rowMatchByFilters(tr) {
-            const tds = [...tr.cells];
-            for (const key in columnFilter) {
-                const i = +key;
-                const cfg = columnFilter[key];
-                const raw = getFilterTextFromCell(tds[i]);
+                    <td class="px-3 py-2 align-top">
+                        <span class="block max-w-[18rem] truncate" title="${interestLabelID(it.internship_interest)}">
+                            ${interestLabelID(it.internship_interest)}
+                        </span>
+                    </td>
 
-                if (cfg.kind === 'text') {
-                    if (cfg.q && !raw.toLowerCase().includes(cfg.q.toLowerCase())) return false;
-                } else if (cfg.kind === 'select') {
-                    if (cfg.q && raw !== cfg.q) return false;
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_interest_other)}">${fmtStr(it.internship_interest_other)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.design_software)}">${fmtStr(it.design_software)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.video_software)}">${fmtStr(it.video_software)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.programming_languages)}">${fmtStr(it.programming_languages)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.digital_marketing_type)}">${fmtStr(it.digital_marketing_type)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.digital_marketing_type_other)}">${fmtStr(it.digital_marketing_type_other)}</span></td>
+
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(yesNoMapID, it.laptop_equipment)}">${labelize(yesNoMapID, it.laptop_equipment)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.owned_tools)}">${fmtStr(it.owned_tools)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.owned_tools_other)}">${fmtStr(it.owned_tools_other)}</span></td>
+
+                    <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.start_date)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.end_date)}</span></td>
+
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_info_sources)}">${fmtStr(it.internship_info_sources)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_info_other)}">${fmtStr(it.internship_info_other)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.current_activities)}">${fmtStr(it.current_activities)}</span></td>
+
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.boarding_info)}">${fmtStr(it.boarding_info)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.family_status)}">${fmtStr(it.family_status)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.parent_wa_contact)}</span></td>
+                    <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.social_media_instagram)}</span></td>
+
+                    <td class="px-3 py-2 align-top">${
+                        it.cv_ktp_portofolio_pdf
+                            ? `<a href="${it.cv_ktp_portofolio_pdf}" target="_blank" class="text-emerald-600 underline hover:text-emerald-700">Lihat</a>`
+                            : '<span class="text-gray-400">-</span>'}
+                    </td>
+                    <td class="px-3 py-2 align-top">${
+                        it.portofolio_visual
+                            ? `<a href="${it.portofolio_visual}" target="_blank" class="text-emerald-600 underline hover:text-emerald-700">Lihat</a>`
+                            : '<span class="text-gray-400">-</span>'}
+                    </td>
+
+                    <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtDate(it.created_at)}</span></td>
+
+                    <td class="px-3 py-2 align-top">
+                        ${buildStatusCell(it)}
+                    </td>
+                    ${
+                    SCOPE === 'completed'
+                        ? `<td class="px-3 py-2 align-top">${buildCertCell(it)}</td>`
+                        : ''
+                    }
+                    <td class="px-3 py-2 align-top">
+                        ${buildActionCell(it)}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        bindStatusListeners();
+        buildPager(meta);
+        hydrateSelectOptions();
+        applyColumnFilters();
+    }
+
+    function buildPager(meta) {
+        const {
+            current_page,
+            last_page
+        } = meta;
+        const prev = current_page > 1 ? current_page - 1 : null;
+        const next = current_page < last_page ? current_page + 1 : null;
+
+        pagerEl.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-600 dark:text-gray-300">
+                    Halaman <strong>${current_page}</strong> dari <strong>${last_page}</strong>
+                </div>
+                <div class="flex gap-2">
+                    <button ${!prev?'disabled':''} data-goto="${prev||''}"
+                        class="rounded-lg border px-3 py-2 text-sm disabled:opacity-50">Sebelumnya</button>
+                    <button ${!next?'disabled':''} data-goto="${next||''}"
+                        class="rounded-lg border px-3 py-2 text-sm disabled:opacity-50">Berikutnya</button>
+                </div>
+            </div>
+        `;
+
+        pagerEl.querySelectorAll('button[data-goto]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const p = Number(btn.dataset.goto);
+                if (p) loadPage(p);
+            });
+        });
+    }
+
+    // ========== AKSI: BATALKAN ==========
+    discardBtn ?.addEventListener('click', () => {
+        if (pending.size === 0) return;
+        for (const {
+                select,
+                from
+            } of pending.values()) {
+            select.value = from;
+            // tetap biarkan dataset.current tidak berubah; commit UI saja
+            markSelect(select, false);
+        }
+        pending.clear();
+        updatePendingBar();
+        pushToast('Semua perubahan dibatalkan.', 'success');
+    });
+
+    // Helper: batasi paralel request agar tidak membebani server
+    async function runWithConcurrency(tasks, limit = 4) {
+        const results = [];
+        let i = 0;
+        const workers = Array.from({
+            length: Math.min(limit, tasks.length)
+        }, async () => {
+            while (i < tasks.length) {
+                const cur = i++;
+                try {
+                    results[cur] = await tasks[cur]();
+                } catch (e) {
+                    results[cur] = e;
                 }
             }
-            return true;
-        }
+        });
+        await Promise.all(workers);
+        return results;
+    }
 
-        // ====== TERAPKAN FILTER KE TABEL ======
-        const applyColumnFilters = (() => {
-            const run = () => {
-                const table = document.getElementById(TABLE_ID);
-                const tbody = table ?.tBodies ?.[0];
-                if (!tbody) return;
+    // ========== AKSI: SIMPAN ==========
+    saveAllBtn ?.addEventListener('click', async () => {
+        if (pending.size === 0) return;
 
-                [...tbody.rows].forEach(tr => {
-                    tr.style.display = rowMatchByFilters(tr) ? '' : 'none';
-                });
-            };
-            return debounce(run, 120);
-        })();
+        const items = Array.from(pending.values());
+        saveAllBtn.disabled = true;
+        discardBtn.disabled = true;
 
-        function bindFilterInputs() {
-            const table = document.getElementById(TABLE_ID);
-            if (!table) return;
+        const tasks = items.map(item => async () => {
+            // jika endpoint-mu memakai field berbeda, ganti di sini:
+            await patchForm(item.url, {
+                internship_status: item.to
+            });
+            return item;
+        });
 
-            // input teks per kolom (termasuk kolom tanggal yang sekarang string)
-            table.querySelectorAll('thead input[data-col]').forEach(inp => {
-                const col = +inp.dataset.col;
-                if (!columnFilter[col]) columnFilter[col] = {
-                    kind: 'text',
-                    q: ''
-                };
-                inp.addEventListener('input', e => {
-                    columnFilter[col].q = e.target.value;
-                    applyColumnFilters();
-                });
+        try {
+            const results = await runWithConcurrency(tasks, 4);
+
+            let ok = 0,
+                fail = 0;
+            const failed = [];
+
+            results.forEach((res, idx) => {
+                if (res instanceof Error) {
+                    fail++;
+                    failed.push({
+                        item: items[idx],
+                        err: res
+                    });
+                    return;
+                }
+                ok++;
+
+                const it = res; // item yang berhasil
+                it.select.dataset.current = it.to; // commit state baru
+                markSelect(it.select, false);
+                applyBadge(it.badge, it.to);
+
+                pending.delete(it.id);
             });
 
-            // select per kolom
-            table.querySelectorAll('thead select[data-col]').forEach(sel => {
-                const col = +sel.dataset.col;
-                if (!columnFilter[col]) columnFilter[col] = {
-                    kind: 'select',
-                    q: ''
-                };
-                sel.addEventListener('change', e => {
-                    columnFilter[col].q = e.target.value;
-                    applyColumnFilters();
+            updatePendingBar();
+
+            if (ok) pushToast(`${ok} perubahan disimpan.`, 'success');
+            if (fail) {
+                failed.forEach(({
+                    item
+                }) => { // tetap pending
+                    item.select.value = item.to;
+                    markSelect(item.select, true);
                 });
-            });
-        }
-
-
-
-
-        // ====== Localized label maps (ID) ======
-        const interestMapID = {
-            'project-manager': 'Manajer Proyek',
-            'administration': 'Administrasi',
-            'hr': 'Sumber Daya Manusia (HR)',
-            'uiux': 'UI/UX',
-            'programmer': 'Programmer (Front End / Backend)',
-            'photographer': 'Fotografer',
-            'videographer': 'Videografer',
-            'graphic-designer': 'Desainer Grafis',
-            'social-media-specialist': 'Spesialis Media Sosial',
-            'content-writer': 'Penulis Konten',
-            'content-planner': 'Perencana Konten',
-            'marketing-and-sales': 'Penjualan & Pemasaran',
-            'public-relation': 'Hubungan Masyarakat (Marcomm)',
-            'digital-marketing': 'Pemasaran Digital',
-            'tiktok-creator': 'Kreator TikTok',
-            'welding': 'Pengelasan',
-            'customer-service': 'Layanan Pelanggan',
-        };
-
-        const genderMapID = {
-            'male': 'Laki-laki',
-            'laki-laki': 'Laki-laki',
-            'pria': 'Laki-laki',
-            'm': 'Laki-laki',
-            'female': 'Perempuan',
-            'perempuan': 'Perempuan',
-            'wanita': 'Perempuan',
-            'f': 'Perempuan'
-        };
-
-        const statusNowMapID = {
-            'Fresh Graduate': 'Lulusan Baru',
-            'Student': 'Mahasiswa/Pelajar',
-            'Employee': 'Karyawan',
-            'Unemployed': 'Tidak Bekerja',
-        };
-
-        const arrangementMapID = { // TIPE MAGANG (cara kerja)
-            'onsite': 'WFO',
-            'hybrid': 'HYBRID',
-            'remote': 'WFH'
-        };
-
-        const typeMapID = { // JENIS MAGANG (skema)
-            'campus': 'Magang Kampus',
-            'mandiri': 'Magang Mandiri',
-            'pkl': 'PKL',
-            'kampus-merdeka': 'Kampus Merdeka',
-            'mbkm': 'Kampus Merdeka'
-        };
-
-        const yesNoMapID = {
-            'yes': 'Ya',
-            'y': 'Ya',
-            'true': 'Ya',
-            '1': 'Ya',
-            'ya': 'Ya',
-            'no': 'Tidak',
-            'n': 'Tidak',
-            'false': 'Tidak',
-            '0': 'Tidak',
-            'tidak': 'Tidak'
-        };
-
-        // ====== Helpers ======
-        const fmtStr = (s) => (s && String(s).trim() !== '' ? String(s) : '-');
-
-        // labelizer generik dengan fallback string polos
-        const labelize = (map, val) => {
-            if (val == null) return '-';
-            const key = String(val).toLowerCase();
-            for (const k in map) {
-                if (k.toLowerCase() === key) return map[k];
+                pushToast(`${fail} perubahan gagal disimpan. Coba lagi.`, 'error');
             }
-            return String(val); // fallback tampilkan apa adanya
-        };
-
-        function interestLabelID(slug) {
-            if (!slug) return '-';
-            const key = String(slug).toLowerCase();
-            return interestMapID[key] ?? String(slug).replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        } catch (e) {
+            pushToast('Gagal menyimpan perubahan.', 'error');
+        } finally {
+            saveAllBtn.disabled = pending.size === 0;
+            discardBtn.disabled = false;
         }
+    });
 
-        // created_at dari server → tetap format tanggal
-        const fmtDate = (s) => {
-            if (!s) return '-';
-            const d = new Date(s);
-            if (isNaN(d)) return String(s);
-            return d.toLocaleDateString('id-ID', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            });
-        };
+    // ===== Loader API
+    async function loadPage(page = 1, perPage = 1000, searchQuery = '') {
+        const params = new URLSearchParams({
+            scope: SCOPE,
+            page: String(page),
+            per_page: searchQuery ? '1000' : String(perPage),
+            search: searchQuery
+        });
 
-        // ====== Toast helpers ======
-        const toastStack = document.getElementById('toastStack');
+        rowsEl.innerHTML = `
+            <tr>
+                <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
+                    Memuat data…
+                </td>
+            </tr>`;
 
-        function pushToast(message, type = 'success') {
-            const base = 'flex items-center gap-2 rounded-lg border px-3 py-2 text-sm shadow-sm';
-            const theme = type === 'success' ?
-                'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-700 dark:text-emerald-200' :
-                'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-900/20 dark:border-rose-700 dark:text-rose-200';
-            const el = document.createElement('div');
-            el.className = `${base} ${theme}`;
-            el.innerHTML = `<span>${message}</span>
-                            <button class="ml-2 rounded px-2 py-1 text-xs opacity-70 hover:opacity-100">Tutup</button>`;
-            el.querySelector('button').addEventListener('click', () => el.remove());
-            toastStack.appendChild(el);
-            setTimeout(() => el.remove(), 4000);
-        }
-
-        // ====== Pending bar state ======
-        const pendingBar = document.getElementById('pendingBar');
-        const pendingCount = document.getElementById('pendingCount');
-        const saveAllBtn = document.getElementById('saveAll');
-        const discardBtn = document.getElementById('discardAll');
-        const pending = new Map(); // key: id, value: {id,name,from,to,url,select,badge}
-
-        function updatePendingBar() {
-            const n = pending.size;
-            pendingCount.textContent = n;
-            pendingBar.classList.toggle('hidden', n === 0);
-            saveAllBtn.disabled = n === 0;
-        }
-
-        function markSelect(sel, active) {
-            sel.classList.toggle('ring-2', active);
-            sel.classList.toggle('ring-amber-400', active);
-            sel.classList.toggle('bg-amber-50', active);
-        }
-
-        // ubah tampilan badge status setelah sukses
-        function applyBadge(badgeEl, newVal) {
-            const m = statusMap[newVal] || {
-                label: newVal,
-                cls: 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200'
-            };
-            badgeEl.className = `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${m.cls}`;
-            badgeEl.textContent = m.label;
-        }
-
-        async function patchForm(url, fields) {
-            const fd = new FormData();
-            fd.append('_method', 'PATCH');
-            for (const [k, v] of Object.entries(fields)) fd.append(k, v);
+        try {
+            const url = `${API_URL}?${params.toString()}`;
             const res = await fetch(url, {
-                method: 'POST',
-                body: fd,
                 headers: {
-                    'X-CSRF-TOKEN': csrf,
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 credentials: 'same-origin'
             });
             if (!res.ok) {
-                const t = await res.text().catch(() => '');
-                throw new Error(t || `HTTP ${res.status}`);
+                const txt = await res.text().catch(() => '');
+                throw new Error(`HTTP ${res.status} ${res.statusText} ${txt}`);
             }
-            return res;
-        }
+            const json = await res.json();
+            renderRows(json);
 
-        function buildActionCell(it) {
-            return `
-                <div class="flex gap-2">
-                    <button type="button" class="rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600 js-detail"
-                        data-id="${it.id}">
-                        Detail
-                    </button>
-                    <button type="button" class="rounded bg-amber-600 px-2 py-1 text-xs text-white hover:bg-amber-700 js-edit"
-                        data-id="${it.id}">
-                        Edit
-                    </button>
-                    <button type="button" class="rounded bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600 js-delete"
-                        data-id="${it.id}">
-                        Hapus
-                    </button>
-                </div>`;
-        }
+            // simpan halaman aktif
+            window.__CURRENT_PAGE = page;
 
-        // ====== Konstanta pilihan template yang muncul di dropdown ======
-        const CERT_OPTIONS = [
-        { value: 'certmagangjogjacom', label: 'Magangjogja.com' },
-        { value: 'certareakerjacom',   label: 'AreaKerja.com'   },
-        { value: 'certtitipsinicom',    label: 'Titipsini.com'    },
-        ];
-
-        // ====== Helper membuat isi cell "SERTIFIKAT" (dropdown + 1 tombol) ======
-        function buildCertCell(it) {
-        const selected = it.certificate_template || 'certmagangjogjacom';
-        const options  = CERT_OPTIONS.map(o =>
-            `<option value="${o.value}" ${o.value === selected ? 'selected' : ''}>${o.label}</option>`
-        ).join('');
-
-        const base = document.getElementById('tableWrap')?.dataset?.base || '/admin/interns';
-
-        return `
-            <div class="flex items-center gap-2">
-            <select class="cert-tpl rounded-md border-gray-300 text-xs dark:bg-gray-700"
-                    data-intern="${it.id}" style="min-width: 160px;">
-                ${options}
-            </select>
-
-            <button type="button"
-                    class="btn btn-sm btn-primary js-download-cert"
-                    data-intern="${it.id}" data-base="${base}">
-                Download
-            </button>
-            </div>
-        `;
-        }
-
-        function buildStatusCell(item) {
-            const cur = item.internship_status || 'waiting';
-            const badge = statusMap[cur] || {
-                label: cur,
-                cls: 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200'
-            };
-            return `
-                <div class="flex min-w-[12rem] items-center justify-between">
-                    <span id="badge-${item.id}"
-                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.cls}">
-                        ${badge.label}
-                    </span>
-                    <form action="${item.status_update_url}" class="inline status-form-row">
-                        <select
-                            class="status-select-row appearance-none rounded-lg border border-gray-300 bg-white px-2 py-1.5 pr-7 text-xs text-gray-700
-                            dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                            data-current="${cur}" data-name="${item.fullname || 'pemagang'}" data-id="${item.id}">
-                            ${Object.entries(statusMap).map(([val, obj]) =>
-                                `<option value="${val}" ${val===cur?'selected':''}>${obj.label}</option>`).join('')}
-                        </select>
-                    </form>
-                </div>`;
-        }
-
-        function bindStatusListeners() {
-            document.querySelectorAll('.status-select-row').forEach(sel => {
-                sel.onchange = function() {
-                    const form = this.closest('form');
-                    const url = form.getAttribute('action');
-                    const id = Number(this.dataset.id);
-                    const name = this.dataset.name || 'pemagang';
-                    const from = this.dataset.current;
-                    const to = this.value;
-
-                    if (to === from) {
-                        if (pending.has(id)) {
-                            pending.delete(id);
-                            markSelect(this, false);
-                            updatePendingBar();
-                        }
-                        return;
-                    }
-
-                    // simpan state baru ke pending
-                    pending.set(id, {
-                        id,
-                        name,
-                        from,
-                        to,
-                        url,
-                        select: this,
-                        badge: document.getElementById(`badge-${id}`)
-                    });
-                    markSelect(this, true);
-                    updatePendingBar();
-                };
-            });
-        }
-
-        function renderRows(payload) {
-            const {
-                data,
-                meta
-            } = payload;
-            const offset = (meta.current_page - 1) * meta.per_page;
-
-            if (!data || data.length === 0) {
-                rowsEl.innerHTML = `
-                    <tr>
-                        <td colspan="{{ count($fields) + 2 }}" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                            Belum ada data.
-                        </td>
-                    </tr>`;
-                pagerEl.innerHTML = '';
-                return;
-            }
-
-            rowsEl.innerHTML = data.map((it, idx) => {
-                window.rowData.set(it.id, it);
-                // ==== (ISI KOLOM TETAP, PERSIS seperti punyamu) ====
-                return `
-                    <tr data-row-id="${it.id}"
-                        class="odd:bg-white even:bg-gray-50 hover:bg-gray-100 dark:odd:bg-gray-800 dark:even:bg-gray-800/60 dark:hover:bg-gray-700/60">
-                        <td class="px-3 py-2 text-gray-600 dark:text-gray-300">${offset + idx + 1}</td>
-
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.fullname)}">${fmtStr(it.fullname)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.born_date)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.student_id)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.email)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${labelize(genderMapID, it.gender)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.phone_number)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.institution_name)}">${fmtStr(it.institution_name)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.study_program)}">${fmtStr(it.study_program)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.faculty)}">${fmtStr(it.faculty)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.current_city)}">${fmtStr(it.current_city)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_reason)}">${fmtStr(it.internship_reason)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(typeMapID, it.internship_type)}">${labelize(typeMapID, it.internship_type)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(arrangementMapID, it.internship_arrangement)}">${labelize(arrangementMapID, it.internship_arrangement)}</span></td>
-                        <td class="px-3 py-2 align-top">
-                            <span class="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium ${it.current_status==='Fresh Graduate'
-                                ? 'bg-slate-100 text-slate-800 dark:bg-slate-600/20 dark:text-slate-300'
-                                : (it.current_status==='Student'
-                                ? 'bg-sky-100 text-sky-800 dark:bg-sky-600/20 dark:text-sky-300'
-                                : 'bg-gray-100 text-gray-800 dark:bg-gray-600/20 dark:text-gray-200')}">
-                                ${labelize(statusNowMapID, it.current_status)}
-                            </span>
-                        </td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.english_book_ability)}">${fmtStr(it.english_book_ability)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.supervisor_contact)}">${fmtStr(it.supervisor_contact)}</span></td>
-
-                        <td class="px-3 py-2 align-top">
-                            <span class="block max-w-[18rem] truncate" title="${interestLabelID(it.internship_interest)}">
-                                ${interestLabelID(it.internship_interest)}
-                            </span>
-                        </td>
-
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_interest_other)}">${fmtStr(it.internship_interest_other)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.design_software)}">${fmtStr(it.design_software)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.video_software)}">${fmtStr(it.video_software)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.programming_languages)}">${fmtStr(it.programming_languages)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.digital_marketing_type)}">${fmtStr(it.digital_marketing_type)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.digital_marketing_type_other)}">${fmtStr(it.digital_marketing_type_other)}</span></td>
-
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${labelize(yesNoMapID, it.laptop_equipment)}">${labelize(yesNoMapID, it.laptop_equipment)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.owned_tools)}">${fmtStr(it.owned_tools)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.owned_tools_other)}">${fmtStr(it.owned_tools_other)}</span></td>
-
-                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.start_date)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.end_date)}</span></td>
-
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_info_sources)}">${fmtStr(it.internship_info_sources)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.internship_info_other)}">${fmtStr(it.internship_info_other)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.current_activities)}">${fmtStr(it.current_activities)}</span></td>
-
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.boarding_info)}">${fmtStr(it.boarding_info)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="block max-w-[18rem] truncate" title="${fmtStr(it.family_status)}">${fmtStr(it.family_status)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.parent_wa_contact)}</span></td>
-                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtStr(it.social_media_instagram)}</span></td>
-
-                        <td class="px-3 py-2 align-top">${
-                            it.cv_ktp_portofolio_pdf
-                                ? `<a href="${it.cv_ktp_portofolio_pdf}" target="_blank" class="text-emerald-600 underline hover:text-emerald-700">Lihat</a>`
-                                : '<span class="text-gray-400">-</span>'}
-                        </td>
-                        <td class="px-3 py-2 align-top">${
-                            it.portofolio_visual
-                                ? `<a href="${it.portofolio_visual}" target="_blank" class="text-emerald-600 underline hover:text-emerald-700">Lihat</a>`
-                                : '<span class="text-gray-400">-</span>'}
-                        </td>
-
-                        <td class="px-3 py-2 align-top"><span class="whitespace-nowrap">${fmtDate(it.created_at)}</span></td>
-
-                        <td class="px-3 py-2 align-top">
-                            ${buildStatusCell(it)}
-                        </td>
-                        ${
-                        SCOPE === 'completed'
-                            ? `<td class="px-3 py-2 align-top">${buildCertCell(it)}</td>`
-                            : ''
-                        }
-                        <td class="px-3 py-2 align-top">
-                            ${buildActionCell(it)}
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-
-            bindStatusListeners();
-            buildPager(meta);
-            hydrateSelectOptions();
-            applyColumnFilters();
-        }
-
-        function buildPager(meta) {
-            const {
-                current_page,
-                last_page
-            } = meta;
-            const prev = current_page > 1 ? current_page - 1 : null;
-            const next = current_page < last_page ? current_page + 1 : null;
-
-            pagerEl.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <div class="text-sm text-gray-600 dark:text-gray-300">
-                        Halaman <strong>${current_page}</strong> dari <strong>${last_page}</strong>
-                    </div>
-                    <div class="flex gap-2">
-                        <button ${!prev?'disabled':''} data-goto="${prev||''}"
-                            class="rounded-lg border px-3 py-2 text-sm disabled:opacity-50">Sebelumnya</button>
-                        <button ${!next?'disabled':''} data-goto="${next||''}"
-                            class="rounded-lg border px-3 py-2 text-sm disabled:opacity-50">Berikutnya</button>
-                    </div>
-                </div>
-            `;
-
-            pagerEl.querySelectorAll('button[data-goto]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const p = Number(btn.dataset.goto);
-                    if (p) loadPage(p);
-                });
-            });
-        }
-
-        // ========== AKSI: BATALKAN ==========
-        discardBtn ?.addEventListener('click', () => {
-            if (pending.size === 0) return;
-            for (const {
-                    select,
-                    from
-                } of pending.values()) {
-                select.value = from;
-                // tetap biarkan dataset.current tidak berubah; commit UI saja
-                markSelect(select, false);
-            }
-            pending.clear();
-            updatePendingBar();
-            pushToast('Semua perubahan dibatalkan.', 'success');
-        });
-
-        // Helper: batasi paralel request agar tidak membebani server
-        async function runWithConcurrency(tasks, limit = 4) {
-            const results = [];
-            let i = 0;
-            const workers = Array.from({
-                length: Math.min(limit, tasks.length)
-            }, async () => {
-                while (i < tasks.length) {
-                    const cur = i++;
-                    try {
-                        results[cur] = await tasks[cur]();
-                    } catch (e) {
-                        results[cur] = e;
-                    }
-                }
-            });
-            await Promise.all(workers);
-            return results;
-        }
-
-        // ========== AKSI: SIMPAN ==========
-        saveAllBtn ?.addEventListener('click', async () => {
-            if (pending.size === 0) return;
-
-            const items = Array.from(pending.values());
-            saveAllBtn.disabled = true;
-            discardBtn.disabled = true;
-
-            const tasks = items.map(item => async () => {
-                // jika endpoint-mu memakai field berbeda, ganti di sini:
-                await patchForm(item.url, {
-                    internship_status: item.to
-                });
-                return item;
-            });
-
-            try {
-                const results = await runWithConcurrency(tasks, 4);
-
-                let ok = 0,
-                    fail = 0;
-                const failed = [];
-
-                results.forEach((res, idx) => {
-                    if (res instanceof Error) {
-                        fail++;
-                        failed.push({
-                            item: items[idx],
-                            err: res
-                        });
-                        return;
-                    }
-                    ok++;
-
-                    const it = res; // item yang berhasil
-                    it.select.dataset.current = it.to; // commit state baru
-                    markSelect(it.select, false);
-                    applyBadge(it.badge, it.to);
-
-                    pending.delete(it.id);
-                });
-
-                updatePendingBar();
-
-                if (ok) pushToast(`${ok} perubahan disimpan.`, 'success');
-                if (fail) {
-                    failed.forEach(({
-                        item
-                    }) => { // tetap pending
-                        item.select.value = item.to;
-                        markSelect(item.select, true);
-                    });
-                    pushToast(`${fail} perubahan gagal disimpan. Coba lagi.`, 'error');
-                }
-            } catch (e) {
-                pushToast('Gagal menyimpan perubahan.', 'error');
-            } finally {
-                saveAllBtn.disabled = pending.size === 0;
-                discardBtn.disabled = false;
-            }
-        });
-
-        // ===== Loader API
-        async function loadPage(page = 1, perPage = 1000, searchQuery = '') {
-            const params = new URLSearchParams({
-                scope: SCOPE,
-                page: String(page),
-                per_page: searchQuery ? '1000' : String(perPage),
-                search: searchQuery
-            });
-
+            // saat searching, sembunyikan pagination
+            if (searchQuery) pagerEl.innerHTML = '';
+        } catch (e) {
+            console.error('Error loading page data:', e);
             rowsEl.innerHTML = `
                 <tr>
-                    <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">
-                        Memuat data…
+                    <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-rose-600">
+                        Gagal memuat data.
                     </td>
                 </tr>`;
+        }
+    } // <<< AKHIR fungsi loadPage
 
-            try {
-                const url = `${API_URL}?${params.toString()}`;
-                const res = await fetch(url, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    credentials: 'same-origin'
-                });
-                if (!res.ok) {
-                    const txt = await res.text().catch(() => '');
-                    throw new Error(`HTTP ${res.status} ${res.statusText} ${txt}`);
-                }
-                const json = await res.json();
-                renderRows(json);
+    // ====== EKSPOR HELPER (agar tombol Edit/Hapus bisa refresh tabel)
+    window.__CURRENT_PAGE = 1;
+    window.reloadInterns = (p) => {
+        const page = p || window.__CURRENT_PAGE || 1;
+        loadPage(page);
+    }; // <<< JANGAN LUPA TUTUP
 
-                // simpan halaman aktif
-                window.__CURRENT_PAGE = page;
+    // ====== INIT
+    bindFilterInputs();
+    loadPage(Number(new URLSearchParams(location.search).get('page') || 1));
 
-                // saat searching, sembunyikan pagination
-                if (searchQuery) pagerEl.innerHTML = '';
-            } catch (e) {
-                console.error('Error loading page data:', e);
-                rowsEl.innerHTML = `
-                    <tr>
-                        <td colspan="{{ count($fields) + 2 }}" class="px-6 py-6 text-center text-rose-600">
-                            Gagal memuat data.
-                        </td>
-                    </tr>`;
-            }
-        } // <<< AKHIR fungsi loadPage
-
-        // ====== EKSPOR HELPER (agar tombol Edit/Hapus bisa refresh tabel)
-        window.__CURRENT_PAGE = 1;
-        window.reloadInterns = (p) => {
-            const page = p || window.__CURRENT_PAGE || 1;
-            loadPage(page);
-        }; // <<< JANGAN LUPA TUTUP
-
-        // ====== INIT
-        bindFilterInputs();
-        loadPage(Number(new URLSearchParams(location.search).get('page') || 1));
-
-        // Peringatan unload jika masih ada pending
-        window.addEventListener('beforeunload', (e) => {
-            if (pending.size > 0) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        });
+    // Peringatan unload jika masih ada pending
+    window.addEventListener('beforeunload', (e) => {
+        if (pending.size > 0) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
     });
+});
 </script>
 @endsection
 
 
 @push('scripts')
+<script>
+    const BADGE_MAP = {
+    waiting:   {text:'Menunggu', cls:'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200'},
+    active:    {text:'Aktif',    cls:'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200'},
+    completed: {text:'Selesai',  cls:'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200'},
+    exited:    {text:'Keluar',   cls:'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200'},
+    pending:   {text:'Pending',  cls:'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'},
+    accepted:  {text:'Diterima', cls:'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'},
+    rejected:  {text:'Ditolak',  cls:'bg-gray-200 text-gray-700 dark:bg-gray-800/60 dark:text-gray-200'},
+    };
+
+    function updateBadge(internId, newStatus){
+    const el = document.getElementById(`badge-${internId}`);
+    if (!el) return;
+    const m = BADGE_MAP[newStatus] || {text:newStatus, cls:'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'};
+    // hapus semua kelas bg-*/text-* lama secara aman: reset className dasar lalu tambah m.cls
+    el.className = 'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ' + m.cls;
+    el.textContent = m.text;
+    }
+
+    async function ajaxUpdateStatus(url, newStatus){
+    const res = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        body: new URLSearchParams({ internship_status: newStatus })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+    }
+
+    // Event delegation untuk semua dropdown status
+    document.addEventListener('change', async (e) => {
+    const sel = e.target.closest('.js-status-select');
+    if (!sel) return;
+
+    const url = sel.dataset.url;
+    const id  = sel.dataset.id;
+    const val = sel.value;
+
+    // lock sementara
+    sel.disabled = true;
+
+    try {
+        const data = await ajaxUpdateStatus(url, val);
+        if (data.ok) {
+        updateBadge(id, val);
+
+        // Notifikasi email (jika sent)
+        const mail = data.mail || {};
+        const msg = mail.sent
+            ? `✅ Status diperbarui. Email terkirim ke ${mail.to} (${mail.name}).`
+            : '✅ Status diperbarui.';
+        showToast(msg);
+        } else {
+        showToast('❌ Gagal memperbarui status.', true);
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('❌ Terjadi kesalahan jaringan/server.', true);
+    } finally {
+        sel.disabled = false;
+    }
+    });
+
+    // Simple toast (pakai punyamu jika sudah ada)
+    function showToast(message, isError=false){
+    const el = document.createElement('div');
+    el.className = 'fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transition-opacity duration-300 ' +
+                    (isError ? 'bg-red-600 text-white' : 'bg-gray-900 text-white');
+    el.textContent = message;
+    document.body.appendChild(el);
+    setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(), 300); }, 4000);
+    }
+</script>
+
+
+
 <script>
     // gunakan Map dari script utama
     const rowData = window.rowData || new Map();
@@ -1643,5 +1738,76 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
     });
+</script>
+@endpush
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    // --------- A) Ambil opsi select dari API (sekali) ---------
+    fetch('{{ route('admin.interns.api') }}?per_page=1')
+        .then(r => r.json())
+        .then(api => {
+        // Isi dropdown filter status dari API (optional—biar tidak hardcode)
+        fillSelect('#filter-status', api.select_options?.internship_status || []);
+        })
+        .catch(() => { /* abaikan kalau gagal, fallback ke option default */ });
+
+    // --------- B) Hook tombol Download Sertifikat ---------
+    const base = document.getElementById('tableWrap')?.dataset.base; // "/admin/interns"
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.js-download-cert');
+        if (!btn) return;
+
+        const id  = btn.dataset.intern; // data-intern di tombol
+        const tpl = document.querySelector(`select.cert-tpl[data-intern="${id}"]`)?.value || 'certmagangjogjacom';
+
+        // Bangun URL sesuai routes: /admin/interns/{id}/certificate/{template}.pdf
+        const url = `${base}/${id}/certificate/${tpl}.pdf`;
+        window.open(url, '_blank');
+    });
+
+    // --------- C) (Opsional) fungsi update badge status ---------
+    // Kalau kamu pakai AJAX update status → panggil updateBadge(id, newStatus) setelah sukses.
+    });
+
+    function fillSelect(selector, options) {
+    const el = document.querySelector(selector);
+    if (!el || !Array.isArray(options)) return;
+
+    // Pertahankan "Semua" jika sudah ada
+    const keepDefault = !!el.querySelector('option[value=""]');
+    if (!keepDefault) {
+        const def = document.createElement('option');
+        def.value = '';
+        def.textContent = 'Semua';
+        el.appendChild(def);
+    }
+
+    options.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o.value;
+        opt.textContent = o.label ?? o.value;
+        el.appendChild(opt);
+    });
+    }
+
+    /* (Opsional) mapping badge kalau mau dipakai di AJAX update status */
+    const BADGE_MAP = {
+    waiting:   {text:'Menunggu', cls:'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200'},
+    active:    {text:'Aktif',    cls:'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200'},
+    completed: {text:'Selesai',  cls:'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200'},
+    exited:    {text:'Keluar',   cls:'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200'},
+    pending:   {text:'Pending',  cls:'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'},
+    accepted:  {text:'Diterima', cls:'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'},
+    rejected:  {text:'Ditolak',  cls:'bg-gray-200 text-gray-700 dark:bg-gray-800/60 dark:text-gray-200'},
+    };
+    function updateBadge(internId, newStatus){
+    const el = document.getElementById(`badge-${internId}`);
+    if (!el) return;
+    const m = BADGE_MAP[newStatus] || {text:newStatus, cls:'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'};
+    el.className = 'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ' + m.cls;
+    el.textContent = m.text;
+    }
 </script>
 @endpush

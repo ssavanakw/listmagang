@@ -25,17 +25,25 @@ class UserController extends Controller
     {
         $userId = auth()->id();
 
-        // Cek langsung di DB supaya pasti
+        // Cek langsung di DB untuk mendapatkan status terakhir
         $registration = IR::where('user_id', $userId)->latest('id')->first();
 
-        // Belum pernah isi → paksa user ke halaman form
+        // Jika belum mengisi form, arahkan ke halaman form
         if (!$registration) {
             return redirect()->route('internship.form');
         }
 
-        // Sudah submit → tampilkan halaman submitted
+        // Jika sudah diterima, tampilkan dashboard pengguna
+        if ($registration->internship_status === IR::STATUS_ACCEPTED) {
+            return view('user.dashboard', [
+                'registration' => $registration,
+            ]);
+        }
+
+        // Jika belum diterima, tampilkan halaman edit-profile
         return view('user.edit-profile', [
             'registration' => $registration,
         ]);
     }
+
 }

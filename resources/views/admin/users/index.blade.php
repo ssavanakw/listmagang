@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('content')
-  <div class="container mx-auto px-4 pt-6">
+  <div class="w-full mx-auto px-4 pt-6 pb-6 bg-emerald-300">
     <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
       👥 Semua Pengguna
     </h2>

@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="px-4 pt-6">
+<div class="px-4 pt-6 pb-6 bg-emerald-300">
 
     <!-- Header -->
     <div class="mb-6 flex items-center justify-between">

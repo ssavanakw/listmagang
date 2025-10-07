@@ -13,6 +13,18 @@ class InternApiController extends Controller
     /* =======================
      * Label maps (Bahasa ID)
      * ======================= */
+
+    private array $statusBadge = [
+        'waiting'   => ['Menunggu', 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200'],
+        'active'    => ['Aktif',    'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200'],
+        'completed' => ['Selesai',  'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200'],
+        'exited'    => ['Keluar',   'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200'],
+        'pending'   => ['Pending',  'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'],
+        'accepted'  => ['Diterima', 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'],
+        'rejected'  => ['Ditolak',  'bg-gray-200 text-gray-700 dark:bg-gray-800/60 dark:text-gray-200'],
+    ];
+
+
     private array $mapLaptop = [
         'yes-laptop' => 'Ya, punya laptop',
         'no-laptop'  => 'Tidak punya laptop',
@@ -338,8 +350,13 @@ class InternApiController extends Controller
                 'certificate_url' => $canCert ? route('admin.interns.certificate', $r) : null,
                 'certificate_pdf_url' => $canCert ? route('admin.interns.certificate.pdf', $r) : null,
                 'status_update_url' => route('admin.interns.status.update', $r),
+                'internship_status'        => $r->internship_status,
+                'internship_status_label'  => $this->statusView((string)$r->internship_status)['label'],
+                'internship_status_class'  => $this->statusView((string)$r->internship_status)['class'],
+
             ];
         }, $list);
+        
 
         // Meta & links respons
         if ($isSearching) {
@@ -371,10 +388,48 @@ class InternApiController extends Controller
             ];
         }
 
+        // Opsi untuk select di FE (hindari hardcode di JS/Blade)
+        $selectOptions = [
+            'internship_status' => array_map(function ($k) {
+                return ['value' => $k, 'label' => $this->statusView($k)['label']];
+            }, array_keys($this->statusBadge)),
+
+            'gender' => [
+                ['value' => 'male',   'label' => $this->labelize($this->mapGender, 'male')],
+                ['value' => 'female', 'label' => $this->labelize($this->mapGender, 'female')],
+            ],
+
+            'internship_type' => array_map(function ($k) {
+                return ['value' => $k, 'label' => $this->labelize($this->mapType, $k)];
+            }, array_keys($this->mapType)),
+
+            'internship_arrangement' => array_map(function ($k) {
+                return ['value' => $k, 'label' => $this->labelize($this->mapArrangement, $k)];
+            }, array_keys($this->mapArrangement)),
+
+            'family_status' => [
+                ['value' => 'not_provided', 'label' => $this->labelize($this->mapFamilyStatus, 'not_provided')],
+                ['value' => 'single',       'label' => $this->labelize($this->mapFamilyStatus, 'single')],
+                ['value' => 'married',      'label' => $this->labelize($this->mapFamilyStatus, 'married')],
+                ['value' => 'other',        'label' => $this->labelize($this->mapFamilyStatus, 'other')],
+            ],
+        ];
+
+        // Template sertifikat yang tersedia (sinkron dengan routes)
+        $certificateTemplates = [
+            ['value' => 'certmagangjogjacom', 'label' => 'Magangjogja.com'],
+            ['value' => 'certareakerjacom',   'label' => 'AreaKerja.com'],
+            // NOTE: perhatikan catatan slug di bawah
+            ['value' => 'certtitipsinicom',    'label' => 'Titipsini.com'],
+        ];
+
+
         return response()->json([
-            'data'  => $rows,
-            'meta'  => $meta,
-            'links' => $links,
+            'data'            => $rows,
+            'meta'            => $meta,
+            'links'           => $links,
+            'select_options'  => $selectOptions,
+            'certificate_templates' => $certificateTemplates,
         ]);
 
     }
@@ -386,6 +441,14 @@ class InternApiController extends Controller
  * - Default hanya status 'completed' (bisa override ?completed=0)
  * - 'division' diambil dari mapping internship_interest -> KODE DIV
  */
+
+    private function statusView(string $value): array
+    {
+        $v = strtolower(trim($value));
+        $pair = $this->statusBadge[$v] ?? [ucfirst($v), 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'];
+        return ['label' => $pair[0], 'class' => $pair[1]];
+    }
+
     public function search(Request $request)
     {
         $q = trim((string) $request->get('q', ''));

@@ -74,6 +74,46 @@
 
     @stack('modals')
     @stack('scripts')
+    @if (session('success') || session('mail_info'))
+    <div
+    id="toast"
+    class="fixed top-4 right-4 z-50 w-80 rounded-lg shadow-lg bg-white border border-gray-200 overflow-hidden"
+    >
+    <div class="px-4 py-3 border-b border-gray-100 font-semibold text-green-700">
+        {{ session('success') ?? 'Notifikasi' }}
+    </div>
+
+    @if (session('mail_info'))
+        @php $info = session('mail_info'); @endphp
+        <div class="px-4 py-3 text-sm text-gray-700">
+        <div class="font-medium mb-1">{{ $info['title'] ?? 'Email notifikasi' }}</div>
+
+        @if (!empty($info['to']) && !empty($info['name']))
+            <div class="mt-1">
+            Dikirim ke: <span class="font-mono">{{ $info['to'] }}</span><br>
+            Penerima: <span class="font-medium">{{ $info['name'] }}</span>
+            </div>
+        @endif
+
+        @if (!empty($info['list']))
+            <ul class="mt-2 list-disc list-inside max-h-40 overflow-auto">
+            @foreach ($info['list'] as $row)
+                <li><span class="font-medium">{{ $row['name'] }}</span> — <span class="font-mono">{{ $row['to'] }}</span></li>
+            @endforeach
+            </ul>
+        @endif
+        </div>
+    @endif
+
+    <button onclick="document.getElementById('toast')?.remove()"
+            class="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+        ✕
+    </button>
+    </div>
+    <script>
+    setTimeout(() => { document.getElementById('toast')?.remove(); }, 5000);
+    </script>
+    @endif
 
 
 </body>

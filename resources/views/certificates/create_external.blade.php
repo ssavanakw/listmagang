@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
+<div class="w-full mx-auto px-6 pt-6 pb-6 lg:px-10 bg-emerald-300">
   <div class="flex items-center justify-between mb-6">
     <div>
       <h1 class="text-2xl font-bold">Sertifikat Peserta Eksternal</h1>
       <p class="text-gray-500 text-sm">Buat sertifikat massal untuk peserta di luar pemagang. Divisi otomatis: <b>EXT</b>.</p>
     </div>
-    <a href="{{ route('admin.certificate.index') }}" class="px-3 py-2 rounded border hover:bg-gray-50">Kembali</a>
+    <a href="{{ route('admin.certificate.index') }}" class="px-3 py-2 rounded border bg-white hover:bg-gray-300"> < Kembali</a>
   </div>
 
   @if($errors->any())

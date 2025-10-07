@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="container mx-auto px-0 py-6">
+<div class="w-full mx-auto px-6 py-6 pb-6 bg-emerald-300">
     {{-- Header --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>

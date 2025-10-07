@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Register</title>
-  @vite(['resources/css/app.css','resources/js/app.js'])
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
 
   {{-- Auto dark sesuai sistem (Tailwind darkMode: "class") --}}
   <script>
@@ -93,6 +93,11 @@
       <p class="mt-6 text-center text-xs text-emerald-900/80 dark:text-emerald-200/70">
         Secured area — authorized users only.
       </p>
+
+      <!-- Button to Cancel Registration and go back to Login -->
+      <div class="mt-4 text-center">
+        <a href="{{ route('login') }}" class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline">Tidak jadi daftar? Kembali ke login</a>
+      </div>
     </div>
   </div>
 

@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="px-4 pt-6 lg:px-8">
-  <div class="max-w-6xl mx-auto">
+  <div class="w-full mx-auto px-6 lg:px-10">
     <header class="mb-6">
       <h1 class="text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-3">
         <i class="fa-solid fa-award text-blue-600"></i>

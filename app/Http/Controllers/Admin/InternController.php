@@ -2,19 +2,75 @@
 
 namespace App\Http\Controllers\Admin;
 
+
 use App\Http\Controllers\Controller;
 use App\Models\InternshipRegistration as IR;
 use App\Services\CertificatePdf;
+use App\Mail\InternAcceptedMail;
+use App\Mail\InternRejectedMail;
+use App\Mail\InternWaitingMail;
+
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File as FileFacade;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+
 use Spatie\Browsershot\Browsershot;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class InternController extends Controller
 {
+
+    private function sendWaitingEmail(IR $intern): void
+    {
+        // Ambil email tujuan: prioritas ke kolom email pendaftar
+        $to = $intern->email ?: optional($intern->user)->email;
+        if (!$to) return;
+
+        try {
+            // Kirim email dengan queue
+            Mail::to($to)->queue(new InternWaitingMail($intern)); 
+        } catch (\Exception $e) {
+            // Log error jika ada masalah dengan pengiriman email
+            Log::error("Email gagal terkirim ke {$to}: {$e->getMessage()}");
+        }
+    }
+
+    private function sendRejectedEmail(IR $intern): void
+    {
+        // Ambil email tujuan: prioritas ke kolom email pendaftar
+        $to = $intern->email ?: optional($intern->user)->email;
+        if (!$to) return;
+
+        try {
+            // Kirim email dengan queue
+            Mail::to($to)->queue(new InternRejectedMail($intern)); 
+        } catch (\Exception $e) {
+            // Log error jika ada masalah dengan pengiriman email
+            Log::error("Email gagal terkirim ke {$to}: {$e->getMessage()}");
+        }
+    }
+
+
+    private function sendAcceptedEmail(IR $intern): void
+    {
+        // Ambil email tujuan: prioritas ke kolom email pendaftar
+        $to = $intern->email ?: optional($intern->user)->email;
+        if (!$to) return;
+
+        try {
+            // Kirim email dengan queue
+            Mail::to($to)->queue(new InternAcceptedMail($intern)); 
+        } catch (\Exception $e) {
+            // Log error jika ada masalah dengan pengiriman email
+            Log::error("Email gagal terkirim ke {$to}: {$e->getMessage()}");
+        }
+    }
+
+
     public function certificatePdfDynamic(IR $intern, string $template)
     {
         if ($intern->internship_status !== IR::STATUS_COMPLETED) {
@@ -369,23 +425,77 @@ class InternController extends Controller
         }
     }
 
-
     public function updateStatus(Request $request, IR $intern)
     {
+        // Validasi status
         $validated = $request->validate([
             'internship_status' => 'required|in:waiting,active,completed,exited,pending,accepted,rejected',
         ]);
 
-        $intern->internship_status = $validated['internship_status'];
-        $intern->save();
-        $this->syncPemagangRole($intern);
+        $oldStatus = $intern->internship_status; // Menyimpan status lama
+        $newStatus = $validated['internship_status']; // Status baru yang diterima
 
-        if ($request->wantsJson() || $request->ajax()) {
-            return response()->json(['ok' => true]);
+        // Cek apakah status yang diubah dari 'waiting' valid
+        if ($oldStatus === IR::STATUS_WAITING && !in_array($newStatus, ['accepted', 'rejected'])) {
+            return back()->withErrors(['internship_status' => 'Status "Menunggu" hanya bisa diubah ke "Diterima" atau "Ditolak".']);
         }
 
-        return back()->with('success', 'Status pemagang diperbarui.');
+        // Mengupdate status internship
+        $intern->internship_status = $newStatus;
+
+        // Jika status diubah ke 'diterima'
+        if ($oldStatus === IR::STATUS_WAITING && $newStatus === IR::STATUS_ACCEPTED) {
+            try {
+                $this->sendAcceptedEmail($intern);
+                session()->flash('email_status', 'Email diterima berhasil dikirim!');
+            } catch (\Exception $e) {
+                session()->flash('email_status', 'Gagal mengirim email diterima: ' . $e->getMessage());
+            }
+
+            // Ubah role user menjadi pemagang
+            $user = $intern->user;
+            if ($user && strtolower($user->role) !== 'pemagang') {
+                $user->role = 'pemagang';
+                $user->save();
+            }
+        }
+
+        // Jika status diubah ke 'ditolak'
+        if ($oldStatus === IR::STATUS_WAITING && $newStatus === IR::STATUS_REJECTED) {
+            try {
+                $this->sendRejectedEmail($intern);
+                session()->flash('email_status', 'Email penolakan berhasil dikirim!');
+            } catch (\Exception $e) {
+                session()->flash('email_status', 'Gagal mengirim email penolakan: ' . $e->getMessage());
+            }
+        }
+
+        // Jika status diubah ke 'menunggu' (dari diterima atau ditolak)
+        if (in_array($oldStatus, [IR::STATUS_ACCEPTED, IR::STATUS_REJECTED]) && $newStatus === IR::STATUS_WAITING) {
+            try {
+                $this->sendWaitingEmail($intern);
+                session()->flash('email_status', 'Email pemberitahuan menunggu berhasil dikirim!');
+            } catch (\Exception $e) {
+                session()->flash('email_status', 'Gagal mengirim email pemberitahuan menunggu: ' . $e->getMessage());
+            }
+
+            // Ubah role user kembali menjadi 'user'
+            $user = $intern->user;
+            if ($user && strtolower($user->role) === 'pemagang') {
+                $user->role = 'user';
+                $user->save();
+            }
+        }
+
+        // Simpan perubahan status
+        $intern->save();
+
+        // Redirect dengan pesan sukses dan email status
+        return redirect()->route('admin.interns.index')->with('success', 'Status berhasil diperbarui!')
+            ->with('email_status', session('email_status'));
     }
+
+
 
     /**
      * PATCH /admin/interns/bulk/status
@@ -399,35 +509,52 @@ class InternController extends Controller
         ]);
 
         $affected = 0;
+        $mailCount = 0;
+        $mailList  = [];
 
-        DB::transaction(function () use ($validated, &$affected) {
-        // Kunci baris agar aman saat paralel update
-        $interns = IR::whereIn('id', $validated['ids'])
-            ->lockForUpdate()
-            ->get();
+        DB::transaction(function () use ($validated, &$affected, &$mailCount, &$mailList) {
+            $interns = IR::whereIn('id', $validated['ids'])->lockForUpdate()->get();
 
-        foreach ($interns as $intern) {
-            // skip kalau status sudah sama (hemat write)
-            if ($intern->internship_status === $validated['internship_status']) {
-                continue;
+            foreach ($interns as $intern) {
+                if ($intern->internship_status === $validated['internship_status']) {
+                    continue;
+                }
+
+                $old = $intern->internship_status;
+                $intern->internship_status = $validated['internship_status'];
+                $intern->save();
+                $this->syncPemagangRole($intern);
+
+                if ($old !== IR::STATUS_ACCEPTED && $intern->internship_status === IR::STATUS_ACCEPTED) {
+                    if ($to = $this->sendAcceptedEmail($intern)) {
+                        $mailCount++;
+                        $mailList[] = ['to' => $to, 'name' => $intern->fullname];
+                    }
+                }
+
+                $affected++;
             }
+        });
 
-            $intern->internship_status = $validated['internship_status'];
-            $intern->save();
-
-            // sinkronisasi role "pemagang" berdasar status terbaru
-            $this->syncPemagangRole($intern);
-
-            $affected++;
-        }
-    });
-
-        if ($request->wantsJson() || $request->ajax()) {
-            return response()->json(['ok' => true, 'affected' => $affected]);
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json([
+                'ok'       => true,
+                'affected' => $affected,
+                'mail'     => [
+                    'count' => $mailCount,
+                    'list'  => $mailList,
+                ],
+            ]);
         }
 
-        return back()->with('success', "Status {$affected} pemagang diperbarui.");
+        return back()
+            ->with('success', "Status {$affected} pemagang diperbarui.")
+            ->with('mail_info', $mailCount ? [
+                'title' => "Email notifikasi terkirim ({$mailCount})",
+                'list'  => $mailList,
+            ] : null);
     }
+
 
     /**
      * Admin unggah/ganti file untuk satu pemagang.
