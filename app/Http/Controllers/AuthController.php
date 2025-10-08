@@ -13,7 +13,7 @@ class AuthController extends Controller
     public function showRegisterForm()
     {
         if (auth()->check()) {
-            return redirect()->route('user.dashboard'); // Redirect ke dashboard user jika sudah login
+            return redirect()->route('user.dashboard'); // Redirect ke dashboard jika sudah login
         }
         return view('auth.admin-register');
     }
@@ -21,33 +21,21 @@ class AuthController extends Controller
     // Handle registration
     public function register(Request $request)
     {
-        // Validate the incoming request
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        // Create new user
-        $user = User::create([
+        User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'user',  // Set role as user for this example
+            'role' => 'user',
         ]);
 
-        // Login after successful registration
-        Auth::login($user);
-
-        // Redirect to user dashboard if the user has 'user' role, or to internship form
-        if ($user->role === 'admin') {
-            return redirect()->route('admin.dashboard')
-                ->with('success', 'Registrasi berhasil! Selamat datang Admin.');
-        }
-
-        // Redirect to internship form for new user
-        return redirect()->route('internship.form')
-            ->with('success', 'Registrasi berhasil! Silakan lengkapi form pendaftaran.');
+        return redirect()->route('user.login')
+            ->with('success', 'Registrasi berhasil! Silakan login untuk melanjutkan.');
     }
 
     /**
@@ -56,35 +44,46 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         if (auth()->check()) {
-            return redirect()->route('user.dashboard'); // Redirect ke dashboard user jika sudah login
+            return redirect()->route('user.dashboard'); // Redirect ke dashboard jika sudah login
         }
         return view('auth.admin-login');
     }
+
 
     /**
      * Proses login admin
      */
     public function login(Request $request)
     {
-        // Validate the login form data
+        // Validasi kredensial login
         $credentials = $request->validate([
-            'email' => ['required','email'],
+            'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // Attempt to log the user in
+        // Proses login menggunakan kredensial
         if (auth()->attempt($credentials, $request->boolean('remember'))) {
+            // Regenerasi session untuk keamanan
             $request->session()->regenerate();
 
-            // Redirect based on the user role
-            return auth()->user()->role === 'admin'
-                ? redirect()->route('admin.dashboard.index')     // admin
-                : redirect()->route('user.dashboard');     // user
+            // Cek apakah pengguna sudah mengisi form pendaftaran magang
+            $userId = auth()->id();
+            $registration = \App\Models\InternshipRegistration::where('user_id', $userId)->latest('id')->first();
+
+            if ($registration) {
+                // Jika sudah mengisi form, arahkan ke dashboard pengguna
+                return redirect()->route('user.dashboard');
+            }
+
+            // Jika belum mengisi form, arahkan ke form pendaftaran magang
+            return redirect()->route('user.internship.form');
         }
 
-        // If login fails, return back with error
+        // Jika login gagal, tampilkan pesan error
         return back()->with('error', 'Email atau password salah!')->onlyInput('email');
     }
+
+
 
     /**
      * Logout admin

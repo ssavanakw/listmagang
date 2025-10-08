@@ -445,13 +445,6 @@ class InternController extends Controller
 
         // Jika status diubah ke 'diterima'
         if ($oldStatus === IR::STATUS_WAITING && $newStatus === IR::STATUS_ACCEPTED) {
-            try {
-                $this->sendAcceptedEmail($intern);
-                session()->flash('email_status', 'Email diterima berhasil dikirim!');
-            } catch (\Exception $e) {
-                session()->flash('email_status', 'Gagal mengirim email diterima: ' . $e->getMessage());
-            }
-
             // Ubah role user menjadi pemagang
             $user = $intern->user;
             if ($user && strtolower($user->role) !== 'pemagang') {
@@ -462,23 +455,11 @@ class InternController extends Controller
 
         // Jika status diubah ke 'ditolak'
         if ($oldStatus === IR::STATUS_WAITING && $newStatus === IR::STATUS_REJECTED) {
-            try {
-                $this->sendRejectedEmail($intern);
-                session()->flash('email_status', 'Email penolakan berhasil dikirim!');
-            } catch (\Exception $e) {
-                session()->flash('email_status', 'Gagal mengirim email penolakan: ' . $e->getMessage());
-            }
+            // Tidak ada pengiriman email
         }
 
         // Jika status diubah ke 'menunggu' (dari diterima atau ditolak)
         if (in_array($oldStatus, [IR::STATUS_ACCEPTED, IR::STATUS_REJECTED]) && $newStatus === IR::STATUS_WAITING) {
-            try {
-                $this->sendWaitingEmail($intern);
-                session()->flash('email_status', 'Email pemberitahuan menunggu berhasil dikirim!');
-            } catch (\Exception $e) {
-                session()->flash('email_status', 'Gagal mengirim email pemberitahuan menunggu: ' . $e->getMessage());
-            }
-
             // Ubah role user kembali menjadi 'user'
             $user = $intern->user;
             if ($user && strtolower($user->role) === 'pemagang') {
@@ -490,10 +471,10 @@ class InternController extends Controller
         // Simpan perubahan status
         $intern->save();
 
-        // Redirect dengan pesan sukses dan email status
-        return redirect()->route('admin.interns.index')->with('success', 'Status berhasil diperbarui!')
-            ->with('email_status', session('email_status'));
+        // Redirect dengan pesan sukses
+        return redirect()->route('admin.interns.index')->with('success', 'Status berhasil diperbarui!');
     }
+
 
 
 

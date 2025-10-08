@@ -10,7 +10,10 @@ use Carbon\Carbon;
 
 class InternshipRegistrationController extends Controller
 {
-    
+    public function showForm()
+    {
+        return view('user.form'); // Pastikan view yang benar
+    }
 
     /**
      * Simpan file dengan NAMA ASLI.
@@ -356,7 +359,5 @@ class InternshipRegistrationController extends Controller
             ->route('user.editProfile')
             ->with('success', 'Profil berhasil diperbarui!');
     }
-
-
 
 }

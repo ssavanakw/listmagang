@@ -19,14 +19,14 @@ use App\Http\Controllers\UserController;  // UserController untuk pengguna biasa
 use App\Http\Controllers\CertificateController;
 
 /*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-| - Root -> login (auth/admin-login.blade.php)
-| - User login -> user.dashboard, Admin login -> admin/dashboard (atur di AuthController)
-| - Form internship dilindungi auth + submitted page
+|---------------------------------------------------------------------- 
+| Web Routes 
+|---------------------------------------------------------------------- 
+| - Root -> login (auth/admin-login.blade.php) 
+| - User login -> user.dashboard, Admin login -> admin/dashboard (atur di AuthController) 
+| - Form internship dilindungi auth + submitted page 
 | - Admin area: prefix URL 'admin' + prefix nama 'admin.' agar rapi & tidak bentrok
-|--------------------------------------------------------------------------
+|---------------------------------------------------------------------- 
 */
 
 // Demo (opsional)
@@ -70,6 +70,17 @@ Route::get('/user/edit-profile', [PublicRegController::class, 'editProfile'])
 Route::post('/user/update-profile', [PublicRegController::class, 'updateProfile'])
     ->name('user.updateProfile')
     ->middleware('auth');
+
+Route::middleware(['auth'])->group(function () {
+    // Halaman untuk melihat profil pengguna
+    Route::get('/user/profile', [UserController::class, 'editProfile'])->name('user.profile');
+    
+    // Menangani pembaruan profil pengguna
+    Route::post('/user/profile/update', [UserController::class, 'updateProfile'])->name('user.profile.update');
+
+    // Daftar Magang Form
+    Route::get('/user/internship/form', [PublicRegController::class, 'showForm'])->name('user.internship.form');
+});
 
 /* =================== INTERNSHIP (USER) =================== */
 // Form & store harus login
@@ -183,4 +194,42 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'preve
 
     // (Opsional) Dashboard khusus di area admin -> admin.user.dashboard
     Route::get('/user/dashboard', [AdminUserController::class, 'index'])->name('user.dashboard');
+
+    Route::middleware(['auth', 'role:user'])->group(function () {
+    // Route untuk dashboard pengguna
+        Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
+        // Form pendaftaran magang
+        Route::get('/user/internship/form', [PublicRegController::class, 'create'])->name('user.internship.form');
+    });
+
+    Route::middleware(['auth'])->group(function () {
+        // Dashboard untuk pengguna
+        Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
+        
+        // Form pendaftaran magang
+        Route::get('/user/internship/form', [PublicRegController::class, 'create'])->name('user.internship.form');
+    });
+
+    Route::middleware(['auth', 'role:user'])->group(function () {
+        // Cek apakah pengguna sudah mengisi form pendaftaran magang
+        Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
+        
+        // Rute untuk form pendaftaran magang jika pengguna belum mengisi form
+        Route::get('/user/internship/form', [PublicRegController::class, 'create'])->name('user.internship.form');
+    });
+
+    Route::middleware(['auth'])->group(function () {
+        // Sidebar untuk Daftar Magang
+        Route::get('/user/internship/form', [UserController::class, 'showForm'])->name('user.internship.form');
+    });
+
+    Route::middleware(['auth'])->group(function () {
+        // Rute untuk form pendaftaran magang (menampilkan user/form.blade.php)
+        Route::get('/user/internship/form', [PublicRegController::class, 'showForm'])
+            ->name('user.internship.form')
+            ->middleware('auth');
+    });
+
+
+
 });
