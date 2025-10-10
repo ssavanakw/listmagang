@@ -38,7 +38,7 @@ class RedirectIfAuthenticated
 
                 // Fallback umum: user sudah login, ke halaman guest lain
                 if ($user && ($user->role ?? null) === 'admin') {
-                    return redirect()->route('dashboard.index');
+                    return redirect()->route('admin.dashboard.index');
                 }
 
                 return redirect(RouteServiceProvider::HOME);

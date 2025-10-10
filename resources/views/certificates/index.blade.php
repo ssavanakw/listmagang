@@ -206,6 +206,7 @@
 </div>
 
 {{-- ===================== MODALS ===================== --}}
+{{-- Modal untuk Upload Background --}}
 <div id="modal-bg" class="hidden fixed inset-0 z-50 items-center justify-center">
     <div class="absolute inset-0 bg-black/50" onclick="closeModal('bg')"></div>
     <div class="relative bg-white w-full max-w-lg mx-4 rounded-xl shadow-xl p-5">
@@ -217,12 +218,16 @@
             @csrf
             <div>
                 <label class="block text-sm font-medium mb-1">Format File Gambar (bg_(Nama File Gambar).png/.jpg/.jpeg/.webp)</label>
-                <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required class="block w-full border rounded px-3 py-2">
+                <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required class="block w-full border rounded px-3 py-2" onchange="previewImage(event, 'preview_bg')">
             </div>
             <div class="text-xs text-gray-600">
                 Disimpan ke: <code>storage/app/public/images/backgrounds/</code><br>
                 Otomatis dinamai ulang: <code>bg_{{'{'}}slug{{'}'}}_YYYYmmdd_HHMMSS.ext</code><br>
                 Maks 2 MB.
+            </div>
+            <!-- Preview gambar -->
+            <div class="mt-4">
+                <img id="preview_bg" src="" class="max-h-40 w-full object-cover hidden" alt="Preview Background">
             </div>
             <div class="flex justify-end gap-2">
                 <button type="button" onclick="closeModal('bg')" class="px-4 py-2 rounded border">Batal</button>
@@ -232,6 +237,7 @@
     </div>
 </div>
 
+{{-- Modal untuk Upload Logo --}}
 <div id="modal-logo" class="hidden fixed inset-0 z-50 items-center justify-center">
     <div class="absolute inset-0 bg-black/50" onclick="closeModal('logo')"></div>
     <div class="relative bg-white w-full max-w-lg mx-4 rounded-xl shadow-xl p-5">
@@ -243,12 +249,16 @@
             @csrf
             <div>
                 <label class="block text-sm font-medium mb-1">Format File Gambar (logo_(Nama File Gambar).png/.jpg/.jpeg/.webp)</label>
-                <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required class="block w-full border rounded px-3 py-2">
+                <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required class="block w-full border rounded px-3 py-2" onchange="previewImage(event, 'preview_logo1')">
             </div>
             <div class="text-xs text-gray-600">
                 Disimpan ke: <code>storage/app/public/images/logos/</code><br>
                 Otomatis dinamai ulang: <code>logo_{{'{'}}slug{{'}'}}_YYYYmmdd_HHMMSS.ext</code><br>
                 Maks 2 MB.
+            </div>
+            <!-- Preview gambar -->
+            <div class="mt-4">
+                <img id="preview_logo1" src="" class="max-h-20 w-full object-cover hidden" alt="Preview Logo 1">
             </div>
             <div class="flex justify-end gap-2">
                 <button type="button" onclick="closeModal('logo')" class="px-4 py-2 rounded border">Batal</button>
@@ -258,6 +268,7 @@
     </div>
 </div>
 
+{{-- Modal untuk Upload Tanda Tangan --}}
 <div id="modal-ttd" class="hidden fixed inset-0 z-50 items-center justify-center">
     <div class="absolute inset-0 bg-black/50" onclick="closeModal('ttd')"></div>
     <div class="relative bg-white w-full max-w-lg mx-4 rounded-xl shadow-xl p-5">
@@ -269,12 +280,16 @@
             @csrf
             <div>
                 <label class="block text-sm font-medium mb-1">Format File Gambar (ttd_(Nama File Gambar).png/.jpg/.jpeg/.webp)</label>
-                <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required class="block w-full border rounded px-3 py-2">
+                <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp" required class="block w-full border rounded px-3 py-2" onchange="previewImage(event, 'preview_ttd1')">
             </div>
             <div class="text-xs text-gray-600">
                 Disimpan ke: <code>storage/app/public/images/signature/</code><br>
                 Otomatis dinamai ulang: <code>ttd_{{'{'}}slug{{'}'}}_YYYYmmdd_HHMMSS.ext</code><br>
                 Maks 2 MB.
+            </div>
+            <!-- Preview gambar -->
+            <div class="mt-4">
+                <img id="preview_ttd1" src="" class="max-h-20 w-full object-cover hidden" alt="Preview TTD 1">
             </div>
             <div class="flex justify-end gap-2">
                 <button type="button" onclick="closeModal('ttd')" class="px-4 py-2 rounded border">Batal</button>
@@ -299,6 +314,15 @@ function closeModal(kind){
     if(!el) return;
     el.classList.add('hidden');
     el.classList.remove('flex');
+}
+function previewImage(event, previewId) {
+    var reader = new FileReader();
+    reader.onload = function () {
+        var preview = document.getElementById(previewId);
+        preview.src = reader.result;
+        preview.classList.remove('hidden');
+    };
+    reader.readAsDataURL(event.target.files[0]);
 }
 
 function filterRows(){

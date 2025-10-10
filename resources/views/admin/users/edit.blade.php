@@ -42,7 +42,7 @@
                 class="mt-1 block w-full border border-pink-200 bg-pink-50 rounded-xl shadow-sm focus:ring-purple-400 focus:border-purple-400 px-3 py-2">
           <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>👑 Admin</option>
           <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>👤 User</option>
-          <option value="intern" {{ $user->role == 'intern' ? 'selected' : '' }}>🌱 Intern</option>
+          <option value="pemagang" {{ $user->role == 'pemagang' ? 'selected' : '' }}>🌱 Pemagang</option>
         </select>
       </div>
 

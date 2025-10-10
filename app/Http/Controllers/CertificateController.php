@@ -326,7 +326,7 @@ class CertificateController extends Controller
             }
         });
 
-        return redirect()->route('certificate.index')
+        return redirect()->route('admin.certificate.index')
             ->with('success', "Berhasil membuat {$created} sertifikat eksternal.");
     }
 
@@ -473,7 +473,7 @@ class CertificateController extends Controller
                 }
             });
 
-            return redirect()->route('certificate.index')->with('success', 'Sertifikat untuk pemagang terpilih berhasil dibuat.');
+            return redirect()->route('admin.certificate.index')->with('success', 'Sertifikat untuk pemagang terpilih berhasil dibuat.');
         }
 
         /** Map internship_interest → kode divisi (sinkron dengan InternApiController::search) */
@@ -754,7 +754,7 @@ class CertificateController extends Controller
             'role2'             => $data['role2'],
         ]);
 
-        return redirect()->route('certificate.index')->with('success', 'Sertifikat berhasil dibuat');
+        return redirect()->route('admin.certificate.index')->with('success', 'Sertifikat berhasil dibuat');
     }
 
 
@@ -949,7 +949,7 @@ class CertificateController extends Controller
             'role2'             => $request->role2,
         ]);
 
-        return redirect()->route('certificate.index')->with('success', 'Sertifikat berhasil diupdate');
+        return redirect()->route('admin.certificate.index')->with('success', 'Sertifikat berhasil diupdate');
     }
 
     /**
@@ -1007,16 +1007,35 @@ class CertificateController extends Controller
     {
         // Hapus sertifikat
         $certificate = Certificate::findOrFail($id);
-        Storage::delete($certificate->background_image);
-        Storage::delete($certificate->logo1);
-        Storage::delete($certificate->logo2);
-        Storage::delete($certificate->signature_image1);
-        Storage::delete($certificate->signature_image2);
 
+        // Pastikan file ada sebelum mencoba menghapusnya
+        if (!empty($certificate->background_image) && Storage::exists($certificate->background_image)) {
+            Storage::delete($certificate->background_image);
+        }
+
+        if (!empty($certificate->logo1) && Storage::exists($certificate->logo1)) {
+            Storage::delete($certificate->logo1);
+        }
+
+        if (!empty($certificate->logo2) && Storage::exists($certificate->logo2)) {
+            Storage::delete($certificate->logo2);
+        }
+
+        if (!empty($certificate->signature_image1) && Storage::exists($certificate->signature_image1)) {
+            Storage::delete($certificate->signature_image1);
+        }
+
+        if (!empty($certificate->signature_image2) && Storage::exists($certificate->signature_image2)) {
+            Storage::delete($certificate->signature_image2);
+        }
+
+        // Hapus data sertifikat dari database
         $certificate->delete();
 
-        return redirect()->route('certificate.index')->with('success', 'Sertifikat berhasil dihapus');
+        return redirect()->route('admin.certificate.index')->with('success', 'Sertifikat berhasil dihapus');
     }
+
+
 
     // ======= BULK CREATE (via Interns) =======
     public function bulkCreateInterns()
@@ -1125,7 +1144,7 @@ class CertificateController extends Controller
             $created++;
         }
 
-        return redirect()->route('certificate.index')->with('success', "Berhasil membuat {$created} sertifikat (via interns).");
+        return redirect()->route('admin.certificate.index')->with('success', "Berhasil membuat {$created} sertifikat (via interns).");
     }
 
     // ======= BULK CREATE (External / Non-Interns) =======
@@ -1233,7 +1252,7 @@ class CertificateController extends Controller
             $created++;
         }
 
-        return redirect()->route('certificate.index')->with('success', "Berhasil membuat {$created} sertifikat (external).");
+        return redirect()->route('admin.certificate.index')->with('success', "Berhasil membuat {$created} sertifikat (external).");
     }
 
 

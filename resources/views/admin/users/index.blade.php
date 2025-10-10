@@ -63,7 +63,7 @@
                   <option value="">Semua</option>
                   <option value="admin" {{ request('role')=='admin' ? 'selected' : '' }}>Admin</option>
                   <option value="user" {{ request('role')=='user' ? 'selected' : '' }}>User</option>
-                  <option value="intern" {{ request('role')=='intern' ? 'selected' : '' }}>Intern</option>
+                  <option value="pemagang" {{ request('role')=='pemagang' ? 'selected' : '' }}>Pemagang</option>
                 </select>
               </th>
               <th></th>
@@ -85,13 +85,13 @@
                     $role = strtolower($user->role ?? 'user');
                     $cls = match($role) {
                       'admin' => 'bg-purple-100 text-purple-700',
-                      'intern'=> 'bg-green-100 text-green-700',
+                      'pemagang'=> 'bg-green-100 text-green-700',
                       'user'  => 'bg-blue-100 text-blue-700',
                       default => 'bg-gray-100 text-gray-700'
                     };
                     $emoji = match($role) {
                       'admin' => '👑',
-                      'intern'=> '🌱',
+                      'pemagang'=> '🌱',
                       'user'  => '👤',
                       default => '✨'
                     };

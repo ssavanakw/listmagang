@@ -66,6 +66,12 @@ class AuthController extends Controller
             // Regenerasi session untuk keamanan
             $request->session()->regenerate();
 
+            // Cek apakah pengguna adalah admin
+            if (auth()->user()->role === 'admin') {
+                // Jika admin, arahkan ke admin dashboard
+                return redirect()->route('admin.dashboard.index');
+            }
+
             // Cek apakah pengguna sudah mengisi form pendaftaran magang
             $userId = auth()->id();
             $registration = \App\Models\InternshipRegistration::where('user_id', $userId)->latest('id')->first();
@@ -76,12 +82,13 @@ class AuthController extends Controller
             }
 
             // Jika belum mengisi form, arahkan ke form pendaftaran magang
-            return redirect()->route('user.internship.form');
+            return redirect()->route('user.dashboard');
         }
 
         // Jika login gagal, tampilkan pesan error
         return back()->with('error', 'Email atau password salah!')->onlyInput('email');
     }
+
 
 
 

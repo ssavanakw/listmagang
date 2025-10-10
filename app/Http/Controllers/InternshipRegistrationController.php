@@ -206,6 +206,15 @@ class InternshipRegistrationController extends Controller
 
         // Simpan
         IR::create($data);
+        
+        $user = auth()->user();
+
+        if ($user instanceof \App\Models\User) {
+            $user->role = 'pemagang';
+            $user->save();
+        } else {
+            return back()->with('error', 'Failed to update user role.');
+        }
 
         // Tandai session & redirect
         session(['internship_submitted' => true]);

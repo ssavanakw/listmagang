@@ -55,6 +55,33 @@ class UserController extends Controller
         return view('admin.users.edit', compact('user')); // Tampilkan form edit
     }
 
+    public function update(Request $request, $id)
+    {
+        // Fetch the user from the database
+        $user = User::findOrFail($id);
+
+        // Ensure the authenticated user is an admin
+        if (auth()->user()->role !== 'admin') {
+            return redirect()->route('admin.dashboard')->with('error', 'Unauthorized access');
+        }
+
+        // Validate the role input (make sure only valid roles can be assigned)
+        $validated = $request->validate([
+            'role' => 'required|string|in:admin,user,pemagang', // Allowed roles
+        ]);
+
+        // Update the user's role
+        $user = User::findOrFail($id);
+        $user->role = $validated['role'];
+        $user->save();
+
+
+        // Redirect back with a success message
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User role updated successfully.');
+    }
+
+
     // Menghapus data pengguna
     public function destroy($id)
     {

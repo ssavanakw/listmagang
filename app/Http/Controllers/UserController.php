@@ -7,58 +7,99 @@ use App\Models\User;
 use App\Models\InternshipRegistration as IR;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+
 
 class UserController extends Controller
 {
-    // Menampilkan halaman profile user
-    public function editProfile()
+    // Fungsi untuk menampilkan halaman dashboard completed
+    public function userCompleted()
     {
-        return view('user.profile'); // Menampilkan halaman profile
+        // Mengambil data magang terakhir yang terhubung dengan pengguna yang sedang login
+        $user = auth()->user();
+
+        // Mengambil data magang terakhir untuk user yang login
+        $internship = IR::where('user_id', $user->id)
+            ->latest()
+            ->first(); // Mengambil magang terakhir berdasarkan user_id
+
+        $internship_status = $internship ? $internship->internship_status : null;
+
+        // Kirim data magang ke view
+        return view('user.dashboard-completed', compact('user', 'internship', 'internship_status'));
     }
 
-    // Update profil user
-    public function updateProfile(Request $request)
+    // Menampilkan halaman profile user
+    public function editUserProfile()
     {
-        // Validasi input
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255',
-            'phone_number' => 'nullable|string|max:15',
-            'password' => 'nullable|string|min:8|confirmed',
-            'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:10240', // Validasi gambar
-        ]);
-
         // Ambil user yang sedang login
-        /** @var \App\Models\User $user */ // <-- Tambahkan baris ini
-        $user = auth()->user();
+        $user = User::find(auth()->id());
 
         // Pastikan user ditemukan
         if (!$user) {
             return redirect()->route('user.profile')->with('error', 'User tidak ditemukan.');
         }
 
-        // Update data user
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
-        $user->phone_number = $validated['phone_number'];
+        return view('user.profile', compact('user')); // Kirim data user ke view
+    }
+
+    // Update profil user
+    public function updateUserProfile(Request $request)
+    {
+        // Validasi input
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|string|email|max:255|unique:users,email,' . auth()->id(), // Menambahkan unique dengan pengecualian
+            'phone_number' => 'nullable|string|max:15',
+            'password' => 'nullable|string|min:8|confirmed',
+            'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:10240', // Validasi gambar
+        ]);
+
+        // Ambil user yang sedang login
+        $user = User::find(auth()->id());
+
+        // Pastikan user ditemukan
+        if (!$user) {
+            return redirect()->route('user.profile')->with('error', 'User tidak ditemukan.');
+        }
+
+        // Update name, email, dan phone_number jika ada
+        if (!empty($validated['name'])) {
+            $user->name = $validated['name'];
+        }
+        if (!empty($validated['email'])) {
+            $user->email = $validated['email'];
+        }
+        if (!empty($validated['phone_number'])) {
+            $user->phone_number = $validated['phone_number'];
+        }
 
         // Jika ada password baru, update password
         if (!empty($validated['password'])) {
-            $user->password = bcrypt($validated['password']);
+            $user->password = Hash::make($validated['password']);
         }
 
         // Cek apakah ada gambar profil yang diunggah
         if ($request->hasFile('profile_picture')) {
+            // Hapus gambar lama jika ada
+            if ($user->profile_picture) {
+                Storage::disk('public')->delete($user->profile_picture);
+            }
             // Simpan gambar profil di folder public/images/profile-pictures/
             $imagePath = $request->file('profile_picture')->store('images/profile-pictures', 'public');
             $user->profile_picture = $imagePath;
         }
 
-        // Simpan perubahan data user
+
+        // Simpan semua perubahan data user
         $user->save();
 
         return redirect()->route('user.profile')->with('success', 'Akun berhasil diperbarui!');
     }
+
 
 
     // Menampilkan form login pengguna biasa

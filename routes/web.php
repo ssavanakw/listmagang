@@ -15,7 +15,7 @@ use App\Http\Controllers\Admin\InternApiController;
 use App\Http\Controllers\Admin\CertificateGeneratorController;
 
 // App
-use App\Http\Controllers\UserController;  // UserController untuk pengguna biasa
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\CertificateController;
 
 /*
@@ -73,13 +73,20 @@ Route::post('/user/update-profile', [PublicRegController::class, 'updateProfile'
 
 Route::middleware(['auth'])->group(function () {
     // Halaman untuk melihat profil pengguna
-    Route::get('/user/profile', [UserController::class, 'editProfile'])->name('user.profile');
+    Route::get('/user/profile', [UserController::class, 'editUserProfile'])->name('user.profile');
     
     // Menangani pembaruan profil pengguna
-    Route::post('/user/profile/update', [UserController::class, 'updateProfile'])->name('user.profile.update');
+    Route::post('/user/profile/update', [UserController::class, 'updateUserProfile'])->name('user.profile.update');
+
+    Route::put('/user/profile/update', [UserController::class, 'updateUserProfile'])->name('user.profile.update');
+
 
     // Daftar Magang Form
     Route::get('/user/internship/form', [PublicRegController::class, 'showForm'])->name('user.internship.form');
+
+    // Halaman Dashboard Completed
+    Route::get('/user/dashboard/completed', [UserController::class, 'userCompleted'])->name('user.dashboard.completed');
+
 });
 
 /* =================== INTERNSHIP (USER) =================== */
@@ -117,6 +124,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'preve
 
     // Users CRUD -> admin.users.*
     Route::resource('users', AdminUserController::class);
+    Route::resource('certificate', CertificateController::class);
+
+    Route::get('/certificate/index', [CertificateController::class, 'index'])->name('certificate'); // Add route for viewing certificates list
 
     // Interns (pages + status + certificates) -> admin.interns.*
     Route::prefix('interns')->name('interns.')->group(function () {
@@ -136,6 +146,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'preve
         // Sertifikat default
         Route::get('/{intern}/certificate', [InternController::class, 'certificate'])->name('certificate');
         Route::get('/{intern}/certificate.pdf', [InternController::class, 'certificatePdf'])->name('certificate.pdf');
+        
 
         // Sertifikat AreaKerjaCom
         Route::get('/{intern}/certificate/areakerjacom/preview', [InternController::class, 'certificateAreaKerjaCom'])->name('certificate.areakerjacom.preview');
@@ -194,6 +205,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'preve
 
     // (Opsional) Dashboard khusus di area admin -> admin.user.dashboard
     Route::get('/user/dashboard', [AdminUserController::class, 'index'])->name('user.dashboard');
+
+    Route::put('/admin/users/{id}', [AdminUserController::class, 'update'])->name('user.update');
 
     Route::middleware(['auth', 'role:user'])->group(function () {
     // Route untuk dashboard pengguna

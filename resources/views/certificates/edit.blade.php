@@ -28,7 +28,7 @@
           Perbarui data sertifikat yang sudah dibuat.
         </p>
       </div>
-      <a href="{{ route('certificate.index') }}"
+      <a href="{{ route('admin.certificate.index') }}"
          class="inline-flex items-center rounded-lg bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600">
         <i class="fa-regular fa-circle-left mr-2"></i> Kembali
       </a>
@@ -45,7 +45,7 @@
     @endif
 
     <div class="rounded-2xl bg-white p-6 shadow ring-1 ring-gray-200/60 dark:bg-gray-800 dark:ring-gray-700 sm:p-8">
-      <form method="POST" action="{{ route('certificate.update', $certificate->id) }}" id="certificateForm">
+      <form method="POST" action="{{ route('admin.certificate.update', $certificate->id) }}" id="certificateForm">
         @csrf
         @method('PUT')
 

@@ -1,5 +1,10 @@
 @if(auth()->user()->role === 'admin')
     <x-sidebar-dashboard>
+        {{-- Pengaturan Akun --}}
+        <x-sidebar-menu-dashboard 
+            routeName="user.profile"
+            title="Profile"
+        />
         <x-sidebar-menu-dashboard 
             routeName="admin.dashboard.index" 
             title="Dashboard"
@@ -54,13 +59,12 @@
         </div>
     </x-sidebar-dashboard>
 @endif
-
-@if(auth()->user()->role === 'user')
+@if(auth()->user()->role === 'user' || auth()->user()->role === 'pemagang')
     <x-sidebar-dashboard>
         {{-- Pengaturan Akun --}}
         <x-sidebar-menu-dashboard 
             routeName="user.profile"
-            title="Pengaturan Akun"
+            title="Profile"
         />
         
         {{-- Dashboard User --}}
@@ -68,21 +72,11 @@
             routeName="user.dashboard" 
             title="Dashboard"
         />
-
-        {{-- Menu Pemagang Aktif --}}
-        @if(auth()->user()->internshipRegistration && auth()->user()->internshipRegistration->internship_status === 'active')
-            <x-sidebar-menu-dashboard 
-                routeName="user.dashboard.active"
-                title="Dashboard Magang"
-            />
-        @endif
-
-        {{-- Menu Daftar Magang --}}
-        @if(auth()->user()->internshipRegistration && in_array(auth()->user()->internshipRegistration->internship_status, ['waiting', 'active', 'completed', 'exited']))
-            {{-- Jika sudah mengisi form, tampilkan link ke halaman submitted --}}
+        {{-- Form Pendaftaran Magang --}}
+        @if(auth()->user()->role === 'pemagang')
             <x-sidebar-menu-dashboard 
                 routeName="internship.submitted"
-                title="Form Pendaftaran"
+                title="Daftar Magang"
             />
         @else
             <x-sidebar-menu-dashboard 
@@ -90,6 +84,11 @@
                 title="Daftar Magang"
             />
         @endif
+        {{-- Riwayat Magang --}}
+        <x-sidebar-menu-dashboard 
+            routeName="user.dashboard.completed"
+            title="Riwayat Magang"
+        />
 
         {{-- Logout --}}
         <div class="mt-auto px-4 pb-4">
