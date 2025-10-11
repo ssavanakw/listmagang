@@ -353,7 +353,7 @@
         'programmer':'PROG','programmer (front end / backend)':'PROG',
         'hr':'HR','human resources (hr)':'HR',
         'social-media-specialist':'SMM','spesialis media sosial':'SMM',
-        'photographer':'PV','videographer':'PV','fotografer':'PV','videografer':'PV',
+        'photographer':'PV','videographer':'VID','fotografer':'PV','videografer':'VID',
         'content-writer':'CW','penulis konten':'CW',
         'marketing-and-sales':'MS','penjualan & pemasaran':'MS','penjualan dan pemasaran':'MS',
         'graphic-designer':'CD','desainer grafis':'CD',

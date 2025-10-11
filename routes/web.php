@@ -87,6 +87,20 @@ Route::middleware(['auth'])->group(function () {
     // Halaman Dashboard Completed
     Route::get('/user/dashboard/completed', [UserController::class, 'userCompleted'])->name('user.dashboard.completed');
 
+    // Routes untuk Menampilkan dan Menyimpan Laporan Harian
+    Route::get('/user/daily-report', [UserController::class, 'dailyReport'])->name('user.dailyReport'); // Menampilkan laporan harian
+    Route::post('/user/daily-report', [UserController::class, 'storeDailyReport'])->name('user.storeDailyReport'); // Menyimpan laporan harian
+
+    // Routes untuk Menampilkan dan Menyimpan Permintaan Izin
+    Route::get('/user/leave-request', [UserController::class, 'leaveRequest'])->name('user.leaveRequest'); // Menampilkan permintaan izin
+    Route::post('/user/leave-request', [UserController::class, 'storeLeaveRequest'])->name('user.storeLeaveRequest'); // Menyimpan permintaan izin
+
+    // Routes untuk Menampilkan dan Menyimpan Tugas Pending
+    Route::get('/user/pending-tasks', [UserController::class, 'pendingTasks'])->name('user.pendingTasks'); // Menampilkan tugas pending
+    Route::post('/user/pending-tasks', [UserController::class, 'storePendingTask'])->name('user.storePendingTask'); // Menyimpan tugas pending
+
+    Route::get('/dashboard-active', [UserController::class, 'userActive'])->name('user.dashboard-active');
+
 });
 
 /* =================== INTERNSHIP (USER) =================== */

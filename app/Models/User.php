@@ -5,6 +5,10 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Models\DailyReport;
+use App\Models\LeaveRequests;
+use App\Models\PendingTasks;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -51,4 +55,20 @@ class User extends Authenticatable
         // sesuaikan namespace modelmu
         return $this->hasOne(\App\Models\InternshipRegistration::class, 'user_id');
     }
+
+    public function dailyReports()
+    {
+        return $this->hasMany(DailyReport::class);
+    }
+
+    public function leaveRequests()
+    {
+        return $this->hasMany(LeaveRequest::class);
+    }
+
+    public function pendingTasks()
+    {
+        return $this->hasMany(PendingTask::class);
+    }
+
 }

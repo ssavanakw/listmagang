@@ -23,7 +23,7 @@
     // Map kode divisi -> label
     $divisionLabels = [
       'ADM'=>'Administrasi','UIUX'=>'UI/UX Designer','PROG'=>'Programmer (Front end / Back end)','HR'=>'Human Resource',
-      'SMM'=>'Social Media Specialist','PV'=>'Photographer / Videographer','CW'=>'Content Writer','MS'=>'Marketing & Sales',
+      'SMM'=>'Social Media Specialist','PV'=>'Photographer', 'VID'=>'Videographer','CW'=>'Content Writer','MS'=>'Marketing & Sales',
       'CD'=>'Content Creative (Desain Grafis)','DM'=>'Digital Marketing','PR'=>'Marcom/Public Relations','TC'=>'Tik Tok Creator',
       'CP'=>'Content Planner','PM'=>'Project Manager','LAS'=>'Las','ANIM'=>'Animasi',
     ];

@@ -9,7 +9,7 @@
   <div class="w-full max-w-xl">
     {{-- Jika Belum Mengisi Form --}}
     @if(!$reg)
-      <div class="bg-white/90 rounded-2xl shadow-lg ring-1 ring-emerald-100 p-8 text-center animate__animated animate__fadeInUp">
+      <div class="bg-white rounded-2xl shadow-lg ring-1 ring-emerald-100 p-8 text-center animate__animated animate__fadeInUp">
         <div class="mx-auto mb-4 w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-amber-600" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z"/>
@@ -34,7 +34,7 @@
 
     {{-- Jika Status "Waiting" --}}
     @elseif($reg->internship_status === 'waiting')
-      <div class="bg-white/90 rounded-2xl shadow-lg ring-1 ring-emerald-100 p-8 text-center animate__animated animate__fadeInUp">
+      <div class="bg-emerald-300 rounded-2xl shadow-lg ring-1 ring-emerald-100 p-8 text-center animate__animated animate__fadeInUp">
         <div class="mx-auto mb-4 w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 text-emerald-600">
             <path fill-rule="evenodd"
@@ -67,7 +67,7 @@
 
     {{-- Jika Status "Accepted" --}}
     @elseif($reg->internship_status === 'accepted')
-      <div class="bg-white/90 rounded-2xl shadow-lg ring-1 ring-emerald-100 p-8 text-center animate__animated animate__fadeInUp">
+      <div class="bg-emerald-300 rounded-2xl shadow-lg ring-1 ring-emerald-100 p-8 text-center animate__animated animate__fadeInUp">
         <h2 class="text-2xl font-bold text-emerald-700 mb-2">Selamat! 🎉</h2>
         <p class="text-zinc-600">Anda <strong>DITERIMA</strong> magang. Silakan tunggu informasi jadwal mulai.</p>
         <div class="mt-6 text-left text-sm text-zinc-700">

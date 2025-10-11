@@ -485,7 +485,7 @@ class CertificateController extends Controller
                 'programmer'=>'PROG','programmer (front end / backend)'=>'PROG',
                 'hr'=>'HR','human resources (hr)'=>'HR',
                 'social-media-specialist'=>'SMM','spesialis media sosial'=>'SMM',
-                'photographer'=>'PV','videographer'=>'PV','fotografer'=>'PV','videografer'=>'PV',
+                'photographer'=>'PV','videographer'=>'VID','fotografer'=>'PV','videografer'=>'VID',
                 'content-writer'=>'CW','penulis konten'=>'CW',
                 'marketing-and-sales'=>'MS','penjualan & pemasaran'=>'MS','penjualan dan pemasaran'=>'MS',
                 'graphic-designer'=>'CD','desainer grafis'=>'CD',
@@ -618,7 +618,8 @@ class CertificateController extends Controller
             'PROG' => 'Programmer (Front end / Back end)',
             'HR'   => 'Human Resource',
             'SMM'  => 'Social Media Specialist',
-            'PV'   => 'Photographer / Videographer',
+            'PV'   => 'Photographer',
+            'VID'  => 'Videographer',
             'CW'   => 'Content Writer',
             'MS'   => 'Marketing & Sales',
             'CD'   => 'Content Creative (Desain Grafis)',
@@ -820,7 +821,8 @@ class CertificateController extends Controller
             'PROG' => 'Programmer (Front end / Back end)',
             'HR'   => 'Human Resource',
             'SMM'  => 'Social Media Specialist',
-            'PV'   => 'Photographer / Videographer',
+            'PV'   => 'Photographer',
+            'VID'   => 'Videographer',
             'CW'   => 'Content Writer',
             'MS'   => 'Marketing & Sales',
             'CD'   => 'Content Creative (Desain Grafis)',
@@ -1259,13 +1261,13 @@ class CertificateController extends Controller
     // ======= Helpers (private) =======
     private function loadAssetOptions(): array
     {
-        $backgroundFiles = collect(Storage::files('public/images/backgrounds'))
+        $backgroundFiles = collect(Storage::files('storage/app/public/images/backgrounds'))
             ->map(fn($f)=>basename($f))->filter(fn($f)=>str_starts_with($f,'bg_'))->values();
 
-        $logoFiles = collect(Storage::files('public/images/logos'))
+        $logoFiles = collect(Storage::files('storage/app/public/images/logos'))
             ->map(fn($f)=>basename($f))->filter(fn($f)=>str_starts_with($f,'logo_'))->values();
 
-        $signatureFiles = collect(Storage::files('public/images/signature'))
+        $signatureFiles = collect(Storage::files('storage/app/public/images/signature'))
             ->map(fn($f)=>basename($f))->filter(fn($f)=>str_starts_with($f,'ttd_'))->values();
 
         return [$backgroundFiles,$logoFiles,$signatureFiles];

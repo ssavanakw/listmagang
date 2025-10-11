@@ -19,9 +19,15 @@
       <p class="text-zinc-600 mb-6">Terima kasih sudah mendaftar Magang/PKL. Data kamu sudah kami terima. Kami akan menghubungi kamu melalui email/WhatsApp jika ada informasi lanjutan.</p>
 
       <div class="space-y-3">
-        <a href="{{ route('user.dashboard') }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300">
+        @if (auth()->user()->role === 'pemagang' && auth()->user()->internshipRegistration->internship_status === 'active')
+          <a href="{{ route('user.dashboard-active') }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300">
           Ke Beranda
-        </a>
+          </a>
+        @else
+          <a href="{{ route('user.dashboard') }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300">
+          Ke Beranda
+          </a>
+        @endif
 
         <!-- Tombol Logout -->
         <form method="POST" action="{{ route('user.logout') }}" class="mt-2">

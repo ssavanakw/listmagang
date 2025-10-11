@@ -66,12 +66,35 @@
             routeName="user.profile"
             title="Profile"
         />
-        
-        {{-- Dashboard User --}}
-        <x-sidebar-menu-dashboard 
-            routeName="user.dashboard" 
-            title="Dashboard"
-        />
+
+    @if(auth()->user()->role === 'pemagang' && auth()->user()->internshipRegistration->internship_status === 'active')
+            {{-- Dashboard Pemagang Aktif --}}
+            <x-sidebar-menu-dashboard 
+                routeName="user.dashboard-active" 
+                title="Dashboard"
+            />
+            {{-- Dashboard Pemagang Aktif --}}
+            <x-sidebar-menu-dashboard 
+                routeName="user.dailyReport" 
+                title="Daily Report"
+            />
+            {{-- Dashboard Pemagang Aktif --}}
+            <x-sidebar-menu-dashboard 
+                routeName="user.leaveRequest" 
+                title="Leave Request"
+            />
+            {{-- Dashboard Pemagang Aktif --}}
+            <x-sidebar-menu-dashboard 
+                routeName="user.pendingTasks" 
+                title="Pending Task"
+            />
+        @else
+            {{-- Dashboard User --}}
+            <x-sidebar-menu-dashboard 
+                routeName="user.dashboard" 
+                title="Dashboard"
+            />
+        @endif
         {{-- Form Pendaftaran Magang --}}
         @if(auth()->user()->role === 'pemagang')
             <x-sidebar-menu-dashboard 
