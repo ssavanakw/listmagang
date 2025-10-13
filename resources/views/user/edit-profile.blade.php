@@ -134,8 +134,8 @@
           Edit Profil
         </h2>
         @if ($intern)
-          <span class="inline-flex animate-pop-soft items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
-            {{ $statusMap[$status]['cls'] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' }}">
+          <span class="inline-flex animate-pop-soft items-center rounded-full px-2.5 py-0.5 text-xl font-bold
+            {{ $statusMap[$status]['cls'] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' }} f">
             {{ $statusMap[$status]['label'] ?? ucfirst($status) }}
           </span>
         @endif
@@ -172,7 +172,7 @@
         @if(in_array($status, ['accepted','active','completed']))
           <div class="mt-4 rounded-lg border border-emerald-200/70 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-900
                       dark:border-emerald-800/60 dark:bg-emerald-900/20 dark:text-emerald-200">
-            Saat status <em>accepted</em> diaktifkan admin, akunmu otomatis diberi role <span class="font-semibold">Pemagang</span>.
+            Selamat status kamu sekarang adalah <b><em>Diterima</em></b>, kamu otomatis menjadi <b><span class="font-bold">Pemagang</span></b>.
           </div>
         @elseif($status === 'rejected')
           <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-[13px] text-gray-700
