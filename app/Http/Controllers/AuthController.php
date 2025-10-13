@@ -74,11 +74,11 @@ class AuthController extends Controller
 
             // Cek apakah pengguna sudah mengisi form pendaftaran magang
             $userId = auth()->id();
-            $registration = \App\Models\InternshipRegistration::where('user_id', $userId)->latest('id')->first();
+            $registration = \App\Models\InternshipRegistration::where('user_id', $userId)->where('internship_status', 'active')->latest('id')->first();
 
             if ($registration) {
                 // Jika sudah mengisi form, arahkan ke dashboard pengguna
-                return redirect()->route('user.dashboard');
+                return redirect()->route('user.dashboard-active');
             }
 
             // Jika belum mengisi form, arahkan ke form pendaftaran magang

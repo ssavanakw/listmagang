@@ -82,67 +82,74 @@
 
     {{-- Jika Status "Rejected" --}}
     @elseif($reg->internship_status === 'rejected')
-      <div class="bg-white/90 rounded-2xl shadow-lg ring-1 ring-red-100 p-8 animate__animated animate__fadeInUp">
-        <div class="flex items-start gap-4">
-          <div class="shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-red-600" viewBox="0 0 24 24" fill="currentColor">
-              <path fill-rule="evenodd" d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm1 12h-2v2h2v-2Zm0-8h-2v6h2V6Z" clip-rule="evenodd"/>
-            </svg>
-          </div>
-          <div class="flex-1">
-            <h2 class="text-2xl font-bold text-red-600">Maaf, pengajuanmu belum bisa diterima</h2>
-            <p class="mt-2 text-zinc-700">
-              Terima kasih sudah mendaftar. Kamu bisa melakukan perbaikan data atau ajukan kembali di periode berikutnya.
-            </p>
-
-            {{-- Ringkasan singkat --}}
-            <div class="mt-6 grid sm:grid-cols-2 gap-4">
-              <div class="rounded-xl border border-zinc-200/70 p-4">
-                <h3 class="text-sm font-semibold text-zinc-900">Ringkasan Data</h3>
-                <ul class="mt-2 text-sm text-zinc-700 space-y-1">
-                  <li><span class="text-zinc-500">Nama:</span> {{ $reg->fullname }}</li>
-                  <li><span class="text-zinc-500">Email:</span> {{ $reg->email }}</li>
-                  <li><span class="text-zinc-500">Instansi:</span> {{ $reg->institution_name }}</li>
-                  @if($reg->internship_interest)
-                      <li><span class="text-zinc-500">Minat:</span> {{ $reg->internship_interest }}</li>
-                  @endif
-                </ul>
-              </div>
-
-              <div class="rounded-xl border border-zinc-200/70 p-4">
-                <h3 class="text-sm font-semibold text-zinc-900">Langkah Selanjutnya</h3>
-                <ol class="mt-2 text-sm text-zinc-700 list-decimal list-inside space-y-1">
-                  <li>Periksa kembali data profilmu (kontak, periode, jurusan, dsb).</li>
-                  <li>Lengkapi dokumen pendukung (CV/portofolio) bila belum lengkap.</li>
-                  <li>Ajukan ulang pendaftaran saat data sudah siap.</li>
-                </ol>
-              </div>
-            </div>
-
-            {{-- Aksi --}}
-            <div class="mt-6 flex flex-wrap gap-3">
-              <a href="{{ route('user.editProfile') }}"
-                class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300">
-                Edit Profil
-              </a>
-
-              <a href="{{ route('internship.form') }}"
-                class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white text-zinc-900 font-medium border border-zinc-200 hover:bg-zinc-50 focus:outline-none focus:ring-4 focus:ring-zinc-200">
-                Ajukan Ulang
-              </a>
-            </div>
-
-            {{-- Logout (opsional) --}}
-            <form method="POST" action="{{ route('user.logout') }}" class="mt-4">
-              @csrf
-              <button type="submit"
-                      class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300">
-                Logout
-              </button>
-            </form>
-          </div>
+    <div class="bg-white/90 max-w-7xl mx-auto rounded-2xl shadow-lg ring-1 ring-red-100 p-8 animate__animated animate__fadeInUp">
+      <!-- Header Pemberitahuan -->
+      <div class="flex items-center gap-4 mb-6">
+        <div class="shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm1 12h-2v2h2v-2Zm0-8h-2v6h2V6Z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h2 class="text-2xl font-bold text-red-600">Maaf, pengajuanmu belum bisa diterima</h2>
         </div>
       </div>
+
+      <!-- Isi Pemberitahuan -->
+      <div class="flex flex-col gap-4">
+        <p class="mt-2 text-zinc-700">
+          Terima kasih sudah mendaftar. Kamu bisa melakukan perbaikan data atau ajukan kembali di periode berikutnya.
+        </p>
+
+        {{-- Ringkasan singkat --}}
+        <div class="mt-6 grid sm:grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="rounded-xl border border-zinc-200/70 p-6">
+            <h3 class="text-sm font-semibold text-zinc-900">Ringkasan Data</h3>
+            <ul class="mt-2 text-sm text-zinc-700 space-y-2">
+              <li><span class="text-zinc-500">Nama:</span> {{ $reg->fullname }}</li>
+              <li><span class="text-zinc-500">Email:</span> {{ $reg->email }}</li>
+              <li><span class="text-zinc-500">Instansi:</span> {{ $reg->institution_name }}</li>
+              @if($reg->internship_interest)
+                <li><span class="text-zinc-500">Minat:</span> {{ $reg->internship_interest }}</li>
+              @endif
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-zinc-200/70 p-6">
+            <h3 class="text-sm font-semibold text-zinc-900">Langkah Selanjutnya</h3>
+            <ol class="mt-2 text-sm text-zinc-700 list-decimal list-inside space-y-2">
+              <li>Periksa kembali data profilmu (kontak, periode, jurusan, dsb).</li>
+              <li>Lengkapi dokumen pendukung (CV/portofolio) bila belum lengkap.</li>
+              <li>Ajukan ulang pendaftaran saat data sudah siap.</li>
+            </ol>
+          </div>
+        </div>
+
+        {{-- Aksi --}}
+        <div class="mt-8 flex gap-4 flex-wrap">
+          <a href="{{ route('user.editProfile') }}"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300 transition duration-300">
+            Edit Profil
+          </a>
+
+          <a href="{{ route('internship.form') }}"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-white text-zinc-900 font-semibold border border-zinc-200 hover:bg-zinc-50 focus:outline-none focus:ring-4 focus:ring-zinc-200 transition duration-300">
+            Ajukan Ulang
+          </a>
+        </div>
+
+        {{-- Logout (opsional) --}}
+        <form method="POST" action="{{ route('user.logout') }}" class="mt-6">
+          @csrf
+          <button type="submit"
+            class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition duration-300">
+            Logout
+          </button>
+        </form>
+      </div>
+    </div>
+
+
     @endif
   </div>
 </div>

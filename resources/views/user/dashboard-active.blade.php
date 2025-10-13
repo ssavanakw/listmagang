@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="px-4 pt-6 pb-6 lg:px-8 bg-emerald-300">
-  @if(auth()->user()->role === 'pemagang' && isset($internship) && $internship->internship_status === 'active')
+  @if(auth()->check() && auth()->user()->role === 'pemagang' && isset($internship) && $internship->internship_status === 'active')
     <div class="max-w-7xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden transition hover:shadow-lg">
       
       <!-- Header -->
