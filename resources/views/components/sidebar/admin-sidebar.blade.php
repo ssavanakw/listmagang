@@ -41,6 +41,14 @@
             routeName="admin.certificate.index"  
             title="Certificates"
         />
+        {{-- <x-sidebar-menu-dashboard 
+            routeName=""  
+            title="SKL"
+        />
+        <x-sidebar-menu-dashboard 
+            routeName=""  
+            title="LOA"
+        /> --}}
 
         {{-- Logout --}}
         <div class="mt-auto px-4 pb-4">
@@ -67,27 +75,52 @@
             title="Profile"
         />
 
-    @if(auth()->user()->role === 'pemagang' && auth()->user()->internshipRegistration->internship_status === 'active')
-            {{-- Dashboard Pemagang Aktif --}}
-            <x-sidebar-menu-dashboard 
-                routeName="user.dashboard-active" 
-                title="Dashboard"
-            />
-            {{-- Dashboard Pemagang Aktif --}}
-            <x-sidebar-menu-dashboard 
-                routeName="user.dailyReport" 
-                title="Daily Report"
-            />
-            {{-- Dashboard Pemagang Aktif --}}
-            <x-sidebar-menu-dashboard 
-                routeName="user.leaveRequest" 
-                title="Leave Request"
-            />
-            {{-- Dashboard Pemagang Aktif --}}
-            <x-sidebar-menu-dashboard 
-                routeName="user.pendingTasks" 
-                title="Pending Task"
-            />
+        @if(auth()->user()->role === 'pemagang')
+            @if(auth()->user()->internshipRegistration->internship_status === 'active')
+                {{-- Dashboard Pemagang Aktif --}}
+                <x-sidebar-menu-dashboard 
+                    routeName="user.dashboard-active" 
+                    title="Dashboard"
+                />
+                {{-- Daily Report Pemagang Aktif --}}
+                <x-sidebar-menu-dashboard 
+                    routeName="user.dailyReport" 
+                    title="Daily Report"
+                />
+                {{-- Leave Request Pemagang Aktif --}}
+                <x-sidebar-menu-dashboard 
+                    routeName="user.leaveRequest" 
+                    title="Leave Request"
+                />
+                {{-- Pending Task Pemagang Aktif --}}
+                <x-sidebar-menu-dashboard 
+                    routeName="user.pendingTasks" 
+                    title="Pending Task"
+                />
+            @elseif(auth()->user()->internshipRegistration->internship_status === 'completed')
+                {{-- Dashboard Pemagang Completed --}}
+                <x-sidebar-menu-dashboard 
+                    routeName="user.dashboard.completed" 
+                    title="Dashboard"
+                />
+                {{-- Daily Report Pemagang Aktif --}}
+                <x-sidebar-menu-dashboard 
+                    routeName="user.dailyReport" 
+                    title="Daily Report"
+                />
+                {{-- Leave Request Pemagang Aktif --}}
+                <x-sidebar-menu-dashboard 
+                    routeName="user.leaveRequest" 
+                    title="Leave Request"
+                />
+                {{-- Pending Task Pemagang Aktif --}}
+                <x-sidebar-menu-dashboard 
+                    routeName="user.pendingTasks" 
+                    title="Pending Task"
+                />
+                {{-- Jangan lakukan redirect otomatis --}}
+                {{-- Cukup tampilkan menu dan beri informasi status magang selesai di dalam dashboard --}}
+            @endif
         @else
             {{-- Dashboard User --}}
             <x-sidebar-menu-dashboard 
@@ -95,6 +128,7 @@
                 title="Dashboard"
             />
         @endif
+
         {{-- Form Pendaftaran Magang --}}
         @if(auth()->user()->role === 'pemagang')
             <x-sidebar-menu-dashboard 
@@ -107,9 +141,10 @@
                 title="Daftar Magang"
             />
         @endif
+
         {{-- Riwayat Magang --}}
         <x-sidebar-menu-dashboard 
-            routeName="user.dashboard.completed"
+            routeName="user.riwayatMagang"
             title="Riwayat Magang"
         />
 

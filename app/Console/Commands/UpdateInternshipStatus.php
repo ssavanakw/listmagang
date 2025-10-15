@@ -30,6 +30,8 @@ class UpdateInternshipStatus extends Command
         // Ambil semua magang yang memiliki tanggal mulai dan status selain "aktif"
         $registrations = IR::whereNotNull('start_date') // Pastikan ada tanggal mulai
             ->where('internship_status', '!=', IR::STATUS_ACTIVE) // Jangan update yang sudah aktif
+            ->where('internship_status', '!=', IR::STATUS_COMPLETED) // Jangan update yang sudah selesai
+            ->where('internship_status', '!=', IR::STATUS_REJECTED) // Jangan update yang ditolak
             ->get();
 
         // Periksa setiap magang
@@ -48,4 +50,5 @@ class UpdateInternshipStatus extends Command
         // Beri info bahwa command sudah selesai dijalankan
         $this->info('Proses update status magang selesai.');
     }
+
 }

@@ -22,6 +22,12 @@
             <div>
                 <h2 class="text-3xl font-semibold text-gray-800">{{ auth()->user()->name }}</h2>
                 <p class="text-gray-600 text-lg">{{ auth()->user()->email }}</p>
+
+                {{-- Role and Status --}}
+                <div class="mt-2 flex items-center space-x-4">
+                    <span class="text-sm font-medium text-blue-600">Role: <span class="text-gray-800">{{ auth()->user()->role }}</span></span>
+                    <span class="text-sm font-medium text-green-600">Status: <span class="text-gray-800">{{ auth()->user()->internshipRegistration->internship_status ?? 'Not Registered' }}</span></span>
+                </div>
             </div>
         </div>
 

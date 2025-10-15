@@ -123,6 +123,36 @@ Route::get('/internship/table', fn () => redirect()->route('admin.interns.index'
     ->name('internship.table')
     ->middleware('auth');
 
+// ========================
+// Dokumen Kelulusan (SKL & LOA)
+// ========================
+Route::middleware(['auth', 'role:pemagang'])->prefix('user/documents')->name('user.')->group(function () {
+
+    // Download SKL (GET) → kirim ?intern_id=...
+    Route::get('/skl', [\App\Http\Controllers\UserController::class, 'downloadSKL'])
+        ->name('skl.download');
+
+    // Generate LOA (POST) → body: intern_id
+    Route::post('/loa', [\App\Http\Controllers\UserController::class, 'generateLOA'])
+        ->name('loa.generate');
+});
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin/documents')->name('admin.documents.')->group(function () {
+    Route::get('/skl/{intern}', [\App\Http\Controllers\Admin\InternController::class, 'showSKL'])
+        ->name('skl.show');
+    Route::get('/loa/{intern}', [\App\Http\Controllers\Admin\InternController::class, 'showLOA'])
+        ->name('loa.show');
+});
+
+Route::middleware(['auth','role:pemagang'])->group(function () {
+    Route::get('/user/riwayat-magang', [\App\Http\Controllers\UserController::class, 'riwayatMagang'])
+        ->name('user.riwayatMagang');
+});
+
+
+
+
+
 /* ===== Admin Login (untuk middleware RoleMiddleware) ===== */
 Route::get('/admin/login', [AuthController::class, 'showLoginForm'])
     ->name('admin.login')
@@ -256,7 +286,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'preve
             ->name('user.internship.form')
             ->middleware('auth');
     });
-
 
 
 });

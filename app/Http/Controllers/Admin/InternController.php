@@ -425,9 +425,12 @@ class InternController extends Controller
         }
     }
 
-    public function updateStatus(Request $request, IR $intern)
+    public function updateStatus(Request $request, $id)
     {
-        // Validasi status
+        // Menemukan data berdasarkan ID yang diberikan
+        $intern = IR::findOrFail($id);
+
+        // Validasi status yang diterima
         $validated = $request->validate([
             'internship_status' => 'required|in:waiting,active,completed,exited,pending,accepted,rejected',
         ]);
@@ -435,38 +438,11 @@ class InternController extends Controller
         $oldStatus = $intern->internship_status; // Menyimpan status lama
         $newStatus = $validated['internship_status']; // Status baru yang diterima
 
-        // Cek apakah status yang diubah dari 'waiting' valid
-        if ($oldStatus === IR::STATUS_WAITING && !in_array($newStatus, ['accepted', 'rejected'])) {
-            return back()->withErrors(['internship_status' => 'Status "Menunggu" hanya bisa diubah ke "Diterima" atau "Ditolak".']);
-        }
-
         // Mengupdate status internship
         $intern->internship_status = $newStatus;
 
-        // Jika status diubah ke 'diterima'
-        if ($oldStatus === IR::STATUS_WAITING && $newStatus === IR::STATUS_ACCEPTED) {
-            // Ubah role user menjadi pemagang
-            $user = $intern->user;
-            if ($user && strtolower($user->role) !== 'pemagang') {
-                $user->role = 'pemagang';
-                $user->save();
-            }
-        }
-
-        // Jika status diubah ke 'ditolak'
-        if ($oldStatus === IR::STATUS_WAITING && $newStatus === IR::STATUS_REJECTED) {
-            // Tidak ada pengiriman email
-        }
-
-        // Jika status diubah ke 'menunggu' (dari diterima atau ditolak)
-        if (in_array($oldStatus, [IR::STATUS_ACCEPTED, IR::STATUS_REJECTED]) && $newStatus === IR::STATUS_WAITING) {
-            // Ubah role user kembali menjadi 'user'
-            $user = $intern->user;
-            if ($user && strtolower($user->role) === 'pemagang') {
-                $user->role = 'user';
-                $user->save();
-            }
-        }
+        // Pastikan tidak ada batasan untuk admin mengubah status
+        // Admin bebas mengubah status apapun tanpa perlu pengecekan status sebelumnya
 
         // Simpan perubahan status
         $intern->save();
@@ -474,8 +450,6 @@ class InternController extends Controller
         // Redirect dengan pesan sukses
         return redirect()->route('admin.interns.index')->with('success', 'Status berhasil diperbarui!');
     }
-
-
 
 
     /**
