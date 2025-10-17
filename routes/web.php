@@ -17,6 +17,8 @@ use App\Http\Controllers\Admin\CertificateGeneratorController;
 // App
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\UserFeedbackController;
+use App\Http\Controllers\LoaController;
 
 /*
 |---------------------------------------------------------------------- 
@@ -103,6 +105,16 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/user/loa/generate', [LoaController::class, 'generate'])
+        ->name('user.loa.generate');
+
+    Route::get('/user/loa/preview/{id}', [LoaController::class, 'preview'])
+        ->name('user.loa');
+});
+
+
 /* =================== INTERNSHIP (USER) =================== */
 // Form & store harus login
 Route::get('/internship', [PublicRegController::class, 'create'])
@@ -133,9 +145,15 @@ Route::middleware(['auth', 'role:pemagang'])->prefix('user/documents')->name('us
         ->name('skl.download');
 
     // Generate LOA (POST) → body: intern_id
-    Route::post('/loa', [\App\Http\Controllers\UserController::class, 'generateLOA'])
+    Route::post('/loa', [\App\Http\Controllers\LoaController::class, 'generate'])
         ->name('loa.generate');
+
 });
+
+
+
+Route::post('/user/feedback', [UserFeedbackController::class, 'submit'])
+    ->name('user.feedback.submit');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin/documents')->name('admin.documents.')->group(function () {
     Route::get('/skl/{intern}', [\App\Http\Controllers\Admin\InternController::class, 'showSKL'])
@@ -148,7 +166,6 @@ Route::middleware(['auth','role:pemagang'])->group(function () {
     Route::get('/user/riwayat-magang', [\App\Http\Controllers\UserController::class, 'riwayatMagang'])
         ->name('user.riwayatMagang');
 });
-
 
 
 
@@ -286,6 +303,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'preve
             ->name('user.internship.form')
             ->middleware('auth');
     });
+
+    Route::get('/admin/user/{user}/daily-reports', [DashboardController::class, 'showReports'])->name('user.dailyReports');
+    Route::get('/admin/user/{user}/leave-requests', [DashboardController::class, 'showLeaves'])->name('user.leaveRequests');
+    Route::get('/admin/user/{user}/pending-tasks', [DashboardController::class, 'showTasks'])->name('user.pendingTasks');
+
 
 
 });

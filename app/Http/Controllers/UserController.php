@@ -23,25 +23,25 @@ class UserController extends Controller
 {
 
     public function riwayatMagang(Request $request)
-{
-    $user = $request->user();
+    {
+        $user = $request->user();
 
-    // Pastikan relasi ada di model User:
-    // dailyReports(), leaveRequests(), pendingTasks()
-    $reports = $user->dailyReports()
-        ->orderByDesc('date')
-        ->get();
+        // Pastikan relasi ada di model User:
+        // dailyReports(), leaveRequests(), pendingTasks()
+        $reports = $user->dailyReports()
+            ->orderByDesc('date')
+            ->get();
 
-    $leaveRequests = $user->leaveRequests()
-        ->orderByDesc('leave_date')
-        ->get();
+        $leaveRequests = $user->leaveRequests()
+            ->orderByDesc('leave_date')
+            ->get();
 
-    $pendingTasks = $user->pendingTasks()
-        ->orderByDesc('created_at')
-        ->get();
+        $pendingTasks = $user->pendingTasks()
+            ->orderByDesc('created_at')
+            ->get();
 
-    return view('user.riwayat-magang', compact('reports', 'leaveRequests', 'pendingTasks'));
-}
+        return view('user.riwayat-magang', compact('reports', 'leaveRequests', 'pendingTasks'));
+    }
 
     /**
      * Pastikan direktori publik ada di disk 'public'.
@@ -119,45 +119,43 @@ class UserController extends Controller
         $this->ensureCanAccessCompletedDocs($user, $intern);
 
         try {
-            // ===== Brand/Company data (ambil dari config/app.php atau fallback aman) =====
-            $companyName     = config('app.company_name', config('app.name', 'Nama Perusahaan'));
-            $companyAddress  = config('app.company_address', 'Alamat Perusahaan');
+            // ===== Brand/Company data =====
+            $companyName     = config('app.company_name', config('app.name', 'Seven Inc'));
+            $companyAddress  = config('app.company_address', 'Jl. Raya Teknologi No. 17, Jakarta');
             $leaderName      = config('app.company_leader_name', 'Nama Pimpinan / Manajer HRD');
-            $leaderTitle     = config('app.company_leader_title', 'Jabatan Pimpinan');
-            $companyCity     = config('app.company_city', 'Kota');
-            // Nomor surat default: SKL/{tahun}/{id}
+            $leaderTitle     = config('app.company_leader_title', 'Manajer HRD');
+            $companyCity     = config('app.company_city', 'Jakarta');
             $letterNumber    = config('app.company_letter_prefix', 'SKL') . '/' . now()->format('Y') . '/' . $intern->id;
 
-            // (Opsional) logo & stempel dari storage publik
-            $logoPath  = Storage::disk('public')->exists('branding/logo.png')  ? asset('storage/branding/logo.png')  : null;
-            $stampPath = Storage::disk('public')->exists('branding/stamp.png') ? asset('storage/branding/stamp.png') : null;
+            // ===== Path logo & stempel (pakai absolute path agar DomPDF bisa render) =====
+            $logoStoragePath  = storage_path('app/public/images/logos/logo_seveninc.png');
+            $stampStoragePath = storage_path('app/public/images/logos/stamp.png');
 
-            // ===== Render PDF dari view SKL =====
+            $logoPath  = file_exists($logoStoragePath)  ? $logoStoragePath  : null;
+            $stampPath = file_exists($stampStoragePath) ? $stampStoragePath : null;
+
+            // ===== Render PDF dari view =====
             $pdf = Pdf::loadView('user.skl', [
-                'intern'          => $intern,
-                'user'            => $user,
-
-                // Variabel opsional untuk view
-                'companyName'     => $companyName,
-                'companyAddress'  => $companyAddress,
-                'leaderName'      => $leaderName,
-                'leaderTitle'     => $leaderTitle,
-                'letterNumber'    => $letterNumber,
-                'city'            => $companyCity,
-                'logoPath'        => $logoPath,   // bisa null
-                'stampPath'       => $stampPath,  // bisa null
+                'intern'         => $intern,
+                'user'           => $user,
+                'companyName'    => $companyName,
+                'companyAddress' => $companyAddress,
+                'leaderName'     => $leaderName,
+                'leaderTitle'    => $leaderTitle,
+                'letterNumber'   => $letterNumber,
+                'city'           => $companyCity,
+                'logoPath'       => $logoPath,   // absolute path
+                'stampPath'      => $stampPath,  // absolute path
             ])->setPaper('A4', 'portrait');
 
-            // ===== Simpan salinan ke storage publik (riwayat) =====
+            // ===== Simpan salinan PDF =====
             $safeName = \Illuminate\Support\Str::slug($intern->fullname ?? $user->name, '-');
             $fileName = 'SKL-'.$intern->id.'-'.$safeName.'-'.now()->format('Ymd_His').'.pdf';
             $dir      = 'documents/skl';
-            $this->ensurePublicDir($dir); // helper di controller (sudah kita buat sebelumnya)
+            $this->ensurePublicDir($dir);
             $path     = $dir.'/'.$fileName;
 
             Storage::disk('public')->put($path, $pdf->output());
-
-            // Kirim link publik (butuh `php artisan storage:link`)
             $publicUrl = asset('storage/'.$path);
 
             return back()->with('success', 'SKL berhasil dibuat.')
@@ -174,119 +172,8 @@ class UserController extends Controller
 
 
 
-    /**
-     * Generate LOA (PDF)
-     */
-    public function generateLOA(Request $request)
-    {
-        $request->validate([
-            'intern_id'                 => ['required','integer'],
-            // 3 cara input rows (semua opsional)
-            'loa_items'                 => ['sometimes','array'],
-            'loa_items.*.deskripsi'     => ['nullable','string','max:1000'],
-            'loa_items.*.keterangan'    => ['nullable','string','max:1000'],
 
-            'loa_deskripsi'             => ['sometimes','array'],
-            'loa_deskripsi.*'           => ['nullable','string','max:1000'],
-            'loa_keterangan'            => ['sometimes','array'],
-            'loa_keterangan.*'          => ['nullable','string','max:1000'],
-
-            'rows_json'                 => ['sometimes','string'], // JSON string berisi [{deskripsi, keterangan}, ...]
-        ]);
-
-        $user = $request->user();
-
-        $intern = IR::where('id', $request->input('intern_id'))
-            ->where('user_id', $user->id)
-            ->firstOrFail();
-
-        // Pemagang + owner + status completed
-        $this->ensureCanAccessCompletedDocs($user, $intern);
-
-        // ------ Kumpulkan rows dari SEMUA sumber (digabung) ------
-        $rows = [];
-
-        // Helper tambah baris jika tidak kosong semua
-        $pushRow = function (?string $d, ?string $k) use (&$rows) {
-            $d = trim((string)$d);
-            $k = trim((string)$k);
-            if ($d !== '' || $k !== '') {
-                $rows[] = ['deskripsi' => $d, 'keterangan' => $k];
-            }
-        };
-
-        // 1) loa_items[] (array of objects)
-        $items = $request->input('loa_items', []);
-        if (is_array($items)) {
-            foreach ($items as $it) {
-                $pushRow($it['deskripsi'] ?? '', $it['keterangan'] ?? '');
-            }
-        }
-
-        // 2) dua array paralel: loa_deskripsi[] + loa_keterangan[]
-        $descs = $request->input('loa_deskripsi', []);
-        $notes = $request->input('loa_keterangan', []);
-        if (is_array($descs) || is_array($notes)) {
-            $descs = is_array($descs) ? $descs : [];
-            $notes = is_array($notes) ? $notes : [];
-            $max   = max(count($descs), count($notes));
-            for ($i = 0; $i < $max; $i++) {
-                $pushRow($descs[$i] ?? '', $notes[$i] ?? '');
-            }
-        }
-
-        // 3) rows_json (JSON string)
-        if ($request->filled('rows_json')) {
-            try {
-                $decoded = json_decode($request->input('rows_json'), true);
-                if (is_array($decoded)) {
-                    foreach ($decoded as $it) {
-                        if (is_array($it)) {
-                            $pushRow($it['deskripsi'] ?? '', $it['keterangan'] ?? '');
-                        }
-                    }
-                }
-            } catch (\Throwable $e) {
-                // Abaikan error JSON → akan jatuh ke placeholder di view
-            }
-        }
-
-        // Batasi jumlah baris agar aman
-        if (count($rows) > 100) {
-            $rows = array_slice($rows, 0, 100);
-        }
-
-        try {
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('user.loa', [
-                'intern' => $intern,
-                'user'   => $user,
-                'rows'   => $rows, // <-- Blade akan menggambar tabel dari sini
-            ])->setPaper('A4', 'portrait');
-
-            $safeName = \Illuminate\Support\Str::slug($intern->fullname ?? $user->name, '-');
-            $fileName = 'LOA-'.$intern->id.'-'.$safeName.'-'.now()->format('Ymd_His').'.pdf';
-            $dir      = 'documents/loa';
-            $this->ensurePublicDir($dir);
-            $path     = $dir.'/'.$fileName;
-
-            \Illuminate\Support\Facades\Storage::disk('public')->put($path, $pdf->output());
-            $publicUrl = asset('storage/'.$path);
-
-            return back()->with('success', 'LOA berhasil digenerate.')
-                        ->with('loa_url', $publicUrl);
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Gagal generate LOA', [
-                'err' => $e->getMessage(),
-                'intern_id' => $intern->id,
-                'user_id' => $user->id,
-            ]);
-            return back()->with('error', 'Gagal membuat LOA. Silakan coba lagi atau hubungi admin.');
-        }
-    }
-
-
-
-
+    
 
     // Tambahkan helper ini di dalam class UserController (private):
     private function assertPemagangOrAbort($user): void

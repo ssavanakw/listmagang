@@ -13,8 +13,7 @@ class PendingTask extends Model
     protected $fillable = [
         'user_id', 
         'title', 
-        'description',
-        'status'
+        'description'
     ];
 
     // Definisikan relasi dengan User (jika dibutuhkan)

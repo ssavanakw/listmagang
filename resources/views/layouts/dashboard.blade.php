@@ -117,6 +117,25 @@
     </script>
     @endif
 
+    <script>
+    window.addEventListener('message', (e) => {
+    if (e.data?.type === 'updateLOA') {
+        const { rows } = e.data;
+        const tbody = document.querySelector('table.grid tbody');
+        tbody.innerHTML = '';
+        rows.forEach((r, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td class="center">${i + 1}</td>
+            <td>${r.deskripsi || ''}</td>
+            <td>${r.keterangan || ''}</td>
+        `;
+        tbody.appendChild(tr);
+        });
+    }
+    });
+    </script>
+
 
 </body>
 </html>

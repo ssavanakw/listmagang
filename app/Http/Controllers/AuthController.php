@@ -72,22 +72,29 @@ class AuthController extends Controller
                 return redirect()->route('admin.dashboard.index');
             }
 
-            // Cek apakah pengguna sudah mengisi form pendaftaran magang
+            // Cek status pendaftaran magang
             $userId = auth()->id();
-            $registration = \App\Models\InternshipRegistration::where('user_id', $userId)->where('internship_status', 'active')->latest('id')->first();
+            $registration = \App\Models\InternshipRegistration::where('user_id', $userId)
+                ->latest('id')
+                ->first();
 
             if ($registration) {
-                // Jika sudah mengisi form, arahkan ke dashboard pengguna
-                return redirect()->route('user.dashboard-active');
+                // Cek status magang
+                if (auth()->user()->role === 'pemagang' && $registration->internship_status === 'active') {
+                    return redirect()->route('user.dashboard-active');
+                } elseif (auth()->user()->role === 'pemagang' && $registration->internship_status === 'completed') {
+                    return redirect()->route('user.dashboard.completed');
+                }
             }
 
-            // Jika belum mengisi form, arahkan ke form pendaftaran magang
+            // Jika belum mengisi form pendaftaran magang
             return redirect()->route('user.dashboard');
         }
 
-        // Jika login gagal, tampilkan pesan error
+        // Jika login gagal
         return back()->with('error', 'Email atau password salah!')->onlyInput('email');
     }
+
 
 
 

@@ -10,6 +10,8 @@ use App\Models\LeaveRequest;
 use App\Models\PendingTask;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -50,25 +52,25 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function internshipRegistration()
+    public function internshipRegistration(): HasOne
     {
         // sesuaikan namespace modelmu
         return $this->hasOne(\App\Models\InternshipRegistration::class, 'user_id');
     }
 
-    public function dailyReports()
+    public function dailyReports(): HasMany
     {
-        return $this->hasMany(DailyReport::class);
+        return $this->hasMany(DailyReport::class, 'user_id');
     }
 
-    public function leaveRequests()
+    public function leaveRequests(): HasMany
     {
-        return $this->hasMany(LeaveRequest::class);
+        return $this->hasMany(LeaveRequest::class, 'user_id');
     }
 
-    public function pendingTasks()
+    public function pendingTasks(): HasMany
     {
-        return $this->hasMany(PendingTask::class);
+        return $this->hasMany(PendingTask::class, 'user_id');
     }
 
 }

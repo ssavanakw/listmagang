@@ -142,11 +142,13 @@
             />
         @endif
 
+        @if(auth()->user()->role === 'pemagang')
         {{-- Riwayat Magang --}}
         <x-sidebar-menu-dashboard 
             routeName="user.riwayatMagang"
             title="Riwayat Magang"
         />
+        @endif
 
         {{-- Logout --}}
         <div class="mt-auto px-4 pb-4">
