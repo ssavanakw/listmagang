@@ -41,14 +41,11 @@
             routeName="admin.certificate.index"  
             title="Certificates"
         />
-        {{-- <x-sidebar-menu-dashboard 
-            routeName=""  
+        <x-sidebar-menu-dashboard 
+            routeName="admin.skl.editor"  
             title="SKL"
         />
-        <x-sidebar-menu-dashboard 
-            routeName=""  
-            title="LOA"
-        /> --}}
+
 
         {{-- Logout --}}
         <div class="mt-auto px-4 pb-4">

@@ -13,7 +13,7 @@ use App\Http\Controllers\Admin\InternController;
 use App\Http\Controllers\Admin\InternPageController;
 use App\Http\Controllers\Admin\InternApiController;
 use App\Http\Controllers\Admin\CertificateGeneratorController;
-
+use App\Http\Controllers\SKLController;
 // App
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CertificateController;
@@ -140,16 +140,14 @@ Route::get('/internship/table', fn () => redirect()->route('admin.interns.index'
 // ========================
 Route::middleware(['auth', 'role:pemagang'])->prefix('user/documents')->name('user.')->group(function () {
 
-    // Download SKL (GET) → kirim ?intern_id=...
-    Route::get('/skl', [\App\Http\Controllers\UserController::class, 'downloadSKL'])
-        ->name('skl.download');
+    // Download dinamis (pemagang COMPLETED; admin boleh untuk user lain dengan ?user_id=)
+    Route::get('/skl/download', [SKLController::class, 'download'])->name('skl.download');
 
     // Generate LOA (POST) → body: intern_id
     Route::post('/loa', [\App\Http\Controllers\LoaController::class, 'generate'])
         ->name('loa.generate');
 
 });
-
 
 
 Route::post('/user/feedback', [UserFeedbackController::class, 'submit'])
@@ -308,6 +306,21 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'preve
     Route::get('/admin/user/{user}/leave-requests', [DashboardController::class, 'showLeaves'])->name('user.leaveRequests');
     Route::get('/admin/user/{user}/pending-tasks', [DashboardController::class, 'showTasks'])->name('user.pendingTasks');
 
+    Route::get('/skl/editor', [SKLController::class, 'edit'])->name('skl.editor');
+    Route::post('/skl/editor', [SKLController::class, 'update'])->name('skl.update');
+    // Preview untuk panel editor (dipanggil dari iframe)
+    Route::get('/skl/preview', [SKLController::class, 'preview'])->name('skl.preview');
 
 
+});
+
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin/skl')->group(function () {
+    Route::get('/edit', [SKLController::class, 'edit'])->name('admin.skl.edit');
+    Route::post('/update', [SKLController::class, 'update'])->name('admin.skl.update');
+    Route::get('/preview', [SKLController::class, 'preview'])->name('admin.skl.preview');
+});
+
+Route::get('/skl-preview', function () {
+    return view('user.skl');
 });

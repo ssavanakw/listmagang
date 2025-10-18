@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\InternshipRegistration as IR;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Artisan;
 use App\Models\DailyReport;
 use App\Models\LeaveRequest;
 use App\Models\PendingTask;
@@ -13,6 +16,78 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+
+    public function edit()
+    {
+        $config = [
+            'company_name'    => config('app.company_name'),
+            'company_address' => config('app.company_address'),
+            'company_city'    => config('app.company_city'),
+            'leader_name'     => config('app.company_leader_name'),
+            'leader_title'    => config('app.company_leader_title'),
+        ];
+
+        return view('admin.skl_editor', compact('config'));
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'company_name'    => 'required|string|max:100',
+            'company_address' => 'required|string|max:255',
+            'company_city'    => 'required|string|max:100',
+            'leader_name'     => 'required|string|max:100',
+            'leader_title'    => 'required|string|max:100',
+            'logo'            => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+            'stamp'           => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+        ]);
+
+        // 🔹 Upload logo & stempel
+        if ($request->hasFile('logo')) {
+            $request->file('logo')->storeAs('public/images/logos', 'logo_seveninc.png');
+        }
+
+        if ($request->hasFile('stamp')) {
+            $request->file('stamp')->storeAs('public/images/logos', 'stamp.png');
+        }
+
+        // 🔹 Backup .env sebelum menulis ulang
+        $envPath = base_path('.env');
+        $backupPath = storage_path('app/backups/env-backup-'.now()->format('Ymd_His').'.env');
+        if (File::exists($envPath)) {
+            File::copy($envPath, $backupPath);
+        }
+
+        // 🔹 Edit isi .env dengan regex aman
+        $envContent = File::get($envPath);
+        $replacements = [
+            'APP_COMPANY_NAME'         => $request->company_name,
+            'APP_COMPANY_ADDRESS'      => $request->company_address,
+            'APP_COMPANY_CITY'         => $request->company_city,
+            'APP_COMPANY_LEADER_NAME'  => $request->leader_name,
+            'APP_COMPANY_LEADER_TITLE' => $request->leader_title,
+        ];
+
+        foreach ($replacements as $key => $value) {
+            $pattern = "/^{$key}=.*/m";
+            $replacement = "{$key}=\"{$value}\"";
+
+            if (preg_match($pattern, $envContent)) {
+                $envContent = preg_replace($pattern, $replacement, $envContent);
+            } else {
+                $envContent .= "\n{$replacement}";
+            }
+        }
+
+        File::put($envPath, $envContent);
+
+        // 🔹 Bersihkan & reload cache konfigurasi
+        Artisan::call('config:clear');
+        Artisan::call('config:cache');
+
+        return back()->with('success', '✅ Data SKL berhasil diperbarui & disimpan!');
+    }
+
 
     /**
      * GET /admin/user/{user}/daily-reports

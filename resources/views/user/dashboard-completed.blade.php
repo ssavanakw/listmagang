@@ -117,18 +117,25 @@
             {{-- Wrapper dinamis untuk baris --}}
             <div id="loa-rows" class="space-y-3">
               {{-- Baris awal --}}
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-center loa-row">
                 <input name="loa_deskripsi[]" type="text"
                       class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
                       placeholder="Deskripsi kegiatan (contoh: Orientasi, Pelatihan, Pengembangan aplikasi)">
                 <input name="loa_keterangan[]" type="text"
                       class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
                       placeholder="Keterangan (contoh: Minggu pertama, Dikoordinir oleh HRD)">
+                <button type="button"
+                        class="delete-loa-row text-red-600 hover:text-red-800 text-xs font-medium flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                  Hapus
+                </button>
               </div>
             </div>
 
             {{-- Tombol tambah baris --}}
-            <div class="flex justify-end mt-2">
+            <div class="flex justify-end mt-2 gap-3">
               <button type="button"
                       class="add-loa-row inline-flex items-center gap-2 text-sm text-emerald-700 font-medium hover:text-emerald-800 transition"
                       data-add-target="loa-rows">
@@ -137,7 +144,16 @@
                 </svg>
                 Tambah Baris
               </button>
+              
+              <button type="button" id="clearLoaRows"
+                      class="inline-flex items-center gap-2 text-sm text-red-600 font-medium hover:text-red-700 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Hapus Semua
+              </button>
             </div>
+
 
             {{-- Tombol Preview dan Generate --}}
             <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4">
@@ -178,10 +194,6 @@
             </div>
           </div>
         </div>
-
-
-
-
 
         {{-- BUTTONS --}}
         <div class="grid md:grid-cols-2 gap-4 mb-8">
@@ -226,57 +238,87 @@
 @push('scripts')
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://unpkg.com/flowbite@2.5.1/dist/flowbite.min.js"></script>
-<script>
-document.addEventListener('click', e => {
-  const btn = e.target.closest('.add-loa-row');
-  if (!btn) return;
-  const targetId = btn.dataset.addTarget;
-  const wrap = document.getElementById(targetId);
-  if (!wrap) return;
-  const row = document.createElement('div');
-  row.className = 'grid grid-cols-1 sm:grid-cols-2 gap-3';
-  row.innerHTML = `
-    <input name="loa_deskripsi[]" type="text" class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Deskripsi kegiatan">
-    <input name="loa_keterangan[]" type="text" class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Keterangan">
-  `;
-  wrap.appendChild(row);
-});
-</script>
 @endpush
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const previewBtn = document.getElementById('previewLoaBtn');
-  const previewModal = document.getElementById('loa-preview-modal');
-  const closeBtn = document.getElementById('closePreviewBtn');
-  const iframe = document.getElementById('loaPreviewFrame');
+  document.addEventListener('DOMContentLoaded', () => {
+    const wrap = document.getElementById('loa-rows');
+    const clearBtn = document.getElementById('clearLoaRows');
+    const previewModal = document.getElementById('loa-preview-modal');
+    const closeBtn = document.getElementById('closePreviewBtn');
+    const previewBtn = document.getElementById('previewLoaBtn');
+    const iframe = document.getElementById('loaPreviewFrame');
 
-  previewBtn?.addEventListener('click', () => {
-    const deskripsi = Array.from(document.querySelectorAll('input[name="loa_deskripsi[]"]')).map(i => i.value.trim());
-    const keterangan = Array.from(document.querySelectorAll('input[name="loa_keterangan[]"]')).map(i => i.value.trim());
+    // ========== TAMBAH BARIS ==========
+    document.addEventListener('click', e => {
+      const addBtn = e.target.closest('.add-loa-row');
+      if (addBtn) {
+        const row = document.createElement('div');
+        row.className = 'grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-center loa-row';
+        row.innerHTML = `
+          <input name="loa_deskripsi[]" type="text"
+                class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="Deskripsi kegiatan">
+          <input name="loa_keterangan[]" type="text"
+                class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="Keterangan">
+          <button type="button"
+                  class="delete-loa-row text-red-600 hover:text-red-800 text-xs font-medium flex items-center gap-1 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Hapus
+          </button>
+        `;
+        wrap.appendChild(row);
+      }
 
-    // Buat data JSON untuk dikirim ke preview
-    const data = deskripsi.map((d, i) => ({
-      deskripsi: d || '',
-      keterangan: keterangan[i] || ''
-    }));
+      // ========== HAPUS BARIS INDIVIDUAL ==========
+      const delBtn = e.target.closest('.delete-loa-row');
+      if (delBtn) {
+        const row = delBtn.closest('.loa-row');
+        if (row) {
+          row.style.opacity = '0';
+          row.style.transition = 'opacity 0.2s';
+          setTimeout(() => row.remove(), 200);
+        }
+      }
+    });
 
-    // Kirim data ke iframe (user/loa.blade.php)
-    iframe.contentWindow.postMessage({ type: 'updateLOA', rows: data }, '*');
+    // ========== HAPUS SEMUA BARIS ==========
+    clearBtn?.addEventListener('click', () => {
+      if (confirm('Yakin ingin menghapus semua baris LOA?')) {
+        wrap.innerHTML = '';
+      }
+    });
 
-    // Tampilkan modal
-    previewModal.classList.remove('hidden');
-    previewModal.classList.add('flex');
+    // ========== PREVIEW ==========
+    previewBtn?.addEventListener('click', () => {
+      const deskripsi = Array.from(document.querySelectorAll('input[name="loa_deskripsi[]"]')).map(i => i.value.trim());
+      const keterangan = Array.from(document.querySelectorAll('input[name="loa_keterangan[]"]')).map(i => i.value.trim());
+      const data = deskripsi.map((d, i) => ({ deskripsi: d || '', keterangan: keterangan[i] || '' }));
+
+      iframe.contentWindow.postMessage({ type: 'updateLOA', rows: data }, '*');
+      previewModal.classList.remove('hidden');
+      previewModal.classList.add('flex');
+    });
+
+    closeBtn?.addEventListener('click', () => {
+      previewModal.classList.add('hidden');
+      previewModal.classList.remove('flex');
+    });
+
+    // ========== IFRAME AUTO-HEIGHT ==========
+    window.addEventListener('message', e => {
+      if (e.data?.type === 'setHeight') {
+        iframe.style.height = e.data.height + 'px';
+      }
+    });
   });
-
-  closeBtn?.addEventListener('click', () => {
-    previewModal.classList.add('hidden');
-    previewModal.classList.remove('flex');
-  });
-});
 </script>
 @endpush
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {

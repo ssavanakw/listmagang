@@ -17,6 +17,14 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+
+
+    'company_name' => env('APP_COMPANY_NAME', 'Seven Inc'),
+    'company_address' => env('APP_COMPANY_ADDRESS', 'Jl. Raya Janti Gg. Harjuna No.59, Jaranan, Karangjambe, Kec. Banguntapan, Kabupaten Bantul, Daerah Istimewa Yogyakarta 55198'),
+    'company_city' => env('APP_COMPANY_CITY', 'Yogyakarta'),
+    'company_leader_name' => env('APP_COMPANY_LEADER_NAME', 'Nama Pimpinan / HRD'),
+    'company_leader_title' => env('APP_COMPANY_LEADER_TITLE', 'Manajer HRD'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -83,6 +91,8 @@ return [
     */
 
     'locale' => 'en',
+    Barryvdh\DomPDF\ServiceProvider::class,
+
 
     /*
     |--------------------------------------------------------------------------
@@ -194,6 +204,8 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        Barryvdh\DomPDF\ServiceProvider::class,
+
 
     ],
 
@@ -209,7 +221,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
-        // 'ExampleClass' => App\Example\ExampleClass::class,
+        'PDF' => Facade::class,
     ])->toArray(),
 
 ];

@@ -23,6 +23,10 @@
           <a href="{{ route('user.dashboard-active') }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300">
           Ke Beranda
           </a>
+        @elseif (auth()->user()->role === 'pemagang' && auth()->user()->internshipRegistration->internship_status === 'completed')
+          <a href="{{ route('user.dashboard.completed') }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300">
+          Ke Beranda
+          </a>
         @else
           <a href="{{ route('user.dashboard') }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300">
           Ke Beranda

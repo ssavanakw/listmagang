@@ -24,34 +24,18 @@ use Carbon\Carbon;
 class InternController extends Controller
 {
 
-    private function sendWaitingEmail(IR $intern): void
+    public function showSKL($internId)
     {
-        // Ambil email tujuan: prioritas ke kolom email pendaftar
-        $to = $intern->email ?: optional($intern->user)->email;
-        if (!$to) return;
+        $intern = \App\Models\InternshipRegistration::findOrFail($internId);
+        $user = $intern->user ?? null;
 
-        try {
-            // Kirim email dengan queue
-            Mail::to($to)->queue(new InternWaitingMail($intern)); 
-        } catch (\Exception $e) {
-            // Log error jika ada masalah dengan pengiriman email
-            Log::error("Email gagal terkirim ke {$to}: {$e->getMessage()}");
+        // Jika view skl.blade.php tidak ditemukan
+        if (!view()->exists('user.skl')) {
+            abort(404, 'File SKL tidak ditemukan di resources/views/user/skl.blade.php');
         }
-    }
 
-    private function sendRejectedEmail(IR $intern): void
-    {
-        // Ambil email tujuan: prioritas ke kolom email pendaftar
-        $to = $intern->email ?: optional($intern->user)->email;
-        if (!$to) return;
-
-        try {
-            // Kirim email dengan queue
-            Mail::to($to)->queue(new InternRejectedMail($intern)); 
-        } catch (\Exception $e) {
-            // Log error jika ada masalah dengan pengiriman email
-            Log::error("Email gagal terkirim ke {$to}: {$e->getMessage()}");
-        }
+        // Render surat SKL dengan data peserta
+        return view('user.skl', compact('intern', 'user'));
     }
 
 
