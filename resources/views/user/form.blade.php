@@ -14,13 +14,10 @@
       75% { transform: translateX(-4px); }
       100% { transform: translateX(0); }
     }
-
     .animate-shake {
       animation: shake 2s ease-in-out infinite;
     }
-
   </style>
-  
 </head>
 
 <body class="bg-emerald-400/20  min-h-screen flex items-start sm:items-center justify-center p-4">
@@ -500,6 +497,5 @@
       </section>
     </div>
   </div>
-
 </body>
 </html>

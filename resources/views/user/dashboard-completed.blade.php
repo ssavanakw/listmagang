@@ -6,12 +6,10 @@
 @php
   /** @var \App\Models\User $user */
   $user = auth()->user();
-
   $internships = $internships
       ?? (method_exists($user, 'internshipRegistrations')
           ? $user->internshipRegistrations()->latest('id')->paginate(10)
           : collect());
-
   $reg = $user->internshipRegistration ?? null;
   $canDownload = ($user->role === 'pemagang'
       && $reg

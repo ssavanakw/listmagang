@@ -106,7 +106,6 @@
       display:flex; justify-content:space-between; align-items:center;
       color:var(--muted); font-size:10.5px;
     }
-
     .page-break { page-break-after: always; }
   </style>
 </head>
@@ -243,6 +242,5 @@ window.addEventListener('message', (e) => {
   }
 });
 </script>
-
 </body>
 </html>

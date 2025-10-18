@@ -92,7 +92,6 @@
             style="  width: 40vw; height: 100vh; border: none;"
         ></iframe>
     </div>
-
 </div>
 
 <script>
@@ -128,7 +127,4 @@
     window.__sklTypingDelay = setTimeout(refreshPreview, 400);  // Tunggu 400ms sebelum update preview
   });
 </script>
-
-
-
 @endsection

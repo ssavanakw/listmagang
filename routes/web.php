@@ -149,7 +149,6 @@ Route::middleware(['auth', 'role:pemagang'])->prefix('user/documents')->name('us
 
 });
 
-
 Route::post('/user/feedback', [UserFeedbackController::class, 'submit'])
     ->name('user.feedback.submit');
 
@@ -164,9 +163,6 @@ Route::middleware(['auth','role:pemagang'])->group(function () {
     Route::get('/user/riwayat-magang', [\App\Http\Controllers\UserController::class, 'riwayatMagang'])
         ->name('user.riwayatMagang');
 });
-
-
-
 
 /* ===== Admin Login (untuk middleware RoleMiddleware) ===== */
 Route::get('/admin/login', [AuthController::class, 'showLoginForm'])
@@ -310,7 +306,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'preve
     Route::post('/skl/editor', [SKLController::class, 'update'])->name('skl.update');
     // Preview untuk panel editor (dipanggil dari iframe)
     Route::get('/skl/preview', [SKLController::class, 'preview'])->name('skl.preview');
-
 
 });
 
