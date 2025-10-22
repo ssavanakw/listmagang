@@ -206,19 +206,19 @@
 
       <!-- Tanda tangan gambar -->
       <div class="signature">
-        <img src="{{ $stampData ?? asset('storage/images/signature/' . ($loaSettings->signatory_image ?? 'signature-placeholder.png')) }}" 
+        <img src="{{ $stampData ?? asset('storage/images/signature/ttd_arisetiahusbana.png') }}" 
        alt="Tanda Tangan" class="signature-img">
       </div>
 
       <!-- Tanda tangan -->
       <div class="signature">
         <div class="signature-line"></div>
-        <p class="signature-name">{{ $loaSettings->signatory_name ?? 'Nama Penandatangan' }}</p>
-        <p class="signature-position">{{ $loaSettings->signatory_position ?? 'Jabatan Penandatangan' }}</p>
+        <p class="signature-name">{{ $loaSettings->signatory_name ?? 'Ari Setia Husbana' }}</p>
+        <p class="signature-position">{{ $loaSettings->signatory_position ?? 'HRD' }}</p>
       </div>
 
       <!-- Static company data -->
-      <p>{{ $loaSettings->company_name ?? 'Nama Perusahaan' }}</p>
+      <p>{{ $loaSettings->company_name ?? 'Seven Inc.' }}</p>
       <p>{{ $loaSettings->company_contact_email ?? 'Kontak Perusahaan: (Email / Telepon)' }}</p>
     </div>
   </div>
