@@ -9,6 +9,7 @@ use App\Models\LeaveRequest;
 use App\Models\PendingTask;
 use App\Models\SKLSetting;
 use App\Models\InternshipRegistration as IR;
+use App\Models\DocumentDownload;
 
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -102,85 +103,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Download SKL (PDF)
-     */
-    public function downloadSKL(Request $request)
-    {
-        $request->validate(['intern_id' => 'required|integer']);
-
-        $user = $request->user();
-
-        // Ambil data IR (Internship Registration)
-        $intern = IR::where('id', $request->intern_id)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
-
-        // 🔹 Ambil konfigurasi SKL dari database (yang diubah admin)
-        $sklConfig = SKLSetting::first();
-
-        // Jika belum ada data di DB → fallback default
-        $companyName    = $sklConfig->company_name    ?? 'Seven Inc';
-        $companyAddress = $sklConfig->company_address ?? 'Jl. Raya Teknologi No. 17, Jakarta';
-        $companyCity    = $sklConfig->company_city    ?? 'Jakarta';
-        $leaderName     = $sklConfig->leader_name     ?? 'Nama Pimpinan / HRD';
-        $leaderTitle    = $sklConfig->leader_title    ?? 'Manajer HRD';
-
-        // 🔹 Logo & stempel (cek database dulu, baru fallback)
-        $logoPathDB  = $sklConfig->logo_path  ?? 'storage/images/logos/logo_seveninc.png';
-        $stampPathDB = $sklConfig->stamp_path ?? 'storage/images/logos/stamp.png';
-
-        $logoPathAbs  = public_path($logoPathDB);
-        $stampPathAbs = public_path($stampPathDB);
-
-        $logoPath  = file_exists($logoPathAbs)  ? $logoPathAbs  : public_path('storage/images/logos/logo_seveninc.png');
-        $stampPath = file_exists($stampPathAbs) ? $stampPathAbs : public_path('storage/images/logos/stamp.png');
-
-        $letterNumber = 'SKL/' . now()->format('Y') . '/' . ($intern->id ?? 'XXX');
-
-        try {
-            // 🔹 Render ke PDF
-            $pdf = Pdf::loadView('user.skl', [
-                'intern'         => $intern,
-                'user'           => $user,
-                'companyName'    => $companyName,
-                'companyAddress' => $companyAddress,
-                'leaderName'     => $leaderName,
-                'leaderTitle'    => $leaderTitle,
-                'letterNumber'   => $letterNumber,
-                'city'           => $companyCity,
-                'logoPath'       => $logoPath,
-                'stampPath'      => $stampPath,
-            ])->setPaper('A4', 'portrait');
-
-            // 🔹 Simpan PDF
-            $safeName = Str::slug($intern->fullname ?? $user->name, '-');
-            $fileName = 'SKL-'.$intern->id.'-'.$safeName.'-'.now()->format('Ymd_His').'.pdf';
-            $dir = 'documents/skl';
-            Storage::disk('public')->makeDirectory($dir);
-
-            $path = $dir.'/'.$fileName;
-            Storage::disk('public')->put($path, $pdf->output());
-            $publicUrl = asset('storage/'.$path);
-
-            return back()->with([
-                'success' => '✅ SKL berhasil dibuat!',
-                'skl_url' => $publicUrl
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('Gagal generate SKL', [
-                'error' => $e->getMessage(),
-                'intern_id' => $intern->id,
-                'user_id' => $user->id,
-            ]);
-            return back()->with('error', 'Gagal membuat SKL. Silakan coba lagi atau hubungi admin.');
-        }
-    }
-
-
-
-
-    
 
     // Tambahkan helper ini di dalam class UserController (private):
     private function assertPemagangOrAbort($user): void

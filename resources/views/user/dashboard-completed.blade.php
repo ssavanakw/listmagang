@@ -20,20 +20,20 @@
   <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl p-8 border border-emerald-100">
 
     {{-- TOAST MESSAGES --}}
-    @if(session('success') || session('error'))
+    @if(session('success'))
       <div id="toast-msg" class="mb-6 flex justify-center">
         <div class="flex items-center p-4 text-gray-700 bg-white rounded-xl shadow-md ring-1 ring-emerald-100">
-          <svg class="w-5 h-5 mr-2 {{ session('success') ? 'text-emerald-600' : 'text-red-600' }}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+          <svg class="w-5 h-5 mr-2 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
             <path d="M16.707 5.293a1 1 0 0 0-1.414-1.414L8 11.172 4.707 7.879A1 1 0 0 0 3.293 9.293l4 4a1 1 0 0 0 1.414 0l8-8Z"/>
           </svg>
-          <div class="text-sm font-medium">{{ session('success') ?? session('error') }}</div>
+          <div class="text-sm font-medium">{{ session('success') }}</div>
           <button type="button" class="ml-3 text-gray-500 hover:text-emerald-700" data-dismiss-target="#toast-msg">✕</button>
         </div>
       </div>
     @endif
 
     {{-- TOAST FILES --}}
-    @if(session('skl_url') || session('loa_url'))
+    @if(session('loa_url') || session('skl_url'))
       <div id="toast-file" class="mb-6 flex justify-center">
         <div class="flex items-center p-4 bg-white rounded-xl shadow-md ring-1 ring-emerald-100">
           <svg class="w-5 h-5 text-emerald-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -98,7 +98,6 @@
           </dl>
         </div>
 
-
         {{-- Generate LOA --}}
         <div class="bg-white border border-emerald-200 rounded-2xl p-6 shadow-sm mb-8">
           <h3 class="text-lg font-semibold text-emerald-900 mb-4">📄 Formulir Pembuatan LOA</h3>
@@ -106,7 +105,6 @@
             Isi tabel berikut untuk mendeskripsikan kegiatan atau capaian selama magang.  
             Kamu bisa menambahkan baris sesuai kebutuhan, lalu tekan tombol <strong>“Preview”</strong> untuk melihat hasilnya sebelum Generate PDF.
           </p>
-
           {{-- Form LOA --}}
           <form id="loa-form" action="{{ route('user.loa.generate') }}" method="POST" class="space-y-4">
             @csrf
@@ -115,15 +113,39 @@
             {{-- Wrapper dinamis untuk baris --}}
             <div id="loa-rows" class="space-y-3">
               {{-- Baris awal --}}
-              <div class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-center loa-row">
-                <input name="loa_deskripsi[]" type="text"
+              <div class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] gap-3 items-center loa-row">
+                <!-- Kolom Nama Siswa -->
+                <input name="loa_nama_siswa[]" type="text"
                       class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="Deskripsi kegiatan (contoh: Orientasi, Pelatihan, Pengembangan aplikasi)">
-                <input name="loa_keterangan[]" type="text"
+                      placeholder="Nama Siswa">
+
+                <!-- Kolom NIM/NIS -->
+                <input name="loa_nim_nis[]" type="text"
                       class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="Keterangan (contoh: Minggu pertama, Dikoordinir oleh HRD)">
+                      placeholder="NIM/NIS">
+
+                <!-- Kolom Jurusan -->
+                <input name="loa_jurusan[]" type="text"
+                      class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
+                      placeholder="Jurusan">
+
+                <!-- Kolom Instansi -->
+                <input name="loa_instansi[]" type="text"
+                      class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
+                      placeholder="Instansi">
+
+                <!-- Kolom Periode Magang -->
+                <input name="loa_periode[]" type="text"
+                      class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
+                      placeholder="Periode Magang">
+
+                <!-- Kolom Kontak -->
+                <input name="loa_kontak[]" type="text"
+                      class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
+                      placeholder="Kontak">
+
                 <button type="button"
-                        class="delete-loa-row text-red-600 hover:text-red-800 text-xs font-medium flex items-center gap-1">
+                        class="delete-loa-row text-red-600 hover:text-red-800 text-xs font-medium flex items-center gap-1 transition">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                   </svg>
@@ -142,7 +164,7 @@
                 </svg>
                 Tambah Baris
               </button>
-              
+
               <button type="button" id="clearLoaRows"
                       class="inline-flex items-center gap-2 text-sm text-red-600 font-medium hover:text-red-700 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -151,7 +173,6 @@
                 Hapus Semua
               </button>
             </div>
-
 
             {{-- Tombol Preview dan Generate --}}
             <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4">
@@ -172,7 +193,6 @@
                 Generate LOA (PDF)
               </button>
             </div>
-
           </form>
         </div>
 
@@ -188,34 +208,39 @@
                 <iframe id="loaPreviewFrame" src="{{ route('user.loa', $reg->id) }}"
                         class="w-full h-[70vh] border border-emerald-200 rounded-lg"></iframe>
               </div>
-
             </div>
           </div>
         </div>
 
+
         {{-- BUTTONS --}}
         <div class="grid md:grid-cols-2 gap-4 mb-8">
-          <a href="{{ $canDownload ? route('user.skl.download', ['intern_id' => $reg->id]) : 'javascript:void(0)' }}"
-             class="flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition
-                    {{ $canDownload ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-zinc-200 text-zinc-500 cursor-not-allowed' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 3a1 1 0 0 1 1 1v9.586l2.293-2.293a1 1 0 1 1 1.414 1.414l-4.004 4.004a1 1 0 0 1-1.414 0l-4.004-4.004a1 1 0 1 1 1.414-1.414L11 13.586V4a1 1 0 0 1 1-1z"/>
-              <path d="M5 20a1 1 0 0 1 0-2h14a1 1 0 1 1 0 2H5z"/>
-            </svg>
-            Download SKL
-          </a>
+            {{-- Tombol Download SKL --}}
+            <a href="{{ $canDownload ? route('user.skl.download', ['intern_id' => $reg->id]) : 'javascript:void(0)' }}"
+              class="flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition
+                      {{ $canDownload ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-zinc-200 text-zinc-500 cursor-not-allowed' }}"
+              @if(!$canDownload) disabled @endif>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 3a1 1 0 0 1 1 1v9.586l2.293-2.293a1 1 0 1 1 1.414 1.414l-4.004 4.004a1 1 0 0 1-1.414 0l-4.004-4.004a1 1 0 1 1 1.414-1.414L11 13.586V4a1 1 0 0 1 1-1z"/>
+                    <path d="M5 20a1 1 0 0 1 0-2h14a1 1 0 1 1 0 2H5z"/>
+                </svg>
+                Download SKL
+            </a>
 
-          <button type="button" data-modal-target="completed-loa-modal" data-modal-toggle="completed-loa-modal"
-                  class="flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition
-                         {{ $canDownload ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-zinc-200 text-zinc-500 cursor-not-allowed' }}"
-                  @if(!$canDownload) disabled @endif>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M5 4a2 2 0 0 1 2-2h6l6 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4z"/>
-              <path d="M13 2v4a2 2 0 0 0 2 2h4"/>
-            </svg>
-            Generate LOA
-          </button>
+
+            {{-- Tombol Generate LOA --}}
+            <button type="button" data-modal-target="completed-loa-modal" data-modal-toggle="completed-loa-modal"
+                    class="flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition
+                          {{ $canDownload ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-zinc-200 text-zinc-500 cursor-not-allowed' }}"
+                    @if(!$canDownload) disabled @endif>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M5 4a2 2 0 0 1 2-2h6l6 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4z"/>
+                    <path d="M13 2v4a2 2 0 0 0 2 2h4"/>
+                </svg>
+                Member Card
+            </button>
         </div>
+
 
         {{-- FEEDBACK --}}
         <div class="bg-emerald-50 p-6 rounded-xl border border-emerald-200 shadow-sm">
@@ -236,9 +261,7 @@
 @push('scripts')
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://unpkg.com/flowbite@2.5.1/dist/flowbite.min.js"></script>
-@endpush
 
-@push('scripts')
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const wrap = document.getElementById('loa-rows');
@@ -248,19 +271,31 @@
     const previewBtn = document.getElementById('previewLoaBtn');
     const iframe = document.getElementById('loaPreviewFrame');
 
-    // ========== TAMBAH BARIS ==========
-    document.addEventListener('click', e => {
+    // --- Menambah Baris (mendukung kolom lengkap) ---
+    document.addEventListener('click', (e) => {
       const addBtn = e.target.closest('.add-loa-row');
       if (addBtn) {
         const row = document.createElement('div');
-        row.className = 'grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-center loa-row';
+        row.className = 'grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] gap-3 items-center loa-row';
         row.innerHTML = `
-          <input name="loa_deskripsi[]" type="text"
-                class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
-                placeholder="Deskripsi kegiatan">
-          <input name="loa_keterangan[]" type="text"
-                class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
-                placeholder="Keterangan">
+          <input name="loa_nama_siswa[]" type="text"
+                 class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
+                 placeholder="Nama Siswa">
+          <input name="loa_nim_nis[]" type="text"
+                 class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
+                 placeholder="NIM/NIS">
+          <input name="loa_jurusan[]" type="text"
+                 class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
+                 placeholder="Jurusan">
+          <input name="loa_instansi[]" type="text"
+                 class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
+                 placeholder="Instansi">
+          <input name="loa_periode[]" type="text"
+                 class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
+                 placeholder="Periode Magang">
+          <input name="loa_kontak[]" type="text"
+                 class="w-full border rounded p-2 text-xs border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500"
+                 placeholder="Kontak">
           <button type="button"
                   class="delete-loa-row text-red-600 hover:text-red-800 text-xs font-medium flex items-center gap-1 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -272,86 +307,67 @@
         wrap.appendChild(row);
       }
 
-      // ========== HAPUS BARIS INDIVIDUAL ==========
+      // --- Hapus Baris (klik tombol atau ikon di dalamnya) ---
       const delBtn = e.target.closest('.delete-loa-row');
       if (delBtn) {
         const row = delBtn.closest('.loa-row');
-        if (row) {
-          row.style.opacity = '0';
-          row.style.transition = 'opacity 0.2s';
-          setTimeout(() => row.remove(), 200);
-        }
+        if (row) row.remove();
       }
     });
 
-    // ========== HAPUS SEMUA BARIS ==========
+    // --- Hapus Semua Baris ---
     clearBtn?.addEventListener('click', () => {
       if (confirm('Yakin ingin menghapus semua baris LOA?')) {
         wrap.innerHTML = '';
       }
     });
 
-    // ========== PREVIEW ==========
+    // --- Preview Modal (kirim data ke iframe) ---
     previewBtn?.addEventListener('click', () => {
-      const deskripsi = Array.from(document.querySelectorAll('input[name="loa_deskripsi[]"]')).map(i => i.value.trim());
-      const keterangan = Array.from(document.querySelectorAll('input[name="loa_keterangan[]"]')).map(i => i.value.trim());
-      const data = deskripsi.map((d, i) => ({ deskripsi: d || '', keterangan: keterangan[i] || '' }));
+      const valAll = (selector) =>
+        Array.from(document.querySelectorAll(selector)).map(i => i.value.trim());
 
-      iframe.contentWindow.postMessage({ type: 'updateLOA', rows: data }, '*');
+      const namaSiswa  = valAll('input[name="loa_nama_siswa[]"]');
+      const nimNis     = valAll('input[name="loa_nim_nis[]"]');
+      const jurusan    = valAll('input[name="loa_jurusan[]"]');
+      const instansi   = valAll('input[name="loa_instansi[]"]');
+      const periode    = valAll('input[name="loa_periode[]"]');
+      const kontak     = valAll('input[name="loa_kontak[]"]');
+
+      const maxLen = Math.max(
+        namaSiswa.length, nimNis.length, jurusan.length,
+        instansi.length, periode.length, kontak.length
+      );
+
+      const rows = Array.from({ length: maxLen }).map((_, i) => ({
+        nomor    : i + 1, // Menambahkan nomor urut otomatis
+        nama_siswa : namaSiswa[i] || '',
+        nim_nis   : nimNis[i] || '',
+        jurusan   : jurusan[i] || '',
+        instansi  : instansi[i] || '',
+        periode   : periode[i] || '',
+        kontak    : kontak[i] || '',
+      }));
+
+      iframe?.contentWindow?.postMessage({ type: 'updateLOA', rows }, '*');
+
       previewModal.classList.remove('hidden');
       previewModal.classList.add('flex');
     });
 
+    // --- Tutup Modal Preview ---
     closeBtn?.addEventListener('click', () => {
       previewModal.classList.add('hidden');
       previewModal.classList.remove('flex');
     });
 
-    // ========== IFRAME AUTO-HEIGHT ==========
-    window.addEventListener('message', e => {
-      if (e.data?.type === 'setHeight') {
+    // --- Auto-resize iframe bila view mengirim tinggi ---
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === 'setHeight' && iframe) {
         iframe.style.height = e.data.height + 'px';
       }
     });
   });
-</script>
-@endpush
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const previewBtn = document.getElementById('previewLoaBtn');
-  const previewModal = document.getElementById('loa-preview-modal');
-  const closeBtn = document.getElementById('closePreviewBtn');
-  const iframe = document.getElementById('loaPreviewFrame');
-
-  // --- Buka Preview ---
-  previewBtn?.addEventListener('click', () => {
-    const deskripsi = Array.from(document.querySelectorAll('input[name="loa_deskripsi[]"]')).map(i => i.value.trim());
-    const keterangan = Array.from(document.querySelectorAll('input[name="loa_keterangan[]"]')).map(i => i.value.trim());
-    const data = deskripsi.map((d, i) => ({ deskripsi: d || '', keterangan: keterangan[i] || '' }));
-
-    // Kirim data ke iframe untuk update isi tabel LOA
-    iframe.contentWindow.postMessage({ type: 'updateLOA', rows: data }, '*');
-    
-    // Tampilkan modal
-    previewModal.classList.remove('hidden');
-    previewModal.classList.add('flex');
-  });
-
-  // --- Tutup Preview ---
-  closeBtn?.addEventListener('click', () => {
-    previewModal.classList.add('hidden');
-    previewModal.classList.remove('flex');
-  });
-
-  // --- Auto Resize Tinggi iframe berdasarkan konten ---
-  window.addEventListener('message', (e) => {
-    if (e.data?.type === 'setHeight') {
-      iframe.style.height = e.data.height + 'px';
-    }
-  });
-});
 </script>
 @endpush
 

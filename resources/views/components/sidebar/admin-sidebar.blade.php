@@ -43,7 +43,19 @@
         />
         <x-sidebar-menu-dashboard 
             routeName="admin.skl.editor"  
-            title="SKL"
+            title="SKL Template"
+        />
+        <x-sidebar-menu-dashboard 
+            routeName="admin.loa.edit"  
+            title="LOA Template"
+        />
+        <x-sidebar-menu-dashboard 
+            routeName="admin.documents.skls"  
+            title="SKL Data"
+        />
+        <x-sidebar-menu-dashboard 
+            routeName="admin.documents.loas"  
+            title="LOA Data"
         />
 
 

@@ -8,6 +8,10 @@ use App\Models\InternshipRegistration as IR;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Spatie\Browsershot\Browsershot;
+use App\Models\DocumentDownload;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class SKLController extends Controller
@@ -138,90 +142,119 @@ class SKLController extends Controller
 
     public function download(Request $request)
     {
-        $authUser = auth()->user();
-        $targetUser = $authUser;
+        try {
+            $authUser = auth()->user();
+            $targetUser = $authUser;
 
-        // Jika admin / staff download untuk user lain
-        if ($request->filled('user_id')) {
-            if (!in_array($authUser->role, ['admin','staff','hrd'])) {
-                abort(403, 'Hanya admin/staff yang dapat mengunduh SKL untuk user lain.');
+            // Jika admin / staff download untuk user lain
+            if ($request->filled('user_id')) {
+                if (!in_array($authUser->role, ['admin','staff','hrd'])) {
+                    abort(403, 'Hanya admin/staff yang dapat mengunduh SKL untuk user lain.');
+                }
+                $targetUser = User::findOrFail($request->user_id);
             }
-            $targetUser = User::findOrFail($request->user_id);
+
+            // Ambil data magang
+            $ir = IR::where('user_id', $targetUser->id)->latest()->first();
+            if (!$ir || $ir->internship_status !== 'completed') {
+                abort(403, 'SKL hanya dapat diunduh setelah status magang completed.');
+            }
+
+            // Ambil config perusahaan
+            $config = SKLSetting::first();
+            $companyName    = $config->company_name ?? 'Seven Inc';
+            $companyAddress = $config->company_address ?? 'Jl. Raya Janti Gg. Harjuna No.59, Jaranan, Karangjambe, Kec. Banguntapan, Kabupaten Bantul, Daerah Istimewa Yogyakarta 55198';
+            $companyCity    = $config->company_city ?? 'Yogyakarta';
+            $leaderName     = $config->leader_name ?? 'Nama Pimpinan / HRD';
+            $leaderTitle    = $config->leader_title ?? 'Manajer HRD';
+
+            // Path logo dan stempel
+            // Ubah gambar menjadi Base64
+            $logoPath = base64_encode(file_get_contents(storage_path('app/public/images/logos/logo_seveninc.png')));
+            $logoData = 'data:image/png;base64,' . $logoPath;
+
+            $stampPath = base64_encode(file_get_contents(storage_path('app/public/images/signature/ttd_arisetiahusbana.png')));
+            $stampData = 'data:image/png;base64,' . $stampPath;
+
+            // Data peserta magang
+            $participantName      = $targetUser->name;
+            $participantId        = $ir->student_id ?? '-';
+            $participantMajor     = $ir->study_program ?? '-';
+            $participantInstitute = $ir->institution_name ?? '-';
+            $divisionName         = $ir->internship_interest ?? '-';
+
+            // Periode magang
+            $startStr = Carbon::parse($ir->start_date)->isoFormat('D MMMM Y');
+            $endStr   = Carbon::parse($ir->end_date)->isoFormat('D MMMM Y');
+            $letterDateStr = Carbon::parse($ir->end_date)->isoFormat('D MMMM Y');
+
+            // Nomor surat dinamis
+            $running = str_pad((string)$ir->id, 4, "0", STR_PAD_LEFT);
+            $letterNumber = 'SKL/' . Carbon::parse($ir->end_date)->format('Y') . '/' . $running;
+
+            // **TAMBAHKAN DEFINED activityDescription**
+            $activityDescription = $ir->activity_description ?? $config->activity_description ?? 'Deskripsi tidak tersedia';
+            $participantAchievement = $ir->participant_achievement ?? $config->participant_achievement ?? 'Prestasi tidak tersedia';
+
+            // Data untuk dikirim ke view
+            $data = compact(
+                'companyName','companyAddress','companyCity','leaderName','leaderTitle',
+                'letterNumber','logoData','stampData',
+                'participantName','participantId','participantMajor','participantInstitute','divisionName',
+                'startStr','endStr','letterDateStr', 'activityDescription', 'participantAchievement'
+            );
+
+            // Render HTML untuk halaman SKL
+            $html = view('user.skl', $data)->render();
+
+            // Buat path sementara untuk menyimpan PDF
+            $safeName = preg_replace('/[^a-z0-9\-_]+/i','_',$participantName);
+            $fileName = "SKL_{$safeName}.pdf";
+            $tempPath = storage_path("app/tmp/{$fileName}");
+
+            if (!file_exists(storage_path('app/tmp'))) {
+                mkdir(storage_path('app/tmp'), 0777, true);
+            }
+
+            // Menggunakan Browsershot untuk merender HTML ke PDF
+            Browsershot::html($html)
+                ->setOption('no-sandbox', true)
+                ->emulateMedia('print')
+                ->format('A4')
+                ->margins(10, 10, 10, 10)
+                ->showBackground()
+                ->waitUntilNetworkIdle()
+                ->timeout(180)
+                ->savePDF($tempPath);
+            
+            
+            // Log Download Sukses
+            DocumentDownload::create([
+                'user_id' => $targetUser->id,
+                'doc_type' => DocumentDownload::TYPE_SKL,
+                'file_path' => $tempPath,
+                'file_url' => asset('storage/tmp/'.$fileName),
+                'downloaded_at' => now(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'status' => 'success',
+            ]);
+
+            // Unduh file PDF dan hapus file setelah pengunduhan
+            return response()->download($tempPath)->deleteFileAfterSend(true);
+        }  catch (\Exception $e) {
+            // Log error jika gagal
+            DocumentDownload::create([
+                'user_id' => $targetUser->id,
+                'doc_type' => DocumentDownload::TYPE_SKL,
+                'status' => 'failed',
+                'error_message' => $e->getMessage(),
+                'downloaded_at' => now(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+            
+            return back()->with('error', 'Terjadi kesalahan saat membuat SKL. Silakan coba lagi.');
         }
-
-        // Ambil data magang
-        $ir = IR::where('user_id', $targetUser->id)->latest()->first();
-        if (!$ir || $ir->internship_status !== 'completed') {
-            abort(403, 'SKL hanya dapat diunduh setelah status magang completed.');
-        }
-
-        // Ambil config perusahaan
-        $config = SKLSetting::first();
-        $companyName    = $config->company_name ?? 'Seven Inc';
-        $companyAddress = $config->company_address ?? 'Jl. Raya Janti Gg. Harjuna No.59, Jaranan, Karangjambe, Kec. Banguntapan, Kabupaten Bantul, Daerah Istimewa Yogyakarta 55198';
-        $companyCity    = $config->company_city ?? 'Yogyakarta';
-        $leaderName     = $config->leader_name ?? 'Nama Pimpinan / HRD';
-        $leaderTitle    = $config->leader_title ?? 'Manajer HRD';
-
-        // Path logo dan stempel
-        // Ubah gambar menjadi Base64
-        $logoPath = base64_encode(file_get_contents(storage_path('app/public/images/logos/logo_seveninc.png')));
-        $logoData = 'data:image/png;base64,' . $logoPath;
-
-        $stampPath = base64_encode(file_get_contents(storage_path('app/public/images/signature/ttd_arisetiahusbana.png')));
-        $stampData = 'data:image/png;base64,' . $stampPath;
-
-
-        // Data peserta magang
-        $participantName      = $targetUser->name;
-        $participantId        = $ir->student_id ?? '-';
-        $participantMajor     = $ir->study_program ?? '-';
-        $participantInstitute = $ir->institution_name ?? '-';
-        $divisionName         = $ir->internship_interest ?? '-';
-
-        // Periode magang
-        $startStr = Carbon::parse($ir->start_date)->isoFormat('D MMMM Y');
-        $endStr   = Carbon::parse($ir->end_date)->isoFormat('D MMMM Y');
-        $letterDateStr = Carbon::parse($ir->end_date)->isoFormat('D MMMM Y');
-
-        // Nomor surat dinamis
-        $running = str_pad((string)$ir->id, 4, "0", STR_PAD_LEFT);
-        $letterNumber = 'SKL/' . Carbon::parse($ir->end_date)->format('Y') . '/' . $running;
-
-        // Data untuk dikirim ke view
-        $data = compact(
-            'companyName','companyAddress','companyCity','leaderName','leaderTitle',
-            'letterNumber','logoData','stampData',
-            'participantName','participantId','participantMajor','participantInstitute','divisionName',
-            'startStr','endStr','letterDateStr', 'activityDescription', 'participantAchievement'
-        );
-
-        // Render HTML untuk halaman SKL
-        $html = view('user.skl', $data)->render();
-
-        // Buat path sementara untuk menyimpan PDF
-        $safeName = preg_replace('/[^a-z0-9\-_]+/i','_',$participantName);
-        $fileName = "SKL_{$safeName}.pdf";
-        $tempPath = storage_path("app/tmp/{$fileName}");
-
-        if (!file_exists(storage_path('app/tmp'))) {
-            mkdir(storage_path('app/tmp'), 0777, true);
-        }
-
-        // Menggunakan Browsershot untuk merender HTML ke PDF
-        Browsershot::html($html)
-            ->setOption('no-sandbox', true)
-            ->emulateMedia('print')
-            ->format('A4')
-            ->margins(10, 10, 10, 10)
-            ->showBackground()
-            ->waitUntilNetworkIdle()
-            ->timeout(180)
-            ->savePDF($tempPath);
-
-        // Unduh file PDF dan hapus file setelah pengunduhan
-        return response()->download($tempPath)->deleteFileAfterSend(true);
     }
-
-
 }

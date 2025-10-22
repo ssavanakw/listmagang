@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\InternPageController;
 use App\Http\Controllers\Admin\InternApiController;
 use App\Http\Controllers\Admin\CertificateGeneratorController;
 use App\Http\Controllers\SKLController;
+use App\Http\Controllers\Admin\DocumentController;
 // App
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CertificateController;
@@ -138,6 +139,14 @@ Route::get('/internship/table', fn () => redirect()->route('admin.interns.index'
 // ========================
 // Dokumen Kelulusan (SKL & LOA)
 // ========================
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Halaman daftar SKL dan LOA
+    Route::get('/documents/loas', [DocumentController::class, 'listLoas'])->name('documents.loas');
+    Route::get('/documents/skls', [DocumentController::class, 'listSkls'])->name('documents.skls');
+});
+
+
 Route::middleware(['auth', 'role:pemagang'])->prefix('user/documents')->name('user.')->group(function () {
 
     // Download dinamis (pemagang COMPLETED; admin boleh untuk user lain dengan ?user_id=)
@@ -319,3 +328,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin/skl')->group(function (
 Route::get('/skl-preview', function () {
     return view('user.skl');
 });
+
+Route::prefix('admin/loa')->name('admin.loa.')->middleware('auth')->group(function () {
+    // Mengedit LOA, membutuhkan parameter 'id'
+    Route::get('edit', [LoaController::class, 'edit'])->name('edit');
+    
+    // Mengupdate LOA, membutuhkan parameter 'id'
+    Route::put('update', [LoaController::class, 'update'])->name('update');
+    
+    // Preview LOA, membutuhkan parameter 'id'
+    Route::post('preview', [LoaController::class, 'preview'])->name('preview');
+    
+    // LOA Editor untuk admin, membutuhkan parameter 'id'
+    Route::get('editor', [LoaController::class, 'edit'])->name('editor');
+});
+
+
+Route::view('/loa-preview', 'user.loa');

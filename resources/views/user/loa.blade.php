@@ -1,246 +1,254 @@
-{{-- resources/views/user/loa.blade.php --}}
 @php
   use Carbon\Carbon;
 
-  $font = "font-family: DejaVu Sans, Arial, Helvetica, sans-serif;";
-  $intern = $intern ?? $reg ?? null;
-  $rows = array_values(array_filter(($rows ?? []), fn($r)
-      => !empty($r['deskripsi']) || !empty($r['keterangan'])
-  ));
+  $font = "font-family: 'Roboto', Arial, Helvetica, sans-serif;";
+
+  // Ensure that intern data (rows) and settings are available, fallback to empty array or default
+  $interns = $rows ?? [];
 @endphp
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <title>Letter of Acceptance (LOA)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Georgia:wght@400;700&display=swap" rel="stylesheet">
   <style>
     /* ===== A4 & Margin ===== */
     @page {
       size: A4 portrait;
-      margin: 2cm 2cm 2.5cm 2cm;
+      margin: 2.5cm 2cm 2.5cm 2cm;
     }
+
     body {
-      {{ $font }}
+      font-family: 'Georgia', serif, 'Roboto', Arial, Helvetica, sans-serif;
       font-size: 12px;
-      color:#0f172a;
-      line-height: 1.5;
+      color: #2d3748;
+      line-height: 1.6;
       margin: 0;
       padding: 0;
+      background-color: #f9fafb;
     }
+
     .wrap {
       width: 100%;
-      max-width: 19cm; /* agar proporsional di A4 */
+      max-width: 19cm; /* Ensure proportional in A4 */
       margin: 0 auto;
+      background-color: #ffffff;
+      padding: 40px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
     }
 
-    /* ===== Warna & Tema ===== */
-    :root{
-      --emerald-900:#064e3b;
-      --emerald-800:#065f46;
-      --emerald-700:#047857;
-      --emerald-600:#059669;
-      --emerald-200:#a7f3d0;
-      --emerald-100:#d1fae5;
-      --slate-400:#94a3b8;
-      --slate-500:#64748b;
-      --slate-700:#334155;
-      --muted:#475569;
-      --border:#cbd5e1;
-      --grid:#a7f3d0;
-      --grid-header:#ecfdf5;
+    .head {
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
     }
 
-    /* ===== Header ===== */
-    .head { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-top:10px; }
-    .brand { display:flex; align-items:center; gap:10px; }
-    .brand .mark {
-      width:28px; height:28px; border-radius:6px; background:var(--emerald-600);
-    }
-    .brand .name {
-      font-weight:700; color:var(--emerald-800); letter-spacing:.2px;
-    }
-    .doc { text-align:right; }
-    .doc .title { margin:0; font-size:19px; font-weight:800; color:var(--emerald-800); letter-spacing:.4px; }
-    .doc .subtitle { margin:2px 0 0; font-size:11px; color:var(--slate-700); }
-    .divider {
-      height:3px; background:linear-gradient(90deg, var(--emerald-600), var(--emerald-200));
-      margin:12px 0 18px; border-radius:4px;
+    .head img {
+      width: 80px;
+      height: auto;
+      border-radius: 8px;
     }
 
-    /* ===== Meta Peserta ===== */
-    .meta { border:1px solid var(--grid); border-radius:10px; padding:12px; }
-    .meta table { width:100%; border-collapse: collapse; }
-    .meta td { padding:6px 10px; vertical-align: top; }
-    .meta td.key { width:36%; color:var(--slate-500); }
-    .chip {
-      display:inline-block; padding:4px 10px; border:1px solid var(--emerald-200);
-      border-radius:999px; font-size:10.5px; color:var(--emerald-700);
-      background:var(--grid-header); font-weight:700;
+    .head .brand, .head .name {
+      display: inline-block;
+      vertical-align: top;
+      margin-left: 15px;
     }
 
-    /* ===== Section Title ===== */
-    .section-title { margin:16px 0 8px; font-weight:700; font-size:13.5px; color:var(--emerald-800); }
-
-    /* ===== Tabel ===== */
-    table.grid { width:100%; border-collapse: collapse; }
-    table.grid th, table.grid td { border: 1px solid var(--grid); padding: 7px 9px; }
-    table.grid thead th {
-      background: var(--grid-header); color: var(--emerald-800);
-      font-weight:700; font-size:12px;
+    .head .name h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #065f46;
+      margin: 0;
     }
-    table.grid tbody tr:nth-child(odd) td { background:#fafafa; }
-    .center { text-align:center; }
 
-    /* ===== Catatan ===== */
-    .muted { color:var(--muted); font-size:11px; margin-top:8px; }
+    .head .name p {
+      font-size: 14px;
+      color: #4a5568;
+      margin: 5px 0;
+    }
 
-    /* ===== Tanda Tangan ===== */
-    .sign { margin-top: 28px; width:100%; }
-    .sign td { vertical-align: bottom; height: 92px; }
-    .sign .caption { color:var(--slate-500); font-size:11px; }
-    .sign .name { margin-top:58px; font-weight:700; color:#0f172a; }
+    h1.title {
+      text-align: center;
+      font-size: 24px;
+      margin: 30px 0;
+      color: #065f46;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
 
-    /* ===== Footer ===== */
+    .content p {
+      text-align: justify;
+      font-size: 14px;
+      margin: 15px 0;
+      color: #2d3748;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table, th, td {
+      border: 1px solid #e2e8f0;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #edf2f7;
+      font-weight: 600;
+    }
+
+    td {
+      background-color: #ffffff;
+    }
+
+    .signature {
+      margin-top: 50px;
+      text-align: left;
+      margin-left: 0;
+    }
+
+    .signature-line {
+      border-top: 1px solid #000;
+      width: 30%;
+      margin-bottom: 10px;
+    }
+
+    .signature-name {
+      font-weight: bold;
+      font-size: 16px;
+      color: #2d3748;
+    }
+
+    .signature-position {
+      font-size: 14px;
+      color: #4a5568;
+    }
+
+    .signature-img {
+      margin-top: 15px;
+      width: 150px; /* Adjust the size of the signature image */
+      height: auto;
+    }
+
     .footer {
-      margin-top:20px; padding-top:8px; border-top:1px dashed var(--grid);
-      display:flex; justify-content:space-between; align-items:center;
-      color:var(--muted); font-size:10.5px;
+      font-size: 10px;
+      text-align: center;
+      margin-top: 30px;
+      color: #aaa;
     }
-    .page-break { page-break-after: always; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    {{-- HEADER --}}
     <div class="head">
       <div class="brand">
-        <img src="{{ asset('storage/images/logos/logo_seveninc.png') }}" alt="Logo" style="width:48px; height:auto; border-radius:8px;">
-        <div class="name">
-          <div style="font-weight:700; color:var(--emerald-800); letter-spacing:.3px;">Program Magang</div>
-          <div style="font-size:11px; color:var(--slate-500); font-weight:500;">Seven Inc</div>
-        </div>
+        <img src="{{ $logoBase64 ?? asset('storage/images/logos/logo_seveninc.png') }}" alt="Logo">
       </div>
-      <div class="doc">
-        <p class="title">LETTER OF ACCEPTANCE (LOA)</p>
-        <p class="subtitle">Surat Penerimaan Peserta Magang</p>
+      <div class="name">
+        <h2>Letter of Acceptance (LOA)</h2>
+        <p>{{ Carbon::now()->format('d F Y') }}</p>
       </div>
     </div>
-    <div class="divider"></div>
 
-    {{-- META --}}
-    <div class="meta">
+    <div class="content">
+      <p>{{ $openingGreeting ?? 'Dengan ini kami mengonfirmasi bahwa Anda telah diterima untuk mengikuti program magang di perusahaan kami. 
+        Berikut adalah detail magang Anda:' }}</p>
+
+
+      <!-- Table to display dynamic data of students -->
       <table>
-        <tr><td class="key">Nama Peserta</td><td>: {{ $intern->fullname ?? $user->name }}</td></tr>
-        <tr><td class="key">Email</td><td>: {{ $intern->email ?? $user->email }}</td></tr>
-        <tr><td class="key">Institusi / Prodi</td><td>: {{ $intern->institution_name ?? '-' }} / {{ $intern->study_program ?? '-' }}</td></tr>
-        <tr>
-          <td class="key">Periode Magang</td>
-          @php
-            $sd = $intern?->start_date ? Carbon::parse($intern->start_date)->isoFormat('D MMMM Y') : '-';
-            $ed = $intern?->end_date   ? Carbon::parse($intern->end_date)->isoFormat('D MMMM Y')   : '-';
-          @endphp
-          <td>: {{ $sd }} s.d. {{ $ed }}</td>
-        </tr>
-        <tr>
-          <td class="key">Bidang / Divisi</td>
-          <td>
-            : {{ $intern->internship_interest ?? '-' }}
-            @if(strtolower((string)($intern->internship_status ?? '')) === 'completed')
-              &nbsp; <span class="chip">COMPLETED</span>
-            @endif
-          </td>
-        </tr>
-      </table>
-    </div>
-
-    {{-- KEGIATAN --}}
-    <div class="section-title">Rincian Penugasan / Kegiatan</div>
-    <table class="grid">
-      <thead>
-        <tr>
-          <th style="width:6%">No</th>
-          <th>Deskripsi Kegiatan / Penugasan</th>
-          <th style="width:30%">Keterangan</th>
-        </tr>
-      </thead>
-      <tbody>
-        @if(count($rows))
-          @foreach($rows as $i => $r)
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama Siswa</th>
+            <th>NIM/NIS</th>
+            <th>Jurusan</th>
+            <th>Instansi</th>
+            <th>Periode Magang</th>
+            <th>Kontak</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach($interns as $index => $row)
             <tr>
-              <td class="center">{{ $i + 1 }}</td>
-              <td>{{ $r['deskripsi'] ?? '' }}</td>
-              <td>{{ $r['keterangan'] ?? '' }}</td>
+              <td>{{ $index + 1 }}</td>
+              <td>{{ $row['nama_siswa'] ?? 'Nama Tidak Diketahui' }}</td>
+              <td>{{ $row['nim_nis'] ?? 'NIM/NIS Tidak Diketahui' }}</td>
+              <td>{{ $row['jurusan'] ?? 'Jurusan Tidak Diketahui' }}</td>
+              <td>{{ $row['instansi'] ?? 'Instansi Tidak Diketahui' }}</td>
+              <td>{{ $row['periode'] ?? 'Periode Tidak Diketahui' }}</td>
+              <td>{{ $row['kontak'] ?? 'Kontak Tidak Diketahui' }}</td>
             </tr>
           @endforeach
-        @else
-          <tr>
-            <td class="center">1</td>
-            <td>Observasi proses kerja divisi terkait</td>
-            <td>Orientasi & pengenalan tools</td>
-          </tr>
-          <tr>
-            <td class="center">2</td>
-            <td>Pelaksanaan tugas terstruktur sesuai arahan mentor</td>
-            <td>Target mingguan</td>
-          </tr>
-        @endif
-      </tbody>
-    </table>
+        </tbody>
+      </table>
 
-    <p class="muted">
-      Catatan: Rencana kegiatan dapat disesuaikan berdasarkan kebutuhan dan kesepakatan dengan pembimbing/mentor.
-    </p>
+      <p>{{ $closingGreeting ?? 'Harap konfirmasi kehadiran Anda melalui email atau telepon yang tertera di bawah ini.' }}</p>
 
-    {{-- TANDA TANGAN --}}
-    <table class="sign">
-      <tr>
-        <td style="width:50%">
-          <div class="caption">Mengetahui,</div>
-          <div>Koordinator/HR Program Magang</div>
-          <div class="name">________________________</div>
-        </td>
-        <td style="width:50%; text-align:right;">
-          <div>{{ Carbon::now()->isoFormat('D MMMM Y') }}</div>
-          <div class="caption">Menyetujui,</div>
-          <div>Peserta</div>
-          <div class="name">{{ $intern->fullname ?? $user->name }}</div>
-        </td>
-      </tr>
-    </table>
+      <p>Terima kasih atas perhatian Anda.</p>
+      <p>Hormat kami,</p>
 
-    {{-- FOOTER --}}
-    <div class="footer">
-      <div>Dokumen dihasilkan secara elektronik & sah tanpa tanda tangan basah.</div>
-      <div>Ref: LOA-{{ $intern->id ?? 'X' }}-{{ now()->format('YmdHis') }}</div>
+      <!-- Tanda tangan gambar -->
+      <div class="signature">
+        <img src="{{ $stampData ?? asset('storage/images/signature/' . ($loaSettings->signatory_image ?? 'signature-placeholder.png')) }}" 
+       alt="Tanda Tangan" class="signature-img">
+      </div>
+
+      <!-- Tanda tangan -->
+      <div class="signature">
+        <div class="signature-line"></div>
+        <p class="signature-name">{{ $loaSettings->signatory_name ?? 'Nama Penandatangan' }}</p>
+        <p class="signature-position">{{ $loaSettings->signatory_position ?? 'Jabatan Penandatangan' }}</p>
+      </div>
+
+      <!-- Static company data -->
+      <p>{{ $loaSettings->company_name ?? 'Nama Perusahaan' }}</p>
+      <p>{{ $loaSettings->company_contact_email ?? 'Kontak Perusahaan: (Email / Telepon)' }}</p>
     </div>
   </div>
 
 <script>
-function sendHeight() {
-  const height = document.body.scrollHeight;
-  parent.postMessage({ type: 'setHeight', height }, '*');
-}
-window.addEventListener('load', sendHeight);
-window.addEventListener('resize', sendHeight);
+  window.addEventListener('message', (event) => {
+    if (event.data.type === 'updateLOA') {
+      updateLOA(event.data.rows);
+    }
+  });
 
-// Jika tabel diupdate oleh parent
-window.addEventListener('message', (e) => {
-  if (e.data?.type === 'updateLOA') {
-    const { rows } = e.data;
-    const tbody = document.querySelector('table.grid tbody');
-    tbody.innerHTML = '';
-    rows.forEach((r, i) => {
+  function updateLOA(rows) {
+    const tableBody = document.querySelector('tbody');
+    tableBody.innerHTML = '';  // Clear previous table rows
+    
+    rows.forEach((row, index) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td class="center">${i + 1}</td>
-        <td>${r.deskripsi || ''}</td>
-        <td>${r.keterangan || ''}</td>
+        <td>${index + 1}</td>
+        <td>${row.nama_siswa}</td>
+        <td>${row.nim_nis}</td>
+        <td>${row.jurusan}</td>
+        <td>${row.instansi}</td> 
+        <td>${row.periode}</td>
+        <td>${row.kontak}</td>
       `;
-      tbody.appendChild(tr);
+      tableBody.appendChild(tr);
     });
-    sendHeight(); // update tinggi iframe setelah tabel berubah
   }
-});
 </script>
+
 </body>
 </html>
