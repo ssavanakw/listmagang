@@ -212,7 +212,6 @@
           </div>
         </div>
 
-
         {{-- BUTTONS --}}
         <div class="grid md:grid-cols-2 gap-4 mb-8">
             {{-- Tombol Download SKL --}}
@@ -228,7 +227,7 @@
             </a>
 
 
-            {{-- Tombol Generate LOA --}}
+            {{-- Tombol Download Membercard (3d) --}}
             <button type="button" data-modal-target="completed-loa-modal" data-modal-toggle="completed-loa-modal"
                     class="flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition
                           {{ $canDownload ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-zinc-200 text-zinc-500 cursor-not-allowed' }}"

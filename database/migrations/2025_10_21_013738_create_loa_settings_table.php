@@ -15,16 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('company_name')->nullable();
             $table->string('company_contact_email')->nullable();
-            $table->string('company_contact_phone')->nullable();
-            $table->text('company_address')->nullable();
-            $table->string('company_logo')->nullable();
             $table->string('signatory_name')->nullable();
             $table->string('signatory_position')->nullable();
-            $table->string('signatory_image')->nullable();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
-            $table->text('opening_greeting')->nullable();
-            $table->text('closing_greeting')->nullable();
+            $table->string('logo_path')->nullable();       // storage path or url
+            $table->string('stamp_path')->nullable();      // ttd/stempel path or url
+            $table->string('header_text')->nullable();     // untuk kop surat
+            $table->string('footer_text')->nullable();
             $table->timestamps();
         });
     }

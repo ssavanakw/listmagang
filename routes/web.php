@@ -329,18 +329,18 @@ Route::get('/skl-preview', function () {
     return view('user.skl');
 });
 
-Route::prefix('admin/loa')->name('admin.loa.')->middleware('auth')->group(function () {
-    // Mengedit LOA, membutuhkan parameter 'id'
-    Route::get('edit', [LoaController::class, 'edit'])->name('edit');
-    
-    // Mengupdate LOA, membutuhkan parameter 'id'
-    Route::put('update', [LoaController::class, 'update'])->name('update');
-    
-    // Preview LOA, membutuhkan parameter 'id'
-    Route::post('preview', [LoaController::class, 'preview'])->name('preview');
-    
-    // LOA Editor untuk admin, membutuhkan parameter 'id'
-    Route::get('editor', [LoaController::class, 'edit'])->name('editor');
+Route::middleware(['auth'])->group(function () {
+    // Editor & Settings
+    Route::get('/admin/loa/editor', [LoaController::class, 'edit'])->name('admin.loa.editor');
+    Route::put('/admin/loa', [LoaController::class, 'update'])->name('admin.loa.update');
+
+    // CRUD sederhana data pemagang (opsional jika sudah ada halaman lain)
+    Route::get('/admin/loa/interns', [LoaController::class, 'indexInterns'])->name('admin.loa.interns');
+    Route::post('/admin/loa/generate', [LoaController::class, 'generate'])->name('admin.loa.generate'); // single
+    Route::post('/admin/loa/generate-batch', [LoaController::class, 'generateBatch'])->name('admin.loa.generateBatch'); // multiple
+
+    // Preview (tanpa simpan)
+    Route::get('/user/loa/preview', [LoaController::class, 'preview'])->name('user.loa.preview');
 });
 
 

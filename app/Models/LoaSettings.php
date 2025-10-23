@@ -10,19 +10,7 @@ class LoaSettings extends Model
     use HasFactory;
 
     protected $fillable = [
-        'company_name', 
-        'company_contact_email', 
-        'company_contact_phone', 
-        'company_address', 
-        'company_logo', 
-        'signatory_name', 
-        'signatory_position', 
-        'signatory_image',
-        'start_date',
-        'end_date',
-        'opening_greeting', 
-        'closing_greeting',
-        'internship_registration_id',
-        'user_id',
+        'company_name','company_contact_email','signatory_name','signatory_position',
+        'logo_path','stamp_path','header_text','footer_text'
     ];
 }

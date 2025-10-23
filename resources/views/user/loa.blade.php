@@ -1,9 +1,6 @@
 @php
   use Carbon\Carbon;
-
   $font = "font-family: 'Roboto', Arial, Helvetica, sans-serif;";
-
-  // Ensure that intern data (rows) and settings are available, fallback to empty array or default
   $interns = $rows ?? [];
 @endphp
 
@@ -17,17 +14,19 @@
     /* ===== A4 & Margin ===== */
     @page {
       size: A4 portrait;
-      margin: 2.5cm 2cm 2.5cm 2cm;
+      margin: 0;
     }
 
     body {
       font-family: 'Georgia', serif, 'Roboto', Arial, Helvetica, sans-serif;
       font-size: 12px;
       color: #2d3748;
-      line-height: 1.6;
+      line-height: 1.5;
       margin: 0;
       padding: 0;
       background-color: #f9fafb;
+      padding-top: 10mm; /* Added top padding to ensure content starts correctly */
+      padding-bottom: 10mm; /* Bottom padding to avoid content cutoff */
     }
 
     .wrap {
@@ -41,7 +40,7 @@
     }
 
     .head {
-      margin-bottom: 30px;
+      margin-bottom: 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -50,7 +49,7 @@
     }
 
     .head img {
-      width: 80px;
+      width: 50px;
       height: auto;
       border-radius: 8px;
     }
@@ -62,10 +61,11 @@
     }
 
     .head .name h2 {
-      font-size: 22px;
+      font-size: 26px;
       font-weight: 700;
       color: #065f46;
       margin: 0;
+      text-transform: uppercase;
     }
 
     .head .name p {
@@ -88,6 +88,7 @@
       font-size: 14px;
       margin: 15px 0;
       color: #2d3748;
+      line-height: 1.7;
     }
 
     table {
@@ -103,7 +104,7 @@
     }
 
     th, td {
-      padding: 12px;
+      padding: 14px;
       text-align: left;
       font-size: 14px;
     }
@@ -117,31 +118,29 @@
       background-color: #ffffff;
     }
 
+    /* Signature alignment */
     .signature {
-      margin-top: 50px;
-      text-align: left;
+      margin-top: 0;
+      text-align: left; /* Align the signature to the left */
       margin-left: 0;
     }
 
-    .signature-line {
-      border-top: 1px solid #000;
-      width: 30%;
-      margin-bottom: 10px;
-    }
-
     .signature-name {
+      text-align: right;
       font-weight: bold;
       font-size: 16px;
+      padding-top: -20px;
       color: #2d3748;
     }
 
     .signature-position {
+      text-align: right;
       font-size: 14px;
       color: #4a5568;
     }
 
     .signature-img {
-      margin-top: 15px;
+      margin-top: 0px;
       width: 150px; /* Adjust the size of the signature image */
       height: auto;
     }
@@ -152,24 +151,39 @@
       margin-top: 30px;
       color: #aaa;
     }
+
+    .header-text {
+      font-size: 16px;
+      font-style: italic;
+      color: #065f46;
+      margin-top: 15px;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: #4a5568;
+      margin-top: 25px;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="head">
       <div class="brand">
-        <img src="{{ $logoBase64 ?? asset('storage/images/logos/logo_seveninc.png') }}" alt="Logo">
+        <img src="{{ $logoData ?? asset('storage/images/logos/logo_seveninc.png') }}" alt="Logo">
       </div>
       <div class="name">
         <h2>Letter of Acceptance (LOA)</h2>
-        <p>{{ Carbon::now()->format('d F Y') }}</p>
+        @if(!empty($loaSettings?->header_text))
+          <p class="header-text">{{ $loaSettings->header_text }}</p>
+        @endif
+        <p>{{ \Carbon\Carbon::now()->format('d F Y') }}</p>
       </div>
     </div>
 
     <div class="content">
       <p>{{ $openingGreeting ?? 'Dengan ini kami mengonfirmasi bahwa Anda telah diterima untuk mengikuti program magang di perusahaan kami. 
         Berikut adalah detail magang Anda:' }}</p>
-
 
       <!-- Table to display dynamic data of students -->
       <table>
@@ -206,13 +220,11 @@
 
       <!-- Tanda tangan gambar -->
       <div class="signature">
-        <img src="{{ $stampData ?? asset('storage/images/signature/ttd_arisetiahusbana.png') }}" 
-       alt="Tanda Tangan" class="signature-img">
+        <img src="{{ $stampData ?? asset('storage/images/signature/ttd_arisetiahusbana.png') }}" alt="Tanda Tangan" class="signature-img">
       </div>
 
       <!-- Tanda tangan -->
       <div class="signature">
-        <div class="signature-line"></div>
         <p class="signature-name">{{ $loaSettings->signatory_name ?? 'Ari Setia Husbana' }}</p>
         <p class="signature-position">{{ $loaSettings->signatory_position ?? 'HRD' }}</p>
       </div>
@@ -220,35 +232,35 @@
       <!-- Static company data -->
       <p>{{ $loaSettings->company_name ?? 'Seven Inc.' }}</p>
       <p>{{ $loaSettings->company_contact_email ?? 'Kontak Perusahaan: (Email / Telepon)' }}</p>
+
+      @if(!empty($loaSettings?->footer_text))
+        <div class="footer-text">{{ $loaSettings->footer_text }}</div>
+      @endif
     </div>
   </div>
-
-<script>
-  window.addEventListener('message', (event) => {
-    if (event.data.type === 'updateLOA') {
-      updateLOA(event.data.rows);
-    }
-  });
-
-  function updateLOA(rows) {
-    const tableBody = document.querySelector('tbody');
-    tableBody.innerHTML = '';  // Clear previous table rows
-    
-    rows.forEach((row, index) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${row.nama_siswa}</td>
-        <td>${row.nim_nis}</td>
-        <td>${row.jurusan}</td>
+  <script> 
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'updateLOA') {
+          updateLOA(event.data.rows);
+      }
+    }); 
+    function updateLOA(rows) {
+      const tableBody = document.querySelector('tbody');
+      tableBody.innerHTML = '';
+      // Clear previous table rows
+      rows.forEach((row, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+        <td>${index + 1}</td> 
+        <td>${row.nama_siswa}</td> 
+        <td>${row.nim_nis}</td> 
+        <td>${row.jurusan}</td> 
         <td>${row.instansi}</td> 
-        <td>${row.periode}</td>
-        <td>${row.kontak}</td>
-      `;
-      tableBody.appendChild(tr);
-    });
-  }
-</script>
-
+        <td>${row.periode}</td> 
+        <td>${row.kontak}</td>`;
+        tableBody.appendChild(tr);
+      });
+    }
+  </script>
 </body>
 </html>

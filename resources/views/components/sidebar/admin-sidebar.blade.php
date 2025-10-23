@@ -46,7 +46,7 @@
             title="SKL Template"
         />
         <x-sidebar-menu-dashboard 
-            routeName="admin.loa.edit"  
+            routeName="admin.loa.editor"  
             title="LOA Template"
         />
         <x-sidebar-menu-dashboard 

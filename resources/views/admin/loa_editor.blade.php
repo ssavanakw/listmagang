@@ -1,136 +1,228 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Edit LOA Settings')
-
 @section('content')
-  @php
-    use Carbon\Carbon;
-  @endphp
+<div class="container mx-auto">
+  <h1 class="text-2xl font-bold mb-4">LOA Editor & Generator</h1>
 
-  <div class="min-h-screen py-12 bg-gradient-to-b from-emerald-200 to-emerald-100">
-    <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-2xl p-8 border border-emerald-100">
-      
-      <!-- Success/Error Toast Messages -->
-      @if(session('success') || session('error'))
-        <div class="mb-6 flex justify-center">
-          <div class="flex items-center p-4 text-gray-700 bg-white rounded-xl shadow-md ring-1 ring-emerald-100">
-            <svg class="w-5 h-5 mr-2 {{ session('success') ? 'text-emerald-600' : 'text-red-600' }}" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M16.707 5.293a1 1 0 0 0-1.414-1.414L8 11.172 4.707 7.879A1 1 0 0 0 3.293 9.293l4 4a1 1 0 0 0 1.414 0l8-8Z"/>
-            </svg>
-            <div class="text-sm font-medium">{{ session('success') ?? session('error') }}</div>
+  @if(session('success'))
+    <div class="bg-green-100 border border-green-300 p-3 rounded mb-4">{{ session('success') }}</div>
+  @endif
+  @if(session('error'))
+    <div class="bg-red-100 border border-red-300 p-3 rounded mb-4">{{ session('error') }}</div>
+  @endif
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {{-- ===== KIRI: FORM ===== --}}
+    <div class="space-y-8">
+      {{-- Settings Form --}}
+      <div class="bg-white shadow rounded p-4 mb-8">
+        <h2 class="text-xl font-semibold mb-3">Pengaturan LOA</h2>
+        <form action="{{ route('admin.loa.update') }}" method="POST" enctype="multipart/form-data">
+          @csrf
+          @method('PUT')
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label>Nama Perusahaan</label>
+              <input type="text" name="company_name" class="form-input w-full" value="{{ old('company_name', $loaSettings->company_name ?? '') }}">
+            </div>
+            <div>
+              <label>Email Kontak</label>
+              <input type="text" name="company_contact_email" class="form-input w-full" value="{{ old('company_contact_email', $loaSettings->company_contact_email ?? '') }}">
+            </div>
+            <div>
+              <label>Nama Penandatangan</label>
+              <input type="text" name="signatory_name" class="form-input w-full" value="{{ old('signatory_name', $loaSettings->signatory_name ?? '') }}">
+            </div>
+            <div>
+              <label>Jabatan Penandatangan</label>
+              <input type="text" name="signatory_position" class="form-input w-full" value="{{ old('signatory_position', $loaSettings->signatory_position ?? '') }}">
+            </div>
+            <div>
+              <label>Logo (opsional)</label>
+              <input type="file" name="logo_path" class="form-input w-full">
+            </div>
+            <div>
+              <label>Tanda Tangan/Stamp (opsional)</label>
+              <input type="file" name="stamp_path" class="form-input w-full">
+            </div>
+            <div class="col-span-2">
+              <label>Kop/Heading (opsional)</label>
+              <input type="text" name="header_text" class="form-input w-full" value="{{ old('header_text', $loaSettings->header_text ?? '') }}">
+            </div>
+            <div class="col-span-2">
+              <label>Footer (opsional)</label>
+              <input type="text" name="footer_text" class="form-input w-full" value="{{ old('footer_text', $loaSettings->footer_text ?? '') }}">
+            </div>
           </div>
+          <div class="mt-4">
+            <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded">Simpan Pengaturan</button>
+          </div>
+        </form>
+      </div>
+
+      {{-- Generate SINGLE --}}
+      <div class="bg-white shadow rounded p-4 mb-8">
+        <h2 class="text-xl font-semibold mb-3">Generate LOA (Single)</h2>
+        <form action="{{ route('admin.loa.generate') }}" method="POST">
+          @csrf
+          <div class="grid grid-cols-3 gap-4">
+            <div class="col-span-2">
+              <label>Pilih Pemagang</label>
+              <select name="intern_id" id="intern_id" class="form-select w-full">
+                <option value="">-- pilih --</option>
+                @foreach($registrations as $r)
+                  <option
+                    value="{{ $r->id }}"
+                    data-fullname="{{ $r->fullname }}"
+                    data-student-id="{{ $r->student_id }}"
+                    data-study-program="{{ $r->study_program }}"
+                    data-institution-name="{{ $r->institution_name }}"
+                    data-start-date="{{ $r->start_date }}"
+                    data-end-date="{{ $r->end_date }}"
+                    data-phone-number="{{ $r->phone_number }}"
+                    data-status="{{ $r->internship_status }}"
+                  >
+                    {{ $r->fullname }} ({{ $r->student_id }}) | {{ $r->institution_name }} | status: {{ $r->internship_status }}
+                  </option>
+                @endforeach
+              </select>
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="bg-blue-600 text-white px-4 py-2 rounded w-full">Generate PDF</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      {{-- Generate BATCH --}}
+      <div class="bg-white shadow rounded p-4">
+        <h2 class="text-xl font-semibold mb-3">Generate LOA (Multiple)</h2>
+        <form action="{{ route('admin.loa.generateBatch') }}" method="POST">
+          @csrf
+          <div class="grid grid-cols-3 gap-4">
+            <div class="col-span-2">
+              <label>Pilih Pemagang (bisa lebih dari satu)</label>
+              <select name="intern_ids[]" id="intern_ids" class="form-multiselect w-full" multiple size="10">
+                @foreach($registrations as $r)
+                  <option
+                    value="{{ $r->id }}"
+                    data-fullname="{{ $r->fullname }}"
+                    data-student-id="{{ $r->student_id }}"
+                    data-study-program="{{ $r->study_program }}"
+                    data-institution-name="{{ $r->institution_name }}"
+                    data-start-date="{{ $r->start_date }}"
+                    data-end-date="{{ $r->end_date }}"
+                    data-phone-number="{{ $r->phone_number }}"
+                    data-status="{{ $r->internship_status }}"
+                  >
+                    {{ $r->fullname }} ({{ $r->student_id }}) | {{ $r->institution_name }} | status: {{ $r->internship_status }}
+                  </option>
+                @endforeach
+              </select>
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="bg-indigo-600 text-white px-4 py-2 rounded w-full">Generate PDF Batch</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {{-- ===== KANAN: LIVE PREVIEW ===== --}}
+    <div>
+      <div class="bg-white shadow rounded p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xl font-semibold">Live Preview LOA</h2>
+          <button id="btnRefreshPreview" class="text-sm px-3 py-1 border rounded">Refresh</button>
         </div>
-      @endif
-
-      <div class="flex gap-6">
-        <!-- LOA Settings Form -->
-        <div class="w-1/2">
-          <h2 class="text-2xl font-semibold text-emerald-700 mb-6">Edit LOA Settings</h2>
-          
-            <form action="{{ route('admin.loa.update', $loaSettings->id ?? 0) }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            @method('PUT')
-
-            <!-- Company Information -->
-            <div class="mb-4">
-                <label for="company_name" class="block text-sm font-medium text-gray-700">Company Name</label>
-                <input type="text" id="company_name" name="company_name" value="{{ old('company_name', $loaSettings->company_name ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-            </div>
-
-            <div class="mb-4">
-                <label for="company_address" class="block text-sm font-medium text-gray-700">Company Address</label>
-                <input type="text" id="company_address" name="company_address" value="{{ old('company_address', $loaSettings->company_address ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-            </div>
-
-            <div class="mb-4">
-                <label for="company_contact_email" class="block text-sm font-medium text-gray-700">Company Contact Email</label>
-                <input type="email" id="company_contact_email" name="company_contact_email" value="{{ old('company_contact_email', $loaSettings->company_contact_email ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-            </div>
-
-            <div class="mb-4">
-                <label for="company_contact_phone" class="block text-sm font-medium text-gray-700">Company Contact Phone</label>
-                <input type="text" id="company_contact_phone" name="company_contact_phone" value="{{ old('company_contact_phone', $loaSettings->company_contact_phone ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-            </div>
-
-            <div class="mb-4">
-                <label for="company_logo" class="block text-sm font-medium text-gray-700">Company Logo (optional)</label>
-                <input type="file" id="company_logo" name="company_logo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-            </div>
-
-            <!-- Signature Information -->
-            <div class="mb-4">
-                <label for="signatory_name" class="block text-sm font-medium text-gray-700">Signatory Name</label>
-                <input type="text" id="signatory_name" name="signatory_name" value="{{ old('signatory_name', $loaSettings->signatory_name ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-            </div>
-
-            <div class="mb-4">
-                <label for="signatory_position" class="block text-sm font-medium text-gray-700">Signatory Position</label>
-                <input type="text" id="signatory_position" name="signatory_position" value="{{ old('signatory_position', $loaSettings->signatory_position ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-            </div>
-
-            <div class="mb-4">
-                <label for="signatory_image" class="block text-sm font-medium text-gray-700">Signatory Image (optional)</label>
-                <input type="file" id="signatory_image" name="signatory_image" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-            </div>
-
-            <!-- Dates -->
-            <div class="mb-4">
-                <label for="start_date" class="block text-sm font-medium text-gray-700">Internship Start Date</label>
-                <input type="date" id="start_date" name="start_date" value="{{ old('start_date', $loaSettings->start_date ? \Carbon\Carbon::parse($loaSettings->start_date)->format('Y-m-d') : '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-            </div>
-
-            <div class="mb-4">
-                <label for="end_date" class="block text-sm font-medium text-gray-700">Internship End Date</label>
-                <input type="date" id="end_date" name="end_date" value="{{ old('end_date', $loaSettings->end_date ? \Carbon\Carbon::parse($loaSettings->end_date)->format('Y-m-d') : '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">
-            </div>
-
-            <div class="mb-4">
-                <label for="opening_greeting" class="block text-sm font-medium text-gray-700">Opening Greeting</label>
-                <textarea id="opening_greeting" name="opening_greeting" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">{{ old('opening_greeting', $loaSettings->opening_greeting ?? '') }}</textarea>
-            </div>
-
-            <div class="mb-4">
-                <label for="closing_greeting" class="block text-sm font-medium text-gray-700">Closing Greeting</label>
-                <textarea id="closing_greeting" name="closing_greeting" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm">{{ old('closing_greeting', $loaSettings->closing_greeting ?? '') }}</textarea>
-            </div>
-
-            <button type="submit" class="mt-4 w-full py-2 px-4 bg-emerald-600 text-white rounded-md">Update LOA Settings</button>
-            </form>
-
-        </div>
-
-        <!-- LOA Preview -->
-        <div class="w-1/2">
-          <h2 class="text-2xl font-semibold text-emerald-700 mb-6">Live LOA Preview</h2>
-
-          <iframe id="loaPreview" src="{{ route('user.loa', ['id' => $loaSettings->id]) }}" class="w-full h-full border rounded-md"></iframe>
-        </div>
+        <iframe
+          id="loaPreview"
+          src="{{ route('user.loa.preview') }}"
+          class="w-full"
+          style="height: calc(100vh - 220px); border:1px solid #e5e7eb; border-radius: 8px;"
+        ></iframe>
+        <p class="text-xs text-gray-500 mt-2">Preview mencerminkan pilihan pemagang pada form di kiri (single/multiple).</p>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- JS to update preview dynamically -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const previewIframe = document.getElementById('loaPreview');
-      const form = document.querySelector('form');
 
-      // Listen for form input changes
-      form.addEventListener('input', function () {
-        const formData = new FormData(form);
-        fetch('{{ route('admin.loa.preview') }}', {
-          method: 'POST',
-          headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-          },
-          body: formData,
-        })
-        .then(response => response.json())
-        .then(data => {
-          previewIframe.contentWindow.postMessage(data, '*');
-        });
-      });
-    });
-  </script>
+@php $justSaved = session()->has('success'); @endphp
+
+
+{{-- ===== SCRIPT: Sinkronisasi ke iframe ===== --}}
+<script>
+(function(){
+  const $single = document.getElementById('intern_id');
+  const $multi  = document.getElementById('intern_ids');
+  const $iframe = document.getElementById('loaPreview');
+  const $btnRefresh = document.getElementById('btnRefreshPreview');
+
+  // ← tambahkan ini: auto refresh jika barusan save settings
+  const JUST_SAVED = {{ $justSaved ? 'true' : 'false' }};
+  if (JUST_SAVED && $iframe) {
+    // pakai cache-buster biar pasti redraw
+    $iframe.src = "{{ route('user.loa.preview') }}" + '?t=' + Date.now();
+  }
+
+  const fmtID = new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+  function formatDate(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? null : fmtID.format(d);
+  }
+
+  function optionToRow(opt) {
+    const start = formatDate(opt.dataset.startDate);
+    const end   = formatDate(opt.dataset.endDate);
+    return {
+      nama_siswa: opt.dataset.fullname || 'Nama Tidak Diketahui',
+      nim_nis: opt.dataset.studentId || 'NIM/NIS Tidak Diketahui',
+      jurusan: opt.dataset.studyProgram || 'Jurusan Tidak Diketahui',
+      instansi: opt.dataset.institutionName || 'Instansi Tidak Diketahui',
+      periode: (start && end) ? (start + ' - ' + end) : 'Periode Tidak Diketahui',
+      kontak: opt.dataset.phoneNumber || 'Kontak Tidak Diketahui'
+    };
+  }
+
+  function collectRows() {
+    const rows = [];
+    if ($multi && $multi.selectedOptions && $multi.selectedOptions.length > 0) {
+      Array.from($multi.selectedOptions).forEach(opt => rows.push(optionToRow(opt)));
+    } else if ($single && $single.value) {
+      const opt = $single.options[$single.selectedIndex];
+      if (opt && opt.value) rows.push(optionToRow(opt));
+    }
+    return rows;
+  }
+
+  function postRowsToIframe() {
+    if (!$iframe || !$iframe.contentWindow) return;
+    const rows = collectRows();
+    $iframe.contentWindow.postMessage({ type: 'updateLOA', rows }, window.location.origin);
+  }
+
+  // Event: perubahan pilihan = update preview
+  if ($single)  $single.addEventListener('change', postRowsToIframe);
+  if ($multi)   $multi.addEventListener('change', postRowsToIframe);
+
+  // Tombol manual refresh
+  if ($btnRefresh) $btnRefresh.addEventListener('click', function(){
+    $iframe.src = "{{ route('user.loa.preview') }}" + '?t=' + Date.now();
+  });
+
+  // Saat iframe selesai load, kirim data terpilih
+  if ($iframe) $iframe.addEventListener('load', postRowsToIframe);
+
+  // Jaga-jaga: saat window refocus, sinkronkan lagi
+  window.addEventListener('focus', postRowsToIframe);
+
+  // Trigger awal
+  document.addEventListener('DOMContentLoaded', postRowsToIframe);
+})();
+</script>
 
 @endsection
