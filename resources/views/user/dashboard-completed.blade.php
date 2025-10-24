@@ -236,7 +236,7 @@
                     <path d="M5 4a2 2 0 0 1 2-2h6l6 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4z"/>
                     <path d="M13 2v4a2 2 0 0 0 2 2h4"/>
                 </svg>
-                Member Card
+                Membercard
             </button>
         </div>
 
