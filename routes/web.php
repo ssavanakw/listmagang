@@ -32,7 +32,8 @@ use App\Http\Controllers\LoaController;
 |---------------------------------------------------------------------- 
 */
 
-// Demo (opsional)
+
+// Demo bermacam macam tampilan
 Route::view('/zombie-survival', 'cobacoba')->name('zombie.survival');
 
 /* =================== ROOT -> LOGIN VIEW =================== */

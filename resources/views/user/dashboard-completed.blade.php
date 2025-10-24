@@ -228,7 +228,9 @@
 
 
             {{-- Tombol Download Membercard (3d) --}}
-            <button type="button" data-modal-target="completed-loa-modal" data-modal-toggle="completed-loa-modal"
+            <button type="button"
+                    data-modal-target="modalMembercard3d"
+                    data-modal-toggle="modalMembercard3d"
                     class="flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition
                           {{ $canDownload ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-zinc-200 text-zinc-500 cursor-not-allowed' }}"
                     @if(!$canDownload) disabled @endif>
@@ -236,8 +238,9 @@
                     <path d="M5 4a2 2 0 0 1 2-2h6l6 6v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4z"/>
                     <path d="M13 2v4a2 2 0 0 0 2 2h4"/>
                 </svg>
-                Membercard
+                Membercard 3D
             </button>
+
         </div>
 
 
@@ -370,5 +373,8 @@
 </script>
 @endpush
 
+@include('user.partials.modal-membercard-3d')
+
 
 @endsection
+@include('user.partials.modal-membercard-3d')
