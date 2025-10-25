@@ -12,12 +12,13 @@
 
       {{-- Header --}}
       <div class="flex items-center justify-between px-5 py-3 border-b border-white/10">
-        <h2 class="text-sm sm:text-base font-semibold text-white/90">Preview Membercard 3D</h2>
+        <h2 class="text-sm sm:text-base font-semibold text-white/90">Membercard</h2>
         <div class="flex items-center gap-2">
-          <a id="download3dButton" href="{{ $membercardGlbUrl }}" download="Membercard.glb"
-             class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium transition">
-            Download .glb
+          <a id="download3dButton" href="#" 
+            class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium transition">
+            Download
           </a>
+
           <button type="button" data-modal-hide="modalMembercard3d"
                   class="text-white/70 hover:text-white focus:outline-none text-xl leading-none">✕</button>
         </div>
@@ -32,7 +33,7 @@
              data-id="{{ $reg->code ?? 'MJ25067' }}"
              data-angkatan="{{ $reg->angkatan ?? '2025' }}"
              data-instansi="{{ $reg->institution_name ?? 'UNIVERSITAS AHMAD DAHLAN' }}"
-             data-brand="magangjogja.com">
+             data-brand="{{ $reg->brand ?? 'magangjogja.com' }}">
           <div class="absolute inset-0 grid place-items-center text-white/60 text-xs">
             Loading 3D Viewer…
           </div>
