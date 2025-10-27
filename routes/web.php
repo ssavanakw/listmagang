@@ -18,7 +18,7 @@ use App\Http\Controllers\Admin\DocumentController;
 // App
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CertificateController;
-use App\Http\Controllers\UserFeedbackController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\LoaController;
 
 /*
@@ -159,7 +159,7 @@ Route::middleware(['auth', 'role:pemagang'])->prefix('user/documents')->name('us
 
 });
 
-Route::post('/user/feedback', [UserFeedbackController::class, 'submit'])
+Route::post('/user/feedback', [FeedbackController::class, 'submit'])
     ->name('user.feedback.submit');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin/documents')->name('admin.documents.')->group(function () {
@@ -344,5 +344,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/loa/preview', [LoaController::class, 'preview'])->name('user.loa.preview');
 });
 
+Route::middleware(['auth', 'role:admin']) // Menambahkan middleware untuk autentikasi dan role admin
+    ->prefix('admin/feedback') // Menambahkan prefix URL
+    ->name('admin.feedback.') // Menambahkan prefix nama route
+    ->group(function () {
+        Route::get('/', [FeedbackController::class, 'index'])->name('index'); // Menampilkan daftar feedback
+        Route::get('{id}/edit', [FeedbackController::class, 'edit'])->name('edit'); // Menampilkan halaman edit feedback
+        Route::post('{id}/update', [FeedbackController::class, 'update'])->name('update'); // Proses update feedback
+        Route::delete('{id}', [FeedbackController::class, 'destroy'])->name('destroy'); // Menghapus feedback
+    });
 
 Route::view('/loa-preview', 'user.loa');
