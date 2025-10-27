@@ -39,6 +39,10 @@
         />
         <x-sidebar-menu-dashboard 
             routeName="admin.certificate.index"  
+            title="Membercards"
+        />
+        <x-sidebar-menu-dashboard 
+            routeName="admin.certificate.index"  
             title="Certificates"
         />
         <x-sidebar-menu-dashboard 

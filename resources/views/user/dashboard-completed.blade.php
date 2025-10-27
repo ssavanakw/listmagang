@@ -372,9 +372,6 @@
   });
 </script>
 @endpush
-
 @include('user.partials.modal-membercard-3d')
-
-
 @endsection
-@include('user.partials.modal-membercard-3d')
+
