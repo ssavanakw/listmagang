@@ -20,6 +20,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\LoaController;
+use App\Http\Controllers\MembercardController;
 
 /*
 |---------------------------------------------------------------------- 
@@ -353,5 +354,18 @@ Route::middleware(['auth', 'role:admin']) // Menambahkan middleware untuk autent
         Route::post('{id}/update', [FeedbackController::class, 'update'])->name('update'); // Proses update feedback
         Route::delete('{id}', [FeedbackController::class, 'destroy'])->name('destroy'); // Menghapus feedback
     });
+
+Route::post('/membercard/download', [MembercardController::class, 'downloadMembercard'])->name('membercard.download');
+
+Route::get('/admin/membercards', [MembercardController::class, 'index'])->name('admin.membercards.index');
+
+// routes/web.php
+Route::post('/log-download', [MembercardController::class, 'logDownload'])->name('log.download');
+
+Route::get('/admin/membercards/{id}', [MembercardController::class, 'show'])->name('admin.membercard.details');
+
+Route::get('/admin/membercards/{id}', [MembercardController::class, 'show'])->name('admin.membercard.details');
+
+Route::delete('/admin/membercards/{id}', [MembercardController::class, 'destroy'])->name('admin.membercard.destroy');
 
 Route::view('/loa-preview', 'user.loa');

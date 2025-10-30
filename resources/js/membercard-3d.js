@@ -147,28 +147,72 @@ function initViewer(container, modelUrl) {
   /* Hook tombol Download PNG */
   const dlBtn = document.getElementById('download3dButton');
   if (dlBtn) {
-    dlBtn.textContent = 'Download PNG';
-    dlBtn.setAttribute('href', '#');
-    dlBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
+      dlBtn.textContent = 'Download PNG';
+      dlBtn.setAttribute('href', '#');
+      dlBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
 
-      // 1) pastikan model ada; kalau belum, pakai scene
-      const targetObj = currentModel || scene;
+          // 1) Pastikan model ada; kalau belum, pakai scene
+          const targetObj = currentModel || scene;
 
-      // 2) animasi ke sudut "Default Elegan" dulu
-      await goToDefaultElegantAngle(targetObj, 420);
+          // 2) Animasi ke sudut "Default Elegan" dulu
+          await goToDefaultElegantAngle(targetObj, 420);
 
-      // 3) nama file otomatis dari data-name
-      const nm = (renderer?.domElement?.parentElement?.dataset?.name || 'membercard');
-      const fname = `membercard-${_slugifyNameForFile(nm).toUpperCase()}.png`;
+          // 3) Nama file otomatis dari data-name
+          const nm = (renderer?.domElement?.parentElement?.dataset?.name || 'membercard');
+          const fname = `membercard-${_slugifyNameForFile(nm).toUpperCase()}.png`;
 
-      // 4) capture PNG transparan 3x
-      captureAndDownloadPNG({
-        filename: fname,
-        scale: 3,
-        transparent: true
+          // 4) Capture PNG transparan 3x
+          captureAndDownloadPNG({
+              filename: fname,
+              scale: 3,
+              transparent: true
+          });
+
+          // 5) Log the download event to the backend
+          logDownloadAction(nm, fname);
       });
-    });
+  }
+
+  /**
+   * Function to log the download action to the backend.
+   */
+  function logDownloadAction(name, filename) {
+      // Collect necessary data to send to the backend
+      const modelUrl = document.getElementById('membercard3dCanvas').getAttribute('data-model-url');
+      const userName = document.getElementById('membercard3dCanvas').getAttribute('data-name');
+      const userId = document.getElementById('membercard3dCanvas').getAttribute('data-id');
+      const angkatan = document.getElementById('membercard3dCanvas').getAttribute('data-angkatan');
+      const instansi = document.getElementById('membercard3dCanvas').getAttribute('data-instansi');
+      const brand = document.getElementById('membercard3dCanvas').getAttribute('data-brand');
+
+      // Prepare the data to send to the backend
+      const downloadData = {
+          model_url: modelUrl,
+          name: userName,
+          id: userId,
+          angkatan: angkatan,
+          instansi: instansi,
+          brand: brand,
+          filename: filename,  // the file name that was downloaded
+      };
+
+      // Send the download data to the backend for logging
+      fetch('/log-download', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          },
+          body: JSON.stringify(downloadData)
+      })
+      .then(response => response.json())
+      .then(data => {
+          console.log('Download logged successfully:', data);
+      })
+      .catch(error => {
+          console.error('Error logging download:', error);
+      });
   }
 
 

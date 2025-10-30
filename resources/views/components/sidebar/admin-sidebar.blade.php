@@ -38,7 +38,7 @@
             title="Pending"
         />
         <x-sidebar-menu-dashboard 
-            routeName="admin.certificate.index"  
+            routeName="admin.membercards.index"  
             title="Membercards"
         />
         <x-sidebar-menu-dashboard 
