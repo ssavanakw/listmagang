@@ -4,14 +4,6 @@
 
 @section('content')
 <div class="container mx-auto py-6">
-
-    @if(session('success'))
-        <div class="bg-green-500 text-white p-4 rounded-lg mb-4">
-            {{ session('success') }}
-        </div>
-    @endif
-
-
     <h1 class="text-2xl font-semibold text-gray-900 mb-4">Membercard Downloads</h1>
 
     <div class="bg-white p-6 rounded-lg shadow-md">

@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         if (!Schema::hasColumn('downloads', 'has_downloaded')) {
-        Schema::table('downloads', function (Blueprint $table) {
-            $table->boolean('has_downloaded')->default(false);
-        });
-    }
+            Schema::table('downloads', function (Blueprint $table) {
+                $table->boolean('has_downloaded')->default(false);
+            });
+        }
     }
 
     /**

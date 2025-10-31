@@ -1,5 +1,3 @@
-{{-- resources/views/admin/membercards/show.blade.php --}}
-
 @extends('layouts.dashboard')
 
 @section('content')
@@ -42,6 +40,13 @@
                     Download Again
                 </button>
                 <span>Membercard information is confidential and only visible to the admin.</span>
+            </div>
+
+            <!-- Back Button -->
+            <div class="mt-6">
+                <a href="{{ url()->previous() }}" class="inline-block text-sm text-blue-600 hover:text-blue-800 transition duration-200 ease-in-out">
+                    &larr; Back to Previous Page
+                </a>
             </div>
         </div>
     </div>
