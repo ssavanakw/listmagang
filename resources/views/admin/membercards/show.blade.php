@@ -44,7 +44,7 @@
 
             <!-- Back Button -->
             <div class="mt-6">
-                <a href="{{ url()->previous() }}" class="inline-block text-sm text-blue-600 hover:text-blue-800 transition duration-200 ease-in-out">
+                <a href="{{ (route('admin.membercards.index')) }}" class="inline-block text-sm text-blue-600 hover:text-blue-800 transition duration-200 ease-in-out">
                     &larr; Back to Previous Page
                 </a>
             </div>

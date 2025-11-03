@@ -430,6 +430,9 @@ class InternController extends Controller
 
         // Simpan perubahan status
         $intern->save();
+        if (in_array($intern->internship_status, ['active', 'completed', 'accepted'])) {
+            $intern->user?->createMemberCard();
+        }
 
         // Redirect dengan pesan sukses
         return redirect()->route('admin.interns.index')->with('success', 'Status berhasil diperbarui!');
@@ -462,6 +465,9 @@ class InternController extends Controller
                 $old = $intern->internship_status;
                 $intern->internship_status = $validated['internship_status'];
                 $intern->save();
+                if (in_array($intern->internship_status, ['active', 'completed', 'accepted'])) {
+                    $intern->user?->createMemberCard();
+                }
                 $this->syncPemagangRole($intern);
 
                 if ($old !== IR::STATUS_ACCEPTED && $intern->internship_status === IR::STATUS_ACCEPTED) {

@@ -1,7 +1,5 @@
 <?php
 
-// app/Http/Controllers/MembercardController.php
-
 namespace App\Http\Controllers;
 
 use App\Models\Download;
@@ -9,105 +7,94 @@ use Illuminate\Http\Request;
 
 class MembercardController extends Controller
 {
-
     public function index()
     {
-        // Fetch all downloads data
-        $downloads = Download::all(); // You can filter or paginate as needed
-
+        $downloads = Download::orderByDesc('created_at')->get();
         return view('admin.membercards.index', compact('downloads'));
     }
-    public function downloadMembercard(Request $request)
-    {
-        // Assuming you already have user info and download file path logic
-        $user = auth()->user();  // Or get user from request
 
-        // Save download record
-        $download = Download::create([
-            'name' => $user->name,  // User's name
-            'user_id' => $user->id,  // User's ID
-            'angkatan' => $user->angkatan,  // Angkatan
-            'instansi' => $user->instansi,  // Instansi
-            'brand' => 'magangjogja.com',  // Brand or other info
-            'has_downloaded' => true,  // Status: download completed
-            'downloaded_at' => now(),  // Timestamp of download
-        ]);
-
-        // You can return the download file as well:
-        return response()->download(storage_path('path_to_file/membercard.png'));
-    }
-
-    // app/Http/Controllers/MembercardController.php
     public function logDownload(Request $request)
     {
-        // Validate and log the download information
         $data = $request->validate([
             'model_url' => 'required|string',
             'name' => 'required|string',
-            'id' => 'required|string',
+            'id' => 'required|string', // this is the code
             'angkatan' => 'nullable|string',
             'instansi' => 'nullable|string',
             'brand' => 'nullable|string',
+            'filename' => 'nullable|string',
         ]);
 
-        // Store download log in the database
-        Download::create([
-            'name' => $data['name'],
-            'user_id' => $data['id'],
-            'angkatan' => $data['angkatan'],
-            'instansi' => $data['instansi'],
-            'brand' => $data['brand'],
-            'has_downloaded' => true,
-            'downloaded_at' => now(),
-        ]);
+        // Find existing record ONLY
+        $download = Download::where('code', $data['id'])->first();
 
-        return response()->json(['message' => 'Download logged successfully']);
+        // ❌ If not found, DO NOT create a new record
+        if (!$download) {
+            return response()->json([
+                'message' => 'Download record not found — please contact admin.',
+                'status' => false
+            ], 404);
+        }
+
+        // ✅ Update status if not already downloaded
+        if (!$download->has_downloaded) {
+            $download->has_downloaded = true;
+            $download->downloaded_at = now();
+            $download->save();
+        }
+
+        return response()->json([
+            'message' => 'Download status updated successfully.',
+            'status' => true
+        ]);
     }
 
-    public function show($id)
-    {
-        // Fetch the membercard by its ID or code (replace with your actual logic)
-        $download = Download::findOrFail($id);
 
-        // Pass the download data to the view
+
+    public function show($code)
+    {
+        $download = Download::where('code', $code)->firstOrFail();
         return view('admin.membercards.show', compact('download'));
     }
 
-    public function store(Request $request)
+    
+    public function edit($code)
     {
-        // Validate the request (file is required)
-        $request->validate([
-            'membercard' => 'required|file|mimes:png,jpg,jpeg|max:2048',  // You can set the max file size as per your requirement
+        $download = Download::where('code', $code)->firstOrFail();
+        return view('admin.membercards.edit', compact('download'));
+    }
+
+    public function update(Request $request, $code)
+    {
+        $download = \App\Models\Download::where('code', $code)->firstOrFail();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'angkatan' => 'nullable|string|max:10',
+            'instansi' => 'nullable|string|max:255',
+            'brand' => 'nullable|string|max:100',
+            'model_url' => 'nullable|string|max:255',
         ]);
 
-        // Store the file in public/downloads folder
-        $filePath = $request->file('membercard')->store('public/downloads');
+        // Jika brand berubah → update prefix code saja
+        if (!empty($validated['brand'])) {
+            $prefix = (new \App\Models\User)->getBrandPrefix($validated['brand']);
+            $angkaBelakang = substr($download->code, 2); // ambil "25007" dari "MJ25007"
+            $validated['code'] = $prefix . $angkaBelakang;
+        }
 
-        // Get the file name
-        $filename = basename($filePath);
+        $download->update($validated);
 
-        // Save the file details in the database (assuming a 'downloads' table)
-        $download = new Download();
-        $download->filename = $filename;
-        $download->user_id = auth()->id();  // If the user is logged in
-        $download->name = auth()->user()->name;
-        $download->save();
-
-        // Redirect or return the download page
-        return redirect()->route('admin.membercard.details', $download->id)
-                         ->with('success', 'File uploaded successfully!');
+        return redirect()->route('admin.membercards.show', $validated['code'])
+            ->with('success', 'Data membercard berhasil diperbarui.');
     }
 
-    public function destroy($id)
+
+
+    public function destroy($code)
     {
-        // Find the download by its ID
-        $download = Download::findOrFail($id);
-
-        // Delete the download record
-        $download->delete();
-
-        // Redirect back with a success message
-        return redirect()->route('admin.membercards.index')->with('success', 'Membercard deleted successfully.');
+        Download::where('code', $code)->delete();
+        return redirect()->route('admin.membercards.index')
+            ->with('success', 'Membercard deleted successfully.');
     }
-
 }

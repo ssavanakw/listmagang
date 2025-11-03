@@ -12,7 +12,15 @@
                 </button>                    
                 <a href="/admin/dashboard" class="flex ml-2 md:mr-24">
                     <img src="{{ asset('storage/images/logos/logo_seveninc.png') }}" class="h-11 mr-3" alt="Internship Admin Logo" />
-                    <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Internship Admin</span>
+                    @if (Auth::check() && Auth::user()->role === 'admin')
+                        <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                            Internship Admin
+                        </span>
+                    @else
+                        <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">
+                            Internship
+                        </span>
+                    @endif
                 </a>
                 <form action="#" method="GET" class="hidden lg:block lg:pl-3.5">
                     <label for="topbar-search" class="sr-only">Search</label>

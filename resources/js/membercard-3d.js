@@ -146,55 +146,46 @@ function initViewer(container, modelUrl) {
 
   /* Hook tombol Download PNG */
   const dlBtn = document.getElementById('download3dButton');
-  if (dlBtn) {
-      dlBtn.textContent = 'Download PNG';
-      dlBtn.setAttribute('href', '#');
+  if (dlBtn && !dlBtn.dataset.bound) {
+      dlBtn.dataset.bound = 'true'; // ❗ Cegah event listener dobel
+
       dlBtn.addEventListener('click', async (e) => {
           e.preventDefault();
 
-          // 1) Pastikan model ada; kalau belum, pakai scene
           const targetObj = currentModel || scene;
 
-          // 2) Animasi ke sudut "Default Elegan" dulu
           await goToDefaultElegantAngle(targetObj, 420);
 
-          // 3) Nama file otomatis dari data-name
-          const nm = (renderer?.domElement?.parentElement?.dataset?.name || 'membercard');
-          const fname = `membercard-${_slugifyNameForFile(nm).toUpperCase()}.png`;
+          const nameData = container.dataset.name || 'membercard';
+          const filename = `membercard-${_slugifyNameForFile(nameData).toUpperCase()}.png`;
 
-          // 4) Capture PNG transparan 3x
           captureAndDownloadPNG({
-              filename: fname,
+              filename: filename,
               scale: 3,
               transparent: true
           });
 
-          // 5) Log the download event to the backend
-          logDownloadAction(nm, fname);
+          logDownloadAction(nameData, filename);
       });
   }
+
 
   /**
    * Function to log the download action to the backend.
    */
   function logDownloadAction(name, filename) {
-      // Collect necessary data to send to the backend
-      const modelUrl = document.getElementById('membercard3dCanvas').getAttribute('data-model-url');
-      const userName = document.getElementById('membercard3dCanvas').getAttribute('data-name');
-      const userId = document.getElementById('membercard3dCanvas').getAttribute('data-id');
-      const angkatan = document.getElementById('membercard3dCanvas').getAttribute('data-angkatan');
-      const instansi = document.getElementById('membercard3dCanvas').getAttribute('data-instansi');
-      const brand = document.getElementById('membercard3dCanvas').getAttribute('data-brand');
+      // Cache the canvas element once
+      const canvas = document.getElementById('membercard3dCanvas');
 
-      // Prepare the data to send to the backend
+      // Safely extract data attributes from the canvas
       const downloadData = {
-          model_url: modelUrl,
-          name: userName,
-          id: userId,
-          angkatan: angkatan,
-          instansi: instansi,
-          brand: brand,
-          filename: filename,  // the file name that was downloaded
+          model_url: canvas?.dataset?.modelUrl || '',
+          name: canvas?.dataset?.name || '',
+          id: canvas?.dataset?.id || '',
+          angkatan: canvas?.dataset?.angkatan || '',
+          instansi: canvas?.dataset?.instansi || '',
+          brand: canvas?.dataset?.brand || '',
+          filename: filename || 'membercard.png',
       };
 
       // Send the download data to the backend for logging
@@ -214,6 +205,7 @@ function initViewer(container, modelUrl) {
           console.error('Error logging download:', error);
       });
   }
+
 
 
 
@@ -318,15 +310,19 @@ function initViewer(container, modelUrl) {
       scene.add(currentModel);
 
       // Data → texture
-      const d = container.dataset || {};
+      const dataset = container.dataset;
+
       const cardData = {
-        brand: d.brand || 'magangjogja.com',
-        name: d.name || 'MUHAMMAD ZAKI AUZAN',
-        id: d.id || 'MJ25067',
-        angkatan: d.angkatan || '2025',
-        instansi: d.instansi || 'UNIVERSITAS AHMAD DAHLAN',
+        brand: dataset.brand ?? 'magangjogja.com',
+        name: dataset.name ?? 'MUHAMMAD ZAKI AUZAN',
+        id: dataset.id ?? 'MJ25067',
+        angkatan: dataset.angkatan ?? '2025',
+        instansi: dataset.instansi ?? 'UNIVERSITAS AHMAD DAHLAN',
       };
+
+
       const frontTex = buildCardCanvasTexture(cardData);
+
 
       // Pilih front/back/edge
       const meshes = [];

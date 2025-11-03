@@ -73,4 +73,72 @@ class User extends Authenticatable
         return $this->hasMany(PendingTask::class, 'user_id');
     }
 
+    // Event to listen to when a user's status changes
+    protected static function booted()
+    {
+        static::updated(function ($user) {
+            // Check if the user is a 'pemagang' and their status is 'active' or 'completed'
+            if ($user->role === 'pemagang' && in_array($user->internship_status, ['active', 'completed'])) {
+                // Trigger the method to create a member card
+                $user->createMemberCard();
+            }
+        });
+    }
+
+    public function createMemberCard()
+    {
+        $intern = $this->internshipRegistration;
+
+        if (!$intern || !$intern->start_date) return;
+
+        $angkatanYear = \Carbon\Carbon::parse($intern->start_date)->format('Y');
+        $angkatan = substr($angkatanYear, -2);
+        $idPadded = str_pad($this->id, 3, '0', STR_PAD_LEFT);
+        $brand = $intern->brand ?? 'magangjogja.com';
+        $prefix = $this->getBrandPrefix($brand);
+        $code = "{$prefix}{$angkatan}{$idPadded}";
+
+        // Cari download yg belum ada kode tapi namanya cocok
+        $download = \App\Models\Download::whereNull('code')
+            ->where('name', $this->name)
+            ->first();
+
+        if ($download) {
+            // Update saja jika sudah ada
+            $download->update([
+                'code' => $code,
+                'angkatan' => $angkatanYear,
+                'instansi' => $intern->institution_name,
+                'brand' => $brand,
+            ]);
+        }
+    }
+
+
+
+
+    public function getBrandPrefix(string $brand): string
+    {
+        return match (strtolower($brand)) {
+            'magangjogja.com' => 'MJ',
+            'areakerja.com'   => 'AK',
+            'republikweb.net'   => 'RW',
+            'titipsini.com'   => 'TS',
+            'ambilpaket.com'   => 'AP',
+            'bikinkepo.com'   => 'BK',
+            'bimbelcerdas.com'   => 'BC',
+            'latihankerja.com'   => 'LK',
+            'lowkerjateng.com'   => 'LJT',
+            'lowkerjogja.com'   => 'LJG',
+            'pijatjogja.com'   => 'PJ',
+            'sayabantu.com'   => 'SB',
+            'titikvisual.com'   => 'TV',
+            'tuantanah.com'   => 'TN',
+            'tukanglas.org'   => 'TL',
+            'adakamarid'   => 'AKI',
+            'seven inc'   => 'SI',
+            default           => 'XX', // fallback default
+        };
+    }
+
 }

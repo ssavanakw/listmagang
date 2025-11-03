@@ -3,18 +3,36 @@
 @section('title', 'Riwayat Magang')
 
 @section('content')
+
 @php
   /** @var \App\Models\User $user */
   $user = auth()->user();
+
+  $reg = $user->internshipRegistration ?? null; // ✅ Define $reg first
+
+  $canDownload = ($user->role === 'pemagang'
+      && $reg
+      && strtolower((string)$reg->internship_status) === 'completed');
+
+  $intern = $reg;
+  $download = null;
+
+  if ($canDownload && $intern && $intern->start_date) {
+      $angkatanYear = \Carbon\Carbon::parse($intern->start_date)->format('Y');
+      $angkatan = substr($angkatanYear, -2);
+      $idPadded = str_pad($user->id, 3, '0', STR_PAD_LEFT);
+      $brand = $intern->brand ?? 'magangjogja.com';
+      $prefix = $user->getBrandPrefix($brand);
+      $code = "{$prefix}{$angkatan}{$idPadded}";
+      $download = \App\Models\Download::where('code', $code)->first();
+  }
+
   $internships = $internships
       ?? (method_exists($user, 'internshipRegistrations')
           ? $user->internshipRegistrations()->latest('id')->paginate(10)
           : collect());
-  $reg = $user->internshipRegistration ?? null;
-  $canDownload = ($user->role === 'pemagang'
-      && $reg
-      && strtolower((string)$reg->internship_status) === 'completed');
 @endphp
+
 
 <div class="min-h-[90vh] py-12 bg-gradient-to-b from-emerald-200 to-emerald-100">
   <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl p-8 border border-emerald-100">
@@ -372,6 +390,6 @@
   });
 </script>
 @endpush
-@include('user.partials.modal-membercard-3d')
+@include('user.partials.modal-membercard-3d', ['download' => $download])
 @endsection
 

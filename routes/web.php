@@ -357,15 +357,32 @@ Route::middleware(['auth', 'role:admin']) // Menambahkan middleware untuk autent
 
 Route::post('/membercard/download', [MembercardController::class, 'downloadMembercard'])->name('membercard.download');
 
-Route::get('/admin/membercards', [MembercardController::class, 'index'])->name('admin.membercards.index');
+Route::prefix('admin')->name('admin.')->group(function () {
+    // index
+    Route::get('membercards', [MembercardController::class, 'index'])
+        ->name('membercards.index');
 
-// routes/web.php
+    // show by code (public admin view for a membercard)
+    Route::get('membercards/{code}', [MembercardController::class, 'show'])
+        ->name('membercards.show');
+
+    // edit & update by code
+    Route::get('membercards/{code}/edit', [MembercardController::class, 'edit'])
+        ->name('membercards.edit');
+
+    // prefer PUT/PATCH for update
+    Route::put('membercards/{code}', [MembercardController::class, 'update'])
+        ->name('membercards.update');
+
+    // optional fallback if your forms send POST instead of PUT
+    Route::post('membercards/{code}', [MembercardController::class, 'update'])
+        ->name('membercards.update.post');
+
+    // destroy by code
+    Route::delete('membercards/{code}', [MembercardController::class, 'destroy'])
+        ->name('membercards.destroy');
+});
+
+// tetap ada route log-download (tidak di dalam admin group, jika publik)
 Route::post('/log-download', [MembercardController::class, 'logDownload'])->name('log.download');
-
-Route::get('/admin/membercards/{id}', [MembercardController::class, 'show'])->name('admin.membercard.details');
-
-Route::get('/admin/membercards/{id}', [MembercardController::class, 'show'])->name('admin.membercard.details');
-
-Route::delete('/admin/membercards/{id}', [MembercardController::class, 'destroy'])->name('admin.membercard.destroy');
-
 Route::view('/loa-preview', 'user.loa');

@@ -3,7 +3,7 @@
 @section('content')
 <div class="px-4 pt-8 pb-6 lg:px-8 bg-emerald-300">
   @if(auth()->user()->role === 'pemagang' && auth()->user()->internshipRegistration && auth()->user()->internshipRegistration->internship_status === 'active')
-    <div class="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition hover:shadow-xl ring-1 ring-emerald-200">
+    <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition hover:shadow-xl ring-1 ring-emerald-200">
 
       <!-- Header -->
       <div class="bg-emerald-600 text-white px-6 py-4 flex items-center gap-3">
@@ -112,7 +112,7 @@
   @else
     <div class="max-w-3xl mx-auto mt-10">
       <div class="p-6 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-lg shadow">
-        <p>Anda belum memiliki magang aktif atau tidak memiliki peran pemagang.</p>
+        <p>Anda bukan  magang aktif atau bukan pemagang.</p>
       </div>
     </div>
   @endif

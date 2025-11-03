@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="container mx-auto">
+<div class="pt-6 container mx-auto">
   <h1 class="text-2xl font-bold mb-4">LOA Editor & Generator</h1>
 
   @if(session('success'))
