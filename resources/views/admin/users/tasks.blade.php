@@ -5,7 +5,7 @@
 @section('content')
 <div class="p-6">
   <div class="mb-6">
-    <h1 class="text-2xl font-bold text-emerald-800">🧩 Pending Tasks <span class="text-gray-500">/ {{ $user->name ?? ('User #'.$user->id) }}</span></h1>
+    <h1 class="text-2xl font-bold text-primary-800">🧩 Pending Tasks <span class="text-gray-500">/ {{ $user->name ?? ('User #'.$user->id) }}</span></h1>
     <p class="text-sm text-gray-500">Daftar tugas yang belum selesai untuk pengguna ini. Gunakan filter untuk mempersempit pencarian.</p>
   </div>
 
@@ -13,18 +13,18 @@
   <form method="GET" class="grid md:grid-cols-4 gap-3 bg-white border rounded-xl p-4 shadow-sm mb-6">
     <div class="md:col-span-2">
       <label class="block text-xs font-medium text-gray-600 mb-1">Cari (judul / deskripsi)</label>
-      <input type="text" name="q" value="{{ request('q') }}" class="w-full rounded-lg border-gray-300 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Misal: API, UI, laporan" />
+      <input type="text" name="q" value="{{ request('q') }}" class="w-full rounded-lg border-gray-300 focus:ring-primary-500 focus:border-primary-500" placeholder="Misal: API, UI, laporan" />
     </div>
     <div>
       <label class="block text-xs font-medium text-gray-600 mb-1">Dari Tanggal</label>
-      <input type="date" name="from" value="{{ request('from') }}" class="w-full rounded-lg border-gray-300 focus:ring-emerald-500 focus:border-emerald-500" />
+      <input type="date" name="from" value="{{ request('from') }}" class="w-full rounded-lg border-gray-300 focus:ring-primary-500 focus:border-primary-500" />
     </div>
     <div>
       <label class="block text-xs font-medium text-gray-600 mb-1">Sampai Tanggal</label>
-      <input type="date" name="to" value="{{ request('to') }}" class="w-full rounded-lg border-gray-300 focus:ring-emerald-500 focus:border-emerald-500" />
+      <input type="date" name="to" value="{{ request('to') }}" class="w-full rounded-lg border-gray-300 focus:ring-primary-500 focus:border-primary-500" />
     </div>
     <div class="md:col-span-4 flex gap-3">
-      <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Terapkan</button>
+      <button type="submit" class="px-4 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700">Terapkan</button>
       <a href="{{ route('admin.user.pendingTasks', $user) }}" class="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-50">Reset</a>
     </div>
   </form>

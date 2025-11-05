@@ -20,11 +20,11 @@
   </style>
 </head>
 
-<body class="bg-emerald-400/20  min-h-screen flex items-start sm:items-center justify-center p-4">
+<body class="bg-primary-400/20  min-h-screen flex items-start sm:items-center justify-center p-4">
   <!-- Floating Action Button -->
   <div class="fixed top-4 left-4 z-50">
     <!-- Back to Dashboard Button -->
-    <a href="{{ route('user.dashboard') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-full shadow-md">
+    <a href="{{ route('user.dashboard') }}" class="bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-full shadow-md">
       Kembali ke Dashboard
     </a>
     <!-- Logout Button -->
@@ -53,9 +53,9 @@
           @php
             $label = 'block mb-2 text-sm font-medium text-zinc-800';
             $help  = 'mt-1 text-xs text-zinc-500';
-            $input = 'block w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 px-3 py-2.5 shadow-sm';
+            $input = 'block w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 px-3 py-2.5 shadow-sm';
             $group = 'bg-white border border-zinc-300 rounded-lg';
-            $radio = 'w-4 h-4 text-emerald-600 border-zinc-300 focus:ring-2 focus:ring-emerald-500';
+            $radio = 'w-4 h-4 text-primary-600 border-zinc-300 focus:ring-2 focus:ring-primary-500';
             $check = $radio;
             $item  = 'flex items-center gap-3 px-3 py-2 hover:bg-zinc-50 transition';
           @endphp
@@ -411,12 +411,12 @@
               <label for="file-input-1" class="{{ $label }}">
                 Upload <strong>CV, Scan KTP/KTM, Portofolio</strong> <span class="{{ $help }}">Format PDF</span>
               </label>
-              <input id="file-input-1" type="file" name="cv_ktp_portofolio_pdf" class="{{ $input }} file:mr-4 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700" />
+              <input id="file-input-1" type="file" name="cv_ktp_portofolio_pdf" class="{{ $input }} file:mr-4 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-primary-600 file:text-white hover:file:bg-primary-700" />
             </div>
             <div>
               <label for="file-input-2" class="{{ $label }}">Upload <strong>Portofolio Visual</strong></label>
               <p class="{{ $help }}">JPG (desainer) atau link YouTube (videografer)</p>
-              <input id="file-input-2" type="file" name="portofolio_visual" class="{{ $input }} file:mr-4 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700" />
+              <input id="file-input-2" type="file" name="portofolio_visual" class="{{ $input }} file:mr-4 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-primary-600 file:text-white hover:file:bg-primary-700" />
             </div>
           </div>
 
@@ -490,7 +490,7 @@
           </div>
 
           <!-- Submit -->
-          <button type="submit" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white focus:outline-none focus:ring-4 focus:ring-emerald-300 dark:focus:ring-emerald-800">
+          <button type="submit" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white focus:outline-none focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-800">
             Kirim Formulir
           </button>
         </form>

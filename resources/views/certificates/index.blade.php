@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="w-full mx-auto px-6 py-6 pb-6 bg-emerald-300">
+<div class="w-full mx-auto px-6 py-6 pb-6 bg-primary-300">
     {{-- Header --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
@@ -39,8 +39,8 @@
 
             {{-- Upload Tanda Tangan --}}
             <button type="button" onclick="openModal('ttd')"
-                class="inline-flex items-center gap-2 bg-white text-emerald-600 border border-emerald-600 px-4 py-2 rounded-lg shadow-sm 
-                    hover:bg-emerald-50 hover:border-emerald-700 hover:text-emerald-700 transition">
+                class="inline-flex items-center gap-2 bg-white text-primary-600 border border-primary-600 px-4 py-2 rounded-lg shadow-sm 
+                    hover:bg-primary-50 hover:border-primary-700 hover:text-primary-700 transition">
                 Upload Tanda Tangan
             </button>
         </div>
@@ -293,7 +293,7 @@
             </div>
             <div class="flex justify-end gap-2">
                 <button type="button" onclick="closeModal('ttd')" class="px-4 py-2 rounded border">Batal</button>
-                <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white hover:bg-emerald-700">Upload</button>
+                <button type="submit" class="px-4 py-2 rounded bg-primary-600 text-white hover:bg-primary-700">Upload</button>
             </div>
         </form>
     </div>

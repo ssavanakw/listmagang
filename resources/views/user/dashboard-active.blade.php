@@ -1,12 +1,12 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="px-4 pt-6 pb-6 lg:px-8 bg-emerald-300">
+<div class="px-4 pt-6 pb-6 lg:px-8 bg-primary-300">
   @if(auth()->check() && auth()->user()->role === 'pemagang' && isset($internship) && $internship->internship_status === 'active')
     <div class="max-w-7xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-md overflow-hidden transition hover:shadow-lg">
       
       <!-- Header -->
-      <div class="bg-emerald-600 text-white px-6 py-4 flex items-center gap-3">
+      <div class="bg-primary-600 text-white px-6 py-4 flex items-center gap-3">
         <i class="fas fa-user-graduate text-2xl"></i>
         <h3 class="text-xl font-semibold">Dashboard Pemagang Aktif</h3>
       </div>
@@ -48,7 +48,7 @@
           </div>
         </div>
 
-        <!-- Tombol Aksi -->
+        {{-- <!-- Tombol Aksi -->
         <div>
           <h4 class="text-lg font-semibold mb-3 flex items-center gap-2 text-gray-800 dark:text-gray-100">
             <i class="fas fa-cogs text-blue-500"></i> Aksi yang Dapat Dilakukan
@@ -67,7 +67,7 @@
               <i class="fas fa-tasks"></i> Tugas Pending
             </a>
           </div>
-        </div>
+        </div> --}}
 
         <!-- Status Magang -->
         <div class="bg-green-50 dark:bg-green-900/30 border border-green-400 rounded-xl p-5 flex items-start gap-3">

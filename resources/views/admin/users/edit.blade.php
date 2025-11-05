@@ -29,7 +29,7 @@
         </label>
         <input type="email" name="email" id="email" 
                value="{{ old('email', $user->email) }}"
-               class="mt-1 block w-full border border-green-200 bg-green-50 rounded-xl shadow-sm focus:ring-yellow-400 focus:border-yellow-400 px-3 py-2"
+               class="mt-1 block w-full border border-primary-200 bg-primary-50 rounded-xl shadow-sm focus:ring-yellow-400 focus:border-yellow-400 px-3 py-2"
                required>
       </div>
 

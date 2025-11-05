@@ -13,9 +13,9 @@
     }
   </script>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-emerald-500
-             bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-700
-             dark:from-emerald-900 dark:via-emerald-950 dark:to-black">
+<body class="min-h-screen flex items-center justify-center bg-primary-500
+             bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700
+             dark:from-primary-900 dark:via-primary-950 dark:to-black">
 
   <div class="w-full max-w-md px-4">
     <div class="rounded-2xl shadow-xl ring-1 ring-black/5 dark:ring-white/10
@@ -43,8 +43,8 @@
                  placeholder="Your Name"
                  class="mt-1 w-full px-4 py-2 rounded-lg border
                         bg-white text-gray-900 placeholder-gray-400
-                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
-                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-emerald-400 dark:focus:border-emerald-400"/>
+                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-primary-400 dark:focus:border-primary-400"/>
         </div>
 
         <!-- Email -->
@@ -54,8 +54,8 @@
                  placeholder="you@example.com"
                  class="mt-1 w-full px-4 py-2 rounded-lg border
                         bg-white text-gray-900 placeholder-gray-400
-                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
-                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-emerald-400 dark:focus:border-emerald-400"/>
+                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-primary-400 dark:focus:border-primary-400"/>
         </div>
 
         <!-- Password -->
@@ -65,8 +65,8 @@
                  placeholder="••••••••"
                  class="mt-1 w-full px-4 py-2 rounded-lg border
                         bg-white text-gray-900 placeholder-gray-400
-                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
-                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-emerald-400 dark:focus:border-emerald-400"/>
+                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-primary-400 dark:focus:border-primary-400"/>
         </div>
 
         <!-- Confirm Password -->
@@ -76,27 +76,27 @@
                  placeholder="••••••••"
                  class="mt-1 w-full px-4 py-2 rounded-lg border
                         bg-white text-gray-900 placeholder-gray-400
-                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
-                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-emerald-400 dark:focus:border-emerald-400"/>
+                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-primary-400 dark:focus:border-primary-400"/>
         </div>
 
         <!-- Submit -->
         <button type="submit"
                 class="w-full inline-flex justify-center items-center gap-2
-                       bg-emerald-600 hover:bg-emerald-700 text-white font-medium
-                       py-2.5 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500
+                       bg-primary-600 hover:bg-primary-700 text-white font-medium
+                       py-2.5 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500
                        dark:focus:ring-offset-gray-900">
           Register
         </button>
       </form>
 
-      <p class="mt-6 text-center text-xs text-emerald-900/80 dark:text-emerald-200/70">
+      <p class="mt-6 text-center text-xs text-primary-900/80 dark:text-primary-200/70">
         Secured area — authorized users only.
       </p>
 
       <!-- Button to Cancel Registration and go back to Login -->
       <div class="mt-4 text-center">
-        <a href="{{ route('login') }}" class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline">Tidak jadi daftar? Kembali ke login</a>
+        <a href="{{ route('login') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">Tidak jadi daftar? Kembali ke login</a>
       </div>
     </div>
   </div>

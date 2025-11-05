@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="w-full mx-auto px-6 pt-6 pb-6 lg:px-10 bg-emerald-300">
+<div class="w-full mx-auto px-6 pt-6 pb-6 lg:px-10 bg-primary-300">
   <div class="flex items-center justify-between mb-6">
     <div>
       <h1 class="text-2xl font-bold">Sertifikat Peserta Eksternal</h1>
@@ -170,7 +170,7 @@
     </div>
 
     <div class="flex justify-end">
-      <button type="submit" class="px-5 py-2.5 rounded bg-emerald-600 text-white hover:bg-emerald-700">
+      <button type="submit" class="px-5 py-2.5 rounded bg-primary-600 text-white hover:bg-primary-700">
         Buat Sertifikat
       </button>
     </div>

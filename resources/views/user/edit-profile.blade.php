@@ -18,7 +18,7 @@
               placeholder-gray-400 dark:placeholder-gray-500
               shadow-sm transition-colors
               hover:border-gray-400 dark:hover:border-gray-600
-              focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
+              focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
               disabled:opacity-60 disabled:cursor-not-allowed
               read-only:bg-gray-50 dark:read-only:bg-gray-800/60';
     $card  = 'rounded-2xl bg-white/95 dark:bg-gray-900/80 
@@ -35,7 +35,7 @@
     $statusMap = [
         'waiting'   => ['label' => 'Menunggu Review', 'cls' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'],
         'pending'   => ['label' => 'Pending',         'cls' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'],
-        'accepted'  => ['label' => 'Diterima',        'cls' => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'],
+        'accepted'  => ['label' => 'Diterima',        'cls' => 'bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-200'],
         'rejected'  => ['label' => 'Ditolak',         'cls' => 'bg-gray-200 text-gray-700 dark:bg-gray-800/60 dark:text-gray-200'],
         'active'    => ['label' => 'Aktif',           'cls' => 'bg-blue-100 text-blue-800 dark:bg-blue-600/20 dark:text-blue-300'],
         'completed' => ['label' => 'Selesai',         'cls' => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200'],
@@ -123,7 +123,7 @@
 </style>
 
 @section('content')
-<div class="bg-emerald-300 px-3 sm:px-4 lg:px-6 pt-4 pb-6">
+<div class="bg-primary-300 px-3 sm:px-4 lg:px-6 pt-4 pb-6">
   <div class="max-w-none w-full">
 
     {{-- HEADER --}}
@@ -156,7 +156,7 @@
               @foreach($steps as $i => $st)
                 <div class="flex flex-col items-center text-center">
                   <div class="z-10 h-6 w-6 rounded-full grid place-items-center
-                        {{ $i <= $currentIdx ? 'bg-emerald-500 text-white'.($i === $currentIdx ? ' animate-pulse-soft' : '') : 'bg-gray-300 dark:bg-gray-600 text-transparent' }}">
+                        {{ $i <= $currentIdx ? 'bg-primary-500 text-white'.($i === $currentIdx ? ' animate-pulse-soft' : '') : 'bg-gray-300 dark:bg-gray-600 text-transparent' }}">
                     <span class="text-[10px] font-bold">•</span>
                   </div>
                   <div class="mt-2 text-[12px] {{ $i <= $currentIdx ? 'text-gray-900 dark:text-gray-100 font-medium' : 'text-gray-500 dark:text-gray-400' }}">
@@ -170,8 +170,8 @@
 
         {{-- INFO STATUS --}}
         @if(in_array($status, ['accepted','active','completed']))
-          <div class="mt-4 rounded-lg border border-emerald-200/70 bg-emerald-50 px-4 py-3 text-[13px] text-emerald-900
-                      dark:border-emerald-800/60 dark:bg-emerald-900/20 dark:text-emerald-200">
+          <div class="mt-4 rounded-lg border border-primary-200/70 bg-primary-50 px-4 py-3 text-[13px] text-primary-900
+                      dark:border-primary-800/60 dark:bg-primary-900/20 dark:text-primary-200">
             Selamat status kamu sekarang adalah <b><em>Diterima</em></b>, kamu otomatis menjadi <b><span class="font-bold">Pemagang</span></b>.
           </div>
         @elseif($status === 'rejected')
@@ -224,7 +224,7 @@
       {{-- Data Pribadi --}}
       <section class="{{ $card }}">
         <div class="flex items-center gap-2 mb-6">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">🌱</span>
+          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">🌱</span>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Data Pribadi</h3>
         </div>
 
@@ -274,7 +274,7 @@
       {{-- Akademik --}}
       <section class="{{ $card }}">
         <div class="flex items-center gap-2 mb-6">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">🎓</span>
+          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">🎓</span>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Akademik</h3>
         </div>
 
@@ -317,7 +317,7 @@
 
         {{-- Periode Magang --}}
         <div class="flex items-center gap-2 mb-6 mt-8">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">🗓️</span>
+          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">🗓️</span>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Periode Magang</h3>
         </div>
 
@@ -342,7 +342,7 @@
       {{-- Preferensi & Alasan --}}
       <section class="{{ $card }}">
         <div class="flex items-center gap-2 mb-6">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">🎯</span>
+          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">🎯</span>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Preferensi & Alasan</h3>
         </div>
 
@@ -400,7 +400,7 @@
       {{-- Keahlian Teknis (baru) --}}
       <section class="{{ $card }}">
         <div class="flex items-center gap-2 mb-6">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">🧰</span>
+          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">🧰</span>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Keahlian Teknis</h3>
         </div>
 
@@ -454,7 +454,7 @@
       {{-- Perlengkapan & Tools (baru) --}}
       <section class="{{ $card }}">
         <div class="flex items-center gap-2 mb-6">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">💻</span>
+          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">💻</span>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Perlengkapan & Tools</h3>
         </div>
 
@@ -507,7 +507,7 @@
       {{-- Sumber Informasi (baru) --}}
       <section class="{{ $card }}">
         <div class="flex items-center gap-2 mb-6">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">🔗</span>
+          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">🔗</span>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Sumber Informasi Magang</h3>
         </div>
 
@@ -535,7 +535,7 @@
       {{-- Kegiatan & Domisili & Kontak (baru) --}}
       <section class="{{ $card }}">
         <div class="flex items-center gap-2 mb-6">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">📇</span>
+          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">📇</span>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Kegiatan & Kontak</h3>
         </div>
 
@@ -608,7 +608,7 @@
       {{-- Berkas --}}
       <section class="{{ $card }}">
         <div class="flex items-center gap-2 mb-6">
-          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">📎</span>
+          <span class="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">📎</span>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Berkas</h3>
         </div>
 
@@ -618,7 +618,7 @@
             @if ($intern->cv_ktp_portofolio_pdf)
               <div class="text-sm mb-2">
                 File saat ini:
-                <a class="text-emerald-700 dark:text-emerald-300 underline"
+                <a class="text-primary-700 dark:text-primary-300 underline"
                    href="{{ Storage::disk('public')->url($intern->cv_ktp_portofolio_pdf) }}" target="_blank">
                   {{ basename($intern->cv_ktp_portofolio_pdf) }}
                 </a>
@@ -638,7 +638,7 @@
             @if ($intern->portofolio_visual)
               <div class="text-sm mb-2">
                 File saat ini:
-                <a class="text-emerald-700 dark:text-emerald-300 underline"
+                <a class="text-primary-700 dark:text-primary-300 underline"
                    href="{{ Storage::disk('public')->url($intern->portofolio_visual) }}" target="_blank">
                   {{ basename($intern->portofolio_visual) }}
                 </a>
@@ -658,7 +658,7 @@
       {{-- Aksi --}}
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
         <button type="submit"
-                class="inline-flex justify-center items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 shadow">
+                class="inline-flex justify-center items-center gap-2 px-5 py-3 rounded-xl bg-primary-600 text-white hover:bg-primary-700 shadow">
           💾 Simpan Perubahan
         </button>
         <a href="{{ route('user.dashboard') }}"

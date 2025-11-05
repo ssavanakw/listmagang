@@ -35,39 +35,56 @@
                 </form>
             </div>
 
-            <div class="flex items-center space-x-4 relative">
-                <!-- Profile Picture with Circular Frame -->
-                <button class="flex items-center gap-2 px-3 py-2 text-gray-600 rounded-lg hover:bg-gray-200 focus:outline-none">
-                    <img src="{{ asset('storage/' . (auth()->user()->profile_picture ?? 'default-avatar.png')) }}" alt="User Profile" class="w-10 h-10 rounded-full border-2 border-emerald-600 object-cover">
+            <div class="relative">
+                <!-- Profile Picture Button -->
+                <button id="profilePictureButton" class="flex items-center gap-2 px-3 py-2 text-gray-600 rounded-lg hover:bg-gray-200 focus:outline-none">
+                    <img src="{{ asset('storage/' . (auth()->user()->profile_picture ?? 'default-avatar.png')) }}" alt="User Profile" class="w-10 h-10 rounded-full border-2 border-primary-600 object-cover">
                 </button>
 
                 <!-- Dropdown Menu -->
-                <div class="absolute right-0 w-48 bg-white border border-gray-200 rounded-lg shadow-lg mt-2 hidden group-hover:block">
+                <div id="profileDropdown"
+                    class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden transition-all duration-300 ease-in-out"
+                    style="max-height: 0; opacity: 0; pointer-events: none;">
                     <ul class="py-1">
                         <li><a href="{{ route('user.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</a></li>
                         <li><a href="{{ route('user.logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a></li>
                     </ul>
                 </div>
             </div>
+
         </div>
     </div>
 </nav>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-    const toggleSidebarButton = document.getElementById("toggleSidebarMobile");
-    const sidebar = document.getElementById("sidebar");
-    const hamburgerIcon = document.getElementById("toggleSidebarMobileHamburger");
-    const closeIcon = document.getElementById("toggleSidebarMobileClose");
+        const button = document.getElementById("profilePictureButton");
+        const dropdown = document.getElementById("profileDropdown");
 
-    toggleSidebarButton.addEventListener("click", function () {
-        // Toggle sidebar visibility
-        sidebar.classList.toggle("hidden");
-        
-        // Toggle icons
-        hamburgerIcon.classList.toggle("hidden");
-        closeIcon.classList.toggle("hidden");
+        button.addEventListener("click", function (e) {
+            e.stopPropagation();
+            const isVisible = dropdown.style.maxHeight && dropdown.style.maxHeight !== "0px";
+
+            if (!isVisible) {
+                dropdown.style.maxHeight = "200px";
+                dropdown.style.opacity = "1";
+                dropdown.style.pointerEvents = "auto";
+            } else {
+                dropdown.style.maxHeight = "0";
+                dropdown.style.opacity = "0";
+                dropdown.style.pointerEvents = "none";
+            }
+        });
+
+        // Close on outside click
+        document.addEventListener("click", function (e) {
+            if (!dropdown.contains(e.target) && !button.contains(e.target)) {
+                dropdown.style.maxHeight = "0";
+                dropdown.style.opacity = "0";
+                dropdown.style.pointerEvents = "none";
+            }
+        });
     });
-});
-
 </script>
+
+

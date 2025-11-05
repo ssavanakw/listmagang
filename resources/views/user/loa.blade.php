@@ -1,15 +1,15 @@
 @php
   use Carbon\Carbon;
-  $font = "font-family: 'Roboto', Arial, Helvetica, sans-serif;";
+  $font = "font-family: 'Times New Roman', serif;";
   $interns = $rows ?? [];
 @endphp
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Letter of Acceptance (LOA)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Georgia:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Georgia:wght@400;700&display=swap" rel="stylesheet">
   <style>
     /* ===== A4 & Margin ===== */
     @page {
@@ -18,7 +18,7 @@
     }
 
     body {
-      font-family: 'Georgia', serif, 'Roboto', Arial, Helvetica, sans-serif;
+      font-family: 'Times New Roman', serif; /* Changed font-family to Times New Roman */
       font-size: 12px;
       color: #2d3748;
       line-height: 1.5;
@@ -63,7 +63,7 @@
     .head .name h2 {
       font-size: 26px;
       font-weight: 700;
-      color: #065f46;
+      color: #000000;
       margin: 0;
       text-transform: uppercase;
     }

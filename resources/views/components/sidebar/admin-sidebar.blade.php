@@ -1,10 +1,5 @@
 @if(auth()->user()->role === 'admin')
     <x-sidebar-dashboard>
-        {{-- Pengaturan Akun --}}
-        <x-sidebar-menu-dashboard 
-            routeName="user.profile"
-            title="Profile"
-        />
         <x-sidebar-menu-dashboard 
             routeName="admin.dashboard.index" 
             title="Dashboard"
@@ -66,8 +61,7 @@
             title="Feedback"
         />
 
-
-        {{-- Logout --}}
+        <!-- Logout -->
         <div class="mt-auto px-4 pb-4">
             <form action="{{ route('user.logout') }}" method="POST">
                 @csrf
@@ -84,69 +78,64 @@
         </div>
     </x-sidebar-dashboard>
 @endif
+
 @if(auth()->user()->role === 'user' || auth()->user()->role === 'pemagang')
     <x-sidebar-dashboard>
-        {{-- Pengaturan Akun --}}
-        <x-sidebar-menu-dashboard 
-            routeName="user.profile"
-            title="Profile"
-        />
-
         @if(auth()->user()->role === 'pemagang')
             @if(auth()->user()->internshipRegistration->internship_status === 'active')
-                {{-- Dashboard Pemagang Aktif --}}
+                <!-- Dashboard Pemagang Aktif -->
                 <x-sidebar-menu-dashboard 
                     routeName="user.dashboard-active" 
                     title="Dashboard"
                 />
-                {{-- Daily Report Pemagang Aktif --}}
+                {{-- <!-- Daily Report Pemagang Aktif -->
                 <x-sidebar-menu-dashboard 
                     routeName="user.dailyReport" 
                     title="Daily Report"
                 />
-                {{-- Leave Request Pemagang Aktif --}}
+                <!-- Leave Request Pemagang Aktif -->
                 <x-sidebar-menu-dashboard 
                     routeName="user.leaveRequest" 
                     title="Leave Request"
                 />
-                {{-- Pending Task Pemagang Aktif --}}
+                <!-- Pending Task Pemagang Aktif -->
                 <x-sidebar-menu-dashboard 
                     routeName="user.pendingTasks" 
                     title="Pending Task"
-                />
+                /> --}}
             @elseif(auth()->user()->internshipRegistration->internship_status === 'completed')
-                {{-- Dashboard Pemagang Completed --}}
+                <!-- Dashboard Pemagang Completed -->
                 <x-sidebar-menu-dashboard 
                     routeName="user.dashboard.completed" 
                     title="Dashboard"
                 />
-                {{-- Daily Report Pemagang Aktif --}}
+                {{-- <!-- Daily Report Pemagang Aktif -->
                 <x-sidebar-menu-dashboard 
                     routeName="user.dailyReport" 
                     title="Daily Report"
                 />
-                {{-- Leave Request Pemagang Aktif --}}
+                <!-- Leave Request Pemagang Aktif -->
                 <x-sidebar-menu-dashboard 
                     routeName="user.leaveRequest" 
                     title="Leave Request"
                 />
-                {{-- Pending Task Pemagang Aktif --}}
+                <!-- Pending Task Pemagang Aktif -->
                 <x-sidebar-menu-dashboard 
                     routeName="user.pendingTasks" 
                     title="Pending Task"
-                />
-                {{-- Jangan lakukan redirect otomatis --}}
-                {{-- Cukup tampilkan menu dan beri informasi status magang selesai di dalam dashboard --}}
+                /> --}}
+                <!-- Jangan lakukan redirect otomatis -->
+                <!-- Cukup tampilkan menu dan beri informasi status magang selesai di dalam dashboard -->
             @endif
         @else
-            {{-- Dashboard User --}}
+            <!-- Dashboard User -->
             <x-sidebar-menu-dashboard 
                 routeName="user.dashboard" 
                 title="Dashboard"
             />
         @endif
 
-        {{-- Form Pendaftaran Magang --}}
+        <!-- Form Pendaftaran Magang -->
         @if(auth()->user()->role === 'pemagang')
             <x-sidebar-menu-dashboard 
                 routeName="internship.submitted"
@@ -159,15 +148,15 @@
             />
         @endif
 
-        @if(auth()->user()->role === 'pemagang')
-        {{-- Riwayat Magang --}}
-        <x-sidebar-menu-dashboard 
-            routeName="user.riwayatMagang"
-            title="Riwayat Magang"
-        />
-        @endif
+        {{-- @if(auth()->user()->role === 'pemagang')
+            <!-- Riwayat Magang -->
+            <x-sidebar-menu-dashboard 
+                routeName="user.riwayatMagang"
+                title="Riwayat Magang"
+            />
+        @endif --}}
 
-        {{-- Logout --}}
+        <!-- Logout -->
         <div class="mt-auto px-4 pb-4">
             <form action="{{ route('user.logout') }}" method="POST">
                 @csrf

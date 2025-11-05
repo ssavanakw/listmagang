@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('content')
-  <div class="w-full mx-auto px-4 pt-6 pb-6 bg-emerald-300">
+  <div class="w-full mx-auto px-4 pt-6 pb-6 bg-primary-300">
     <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2">
       👥 Semua Pengguna
     </h2>
@@ -85,7 +85,7 @@
                     $role = strtolower($user->role ?? 'user');
                     $cls = match($role) {
                       'admin' => 'bg-purple-100 text-purple-700',
-                      'pemagang'=> 'bg-green-100 text-green-700',
+                      'pemagang'=> 'bg-primary-100 text-primary-700',
                       'user'  => 'bg-blue-100 text-blue-700',
                       default => 'bg-gray-100 text-gray-700'
                     };
@@ -102,7 +102,7 @@
                 </td>
                 <td class="px-4 py-3">
                   @if($user->is_online)
-                    <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full animate-pulse">
+                    <span class="inline-flex items-center px-2 py-1 bg-primary-100 text-primary-700 text-sm font-semibold rounded-full animate-pulse">
                       🟢 Online
                     </span>
                   @else

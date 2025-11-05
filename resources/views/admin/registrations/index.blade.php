@@ -24,9 +24,9 @@
                          bg-white dark:bg-gray-800
                          text-sm text-gray-900 dark:text-gray-100
                          placeholder-gray-500 dark:placeholder-gray-400
-                         caret-emerald-500
-                         focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
-                <button class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                         caret-primary-500
+                         focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
+                <button class="px-3 py-2 rounded-lg bg-primary-600 text-white text-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
                     Cari
                 </button>
             </div>
@@ -116,7 +116,7 @@
                                 @if (Str::startsWith($field, 'cv_') || Str::startsWith($field, 'portofolio_'))
                                     @if ($r->$field)
                                         <a href="{{ asset('storage/' . $r->$field) }}" target="_blank"
-                                           class="text-emerald-600 hover:text-emerald-700 underline">
+                                           class="text-primary-600 hover:text-primary-700 underline">
                                             Lihat
                                         </a>
                                     @else

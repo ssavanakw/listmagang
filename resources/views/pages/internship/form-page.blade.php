@@ -6,11 +6,12 @@
   <title>Form Pendaftaran Magang/PKL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
+  @vite(['resources/css/app.css'])
 </head>
 
-<body class="bg-emerald-400/20  min-h-screen flex items-start sm:items-center justify-center p-4">
+<body class="bg-primary-700  min-h-screen flex items-start sm:items-center justify-center p-4">
   <div class="w-full max-w-2xl">
-    <div class="bg-white/80  backdrop-blur rounded-2xl shadow-xl ring-1 ring-zinc-200 overflow-hidden">
+    <div class="bg-white/80 rounded-2xl shadow-xl ring-1 ring-zinc-200 overflow-hidden">
       <section class="py-8 lg:py-10 px-5 sm:px-8">
         <h2 class="mb-3 text-2xl sm:text-3xl font-extrabold text-center text-zinc-900">
           Form Pendaftaran Magang/PKL
@@ -25,40 +26,40 @@
           @php
             $label = 'block mb-2 text-sm font-medium text-zinc-800';
             $help  = 'mt-1 text-xs text-zinc-500';
-            $input = 'block w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 px-3 py-2.5 shadow-sm';
+            $input = 'block w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 px-3 py-2.5 shadow-sm';
             $group = 'bg-white border border-zinc-300 rounded-lg';
-            $radio = 'w-4 h-4 text-emerald-600 border-zinc-300 focus:ring-2 focus:ring-emerald-500';
+            $radio = 'w-4 h-4 text-primary-600 border-zinc-300 focus:ring-2 focus:ring-primary-500';
             $check = $radio;
             $item  = 'flex items-center gap-3 px-3 py-2 hover:bg-zinc-50 transition';
           @endphp
 
           <!-- Nama Lengkap -->
           <div>
-            <label for="fullname" class="{{ $label }}">Nama Lengkap</label>
+            <label for="fullname" class="{{ $label }}">Nama Lengkap<span class="text-red-500">*</span></label>
             <input type="text" id="fullname" name="fullname" required placeholder="Muhammad Sumbul" class="{{ $input }}" value="{{ old('fullname') }}" />
           </div>
 
           <!-- Tahun Lahir (string) -->
           <div>
-            <label for="born_date" class="{{ $label }}">Tahun Lahir</label>
+            <label for="born_date" class="{{ $label }}">Tahun Lahir<span class="text-red-500">*</span></label>
             <input type="text" id="born_date" name="born_date" placeholder="25 Juni 2005" required class="{{ $input }}" value="{{ old('born_date') }}" />
           </div>
 
           <!-- NIM/NIS -->
           <div>
-            <label for="student_id" class="{{ $label }}">Nomor Induk Mahasiswa / Siswa</label>
+            <label for="student_id" class="{{ $label }}">Nomor Induk Mahasiswa / Siswa<span class="text-red-500">*</span></label>
             <input type="text" id="student_id" name="student_id" placeholder="21111234" required class="{{ $input }}" value="{{ old('student_id') }}" />
           </div>
 
           <!-- Email -->
           <div>
-            <label for="email" class="{{ $label }}">Email</label>
+            <label for="email" class="{{ $label }}">Email<span class="text-red-500">*</span></label>
             <input type="email" id="email" name="email" placeholder="surya@example.com" required class="{{ $input }}" value="{{ old('email') }}" />
           </div>
 
           <!-- Jenis Kelamin (value Indonesia) -->
           <div>
-            <h3 class="{{ $label }}">Jenis Kelamin</h3>
+            <h3 class="{{ $label }}">Jenis Kelamin<span class="text-red-500">*</span></h3>
             <ul class="{{ $group }}">
               <li class="border-b border-zinc-200">
                 <label for="gender-lk" class="{{ $item }}">
@@ -77,43 +78,43 @@
 
           <!-- Telepon -->
           <div>
-            <label for="phone_number" class="{{ $label }}">No. HP Aktif (WhatsApp)</label>
+            <label for="phone_number" class="{{ $label }}">No. HP Aktif (WhatsApp)<span class="text-red-500">*</span></label>
             <input type="text" id="phone_number" name="phone_number" placeholder="08xxxxxxxxxx" required class="{{ $input }}" value="{{ old('phone_number') }}" />
           </div>
 
           <!-- Institusi -->
           <div>
-            <label for="institution_name" class="{{ $label }}">Asal Sekolah/Kampus</label>
+            <label for="institution_name" class="{{ $label }}">Asal Sekolah/Kampus<span class="text-red-500">*</span></label>
             <input type="text" id="institution_name" name="institution_name" placeholder="SMA Negeri 1/Amikom Yogyakarta" required class="{{ $input }}" value="{{ old('institution_name') }}" />
           </div>
 
           <!-- Prodi -->
           <div>
-            <label for="study_program" class="{{ $label }}">Program Studi</label>
+            <label for="study_program" class="{{ $label }}">Program Studi<span class="text-red-500">*</span></label>
             <input type="text" id="study_program" name="study_program" placeholder="Teknik Informatika" required class="{{ $input }}" value="{{ old('study_program') }}" />
           </div>
 
           <!-- Fakultas -->
           <div>
-            <label for="faculty" class="{{ $label }}">Fakultas</label>
+            <label for="faculty" class="{{ $label }}">Fakultas<span class="text-red-500">*</span></label>
             <input type="text" id="faculty" name="faculty" placeholder="Ilmu Komputer" required class="{{ $input }}" value="{{ old('faculty') }}" />
           </div>
 
           <!-- Kota -->
           <div>
-            <label for="current_city" class="{{ $label }}">Kota/Daerah tempat tinggal saat ini</label>
+            <label for="current_city" class="{{ $label }}">Kota/Daerah tempat tinggal saat ini<span class="text-red-500">*</span></label>
             <input type="text" id="current_city" name="current_city" placeholder="Kota/daerah" required class="{{ $input }}" value="{{ old('current_city') }}" />
           </div>
 
           <!-- Alasan -->
           <div>
-            <label for="internship_reason" class="{{ $label }}">Mengapa Anda ingin Magang/PKL di sini?</label>
+            <label for="internship_reason" class="{{ $label }}">Mengapa Anda ingin Magang/PKL di sini?<span class="text-red-500">*</span></label>
             <input type="text" id="internship_reason" name="internship_reason" placeholder="Alasan Anda" required class="{{ $input }}" value="{{ old('internship_reason') }}" />
           </div>
 
           <!-- Jenis Magang (value Indonesia) -->
           <div>
-            <h3 class="{{ $label }}">Jenis Magang yang dipilih</h3>
+            <h3 class="{{ $label }}">Jenis Magang yang dipilih<span class="text-red-500">*</span></h3>
             <ul class="{{ $group }}">
               <li class="border-b border-zinc-200">
                 <label for="type-mandiri" class="{{ $item }}">
@@ -124,7 +125,7 @@
               <li>
                 <label for="type-kampus" class="{{ $item }}">
                   <input id="type-kampus" type="radio" value="Magang Kampus" name="internship_type" class="{{ $radio }}" @checked(old('internship_type') === 'Magang Kampus') />
-                  <span class="text-sm">Magang Kampus / Reguler</span>
+                  <span class="text-sm">Magang Reguler (Kewajiban kampus/sekolah)</span>
                 </label>
               </li>
             </ul>
@@ -137,7 +138,7 @@
               <li>
                 <label for="arr-onsite" class="{{ $item }}">
                   <input id="arr-onsite" type="radio" value="Onsite" name="internship_arrangement" class="{{ $radio }}" @checked(old('internship_arrangement') === 'Onsite') />
-                  <span class="text-sm">Onsite (Work From Office)</span>
+                  <span class="text-sm">WFO (Work From Office)</span>
                 </label>
               </li>
             </ul>
@@ -145,7 +146,7 @@
 
           <!-- Status Saat Ini (value Indonesia) -->
           <div>
-            <h3 class="{{ $label }}">Status Anda saat ini</h3>
+            <h3 class="{{ $label }}">Status Anda saat ini<span class="text-red-500">*</span></h3>
             <ul class="{{ $group }}">
               <li class="border-b border-zinc-200">
                 <label for="status-student" class="{{ $item }}">
@@ -239,6 +240,7 @@
             <label for="design_software" class="{{ $label }}">
               Jika minat <strong>Desain Grafis</strong> / <strong>UI/UX</strong>, software apa yang dikuasai?
               <span class="{{ $help }}">(Jika bukan, isi “-”)</span>
+              <span class="text-red-500">*</span>
             </label>
             <input id="design_software" name="design_software" placeholder="Figma, Photoshop" required class="{{ $input }}" value="{{ old('design_software') }}" />
           </div>
@@ -248,6 +250,7 @@
             <label for="video_software" class="{{ $label }}">
               Jika minat <strong>Digital Marketing</strong>, materi apa yang ingin dipraktikkan?
               <span class="{{ $help }}">(Jika bukan, isi “-”)</span>
+              <span class="text-red-500">*</span>
             </label>
             <input id="video_software" name="video_software" placeholder="Konten organik, Iklan, SEO" required class="{{ $input }}" value="{{ old('video_software') }}" />
           </div>
@@ -257,6 +260,7 @@
             <label for="programming_languages" class="{{ $label }}">
               Jika minat <strong>Programmer</strong>, bahasa pemrograman yang dikuasai?
               <span class="{{ $help }}">(Jika bukan, isi “-”)</span>
+              <span class="text-red-500">*</span>
             </label>
             <input id="programming_languages" name="programming_languages" placeholder="PHP, JS, Python" required class="{{ $input }}" value="{{ old('programming_languages') }}" />
           </div>
@@ -343,15 +347,15 @@
 
           <!-- Rentang Tanggal (STRING) -->
           <div>
-            <label class="{{ $label }}">
-              Kapan rencana mulai Magang/PKL?
-              <span class="{{ $help }}">Tulis lengkap tanggal, bulan, tahun & durasi (contoh: 10 September 2025)</span>
-            </label>
-            <div class="flex flex-col sm:flex-row items-center gap-4">
-              <input id="start_date" type="text" name="start_date" value="{{ old('start_date', request('start_date')) }}" class="{{ $input }}" placeholder="Tanggal mulai (10 September 2025)">
-              <span class="text-zinc-700 dark:text-zinc-300">s/d</span>
-              <input id="end_date" type="text" name="end_date" value="{{ old('end_date', request('end_date')) }}" class="{{ $input }}" placeholder="Tanggal selesai (10 Desember 2025)">
-            </div>
+              <label class="{{ $label }}">
+                Kapan rencana mulai Magang/PKL?
+                <span class="{{ $help }}">Tulis lengkap tanggal, bulan, tahun & durasi (contoh: 10 September 2025)</span>
+              </label>
+              <div class="flex flex-col sm:flex-row items-center gap-4">
+                <input id="start_date" type="date" name="start_date" value="{{ old('start_date', request('start_date')) }}" class="{{ $input }}" placeholder="Tanggal mulai (10 September 2025)" onchange="formatDate(this)">
+                <span class="text-zinc-700 dark:text-zinc-300">s/d</span>
+                <input id="end_date" type="date" name="end_date" value="{{ old('end_date', request('end_date')) }}" class="{{ $input }}" placeholder="Tanggal selesai (10 Desember 2025)" onchange="formatDate(this)">
+              </div>
           </div>
 
           <!-- Sumber Info (benahi other) -->
@@ -383,12 +387,12 @@
               <label for="file-input-1" class="{{ $label }}">
                 Upload <strong>CV, Scan KTP/KTM, Portofolio</strong> <span class="{{ $help }}">Format PDF</span>
               </label>
-              <input id="file-input-1" type="file" name="cv_ktp_portofolio_pdf" class="{{ $input }} file:mr-4 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700" />
+              <input id="file-input-1" type="file" name="cv_ktp_portofolio_pdf" class="{{ $input }} file:mr-4 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-primary-600 file:text-white hover:file:bg-primary-700" />
             </div>
             <div>
               <label for="file-input-2" class="{{ $label }}">Upload <strong>Portofolio Visual</strong></label>
               <p class="{{ $help }}">JPG (desainer) atau link YouTube (videografer)</p>
-              <input id="file-input-2" type="file" name="portofolio_visual" class="{{ $input }} file:mr-4 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700" />
+              <input id="file-input-2" type="file" name="portofolio_visual" class="{{ $input }} file:mr-4 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-primary-600 file:text-white hover:file:bg-primary-700" />
             </div>
           </div>
 
@@ -445,8 +449,8 @@
 
           <!-- Instagram -->
           <div>
-            <label for="social-media-link" class="{{ $label }}">Sosial Media (Instagram)</label>
-            <input id="social-media-link" name="social_media_instagram" placeholder="@cakwlive" class="{{ $input }}" value="{{ old('social_media_instagram') }}" />
+              <label for="social-media-link" class="{{ $label }}">Sosial Media (Instagram)</label>
+              <input id="social-media-link" name="social_media_instagram" type="url" placeholder="https://instagram.com/cakwlive" class="{{ $input }}" value="{{ old('social_media_instagram') }}" />
           </div>
 
           <!-- Info unpaid -->
@@ -462,12 +466,24 @@
           </div>
 
           <!-- Submit -->
-          <button type="submit" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white focus:outline-none focus:ring-4 focus:ring-emerald-300 dark:focus:ring-emerald-800">
+          <button type="submit" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-5 py-3 rounded-lg text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white focus:outline-none focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-800">
             Kirim Formulir
           </button>
         </form>
       </section>
     </div>
   </div>
+
+  <script>
+    // Fungsi untuk mengubah format tanggal dari YYYY-MM-DD ke DD/MM/YYYY
+    function formatDate(input) {
+      const value = input.value;
+      if (value) {
+        const date = new Date(value);
+        const formattedDate = date.getDate().toString().padStart(2, '0') + '/' + (date.getMonth() + 1).toString().padStart(2, '0') + '/' + date.getFullYear();
+        input.value = formattedDate;
+      }
+    }
+  </script>
 </body>
 </html>

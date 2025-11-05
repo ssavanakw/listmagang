@@ -79,31 +79,31 @@
 
             <div class="mt-4 flex flex-wrap gap-2">
                 <a href="{{ route('admin.interns.index') }}"
-                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'all' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
+                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'all' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Semua
                 </a>
                 <a href="{{ route('admin.interns.active') }}"
-                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'active' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
+                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'active' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Aktif
                 </a>
                 <a href="{{ route('admin.interns.completed') }}"
-                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'completed' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
+                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'completed' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Selesai
                 </a>
                 <a href="{{ route('admin.interns.exited') }}"
-                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'exited' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
+                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'exited' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Keluar
                 </a>
                 <a href="{{ route('admin.interns.pending') }}"
-                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'pending' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
+                   class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'pending' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Pending
                 </a>
                 <a href="{{ route('admin.interns.accepted') }}"
-                    class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'accepted' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
+                    class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'accepted' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Diterima
                 </a>
                 <a href="{{ route('admin.interns.rejected') }}"
-                    class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'rejected' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
+                    class="rounded-lg px-3 py-2 text-sm {{ ($scope ?? '') === 'rejected' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100' }}">
                     Ditolak
                 </a>
             </div>
@@ -127,8 +127,8 @@
                         Batalkan
                     </button>
                     <button id="saveAll" disabled
-                            class="rounded-full bg-emerald-600 px-3 py-1 text-[12px]
-                                   text-white hover:bg-emerald-700 disabled:opacity-50">
+                            class="rounded-full bg-primary-600 px-3 py-1 text-[12px]
+                                   text-white hover:bg-primary-700 disabled:opacity-50">
                         Simpan
                     </button>
                 </div>
@@ -307,7 +307,7 @@
                                             'completed' => ['Selesai',  'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200'],
                                             'exited'    => ['Keluar',   'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200'],
                                             'pending'   => ['Pending',  'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'],
-                                            'accepted'  => ['Diterima', 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'],
+                                            'accepted'  => ['Diterima', 'bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-200'],
                                             'rejected'  => ['Ditolak',  'bg-gray-200 text-gray-700 dark:bg-gray-800/60 dark:text-gray-200'],
                                         ];
                                         $st = strtolower($intern->internship_status ?? 'waiting');
@@ -511,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cls: 'bg-amber-100 text-amber-800 dark:bg-amber-600/20 dark:text-amber-300'
         },accepted:  { 
             label: 'Diterima',       
-            cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-700/20 dark:text-emerald-200' 
+            cls: 'bg-primary-100 text-primary-800 dark:bg-primary-700/20 dark:text-primary-200' 
         },
         rejected:  { 
             label: 'Ditolak',        
@@ -828,7 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function pushToast(message, type = 'success') {
         const base = 'flex items-center gap-2 rounded-lg border px-3 py-2 text-sm shadow-sm';
         const theme = type === 'success' ?
-            'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-700 dark:text-emerald-200' :
+            'bg-primary-50 border-primary-200 text-primary-800 dark:bg-primary-900/20 dark:border-primary-700 dark:text-primary-200' :
             'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-900/20 dark:border-rose-700 dark:text-rose-200';
         const el = document.createElement('div');
         el.className = `${base} ${theme}`;
@@ -954,7 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <form action="${item.status_update_url}" class="inline status-form-row">
                     <select
                         class="status-select-row appearance-none rounded-lg border border-gray-300 bg-white px-2 py-1.5 pr-7 text-xs text-gray-700
-                        dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                         data-current="${cur}" data-name="${item.fullname || 'pemagang'}" data-id="${item.id}">
                         ${Object.entries(statusMap).map(([val, obj]) =>
                             `<option value="${val}" ${val===cur?'selected':''}>${obj.label}</option>`).join('')}
@@ -1080,12 +1080,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     <td class="px-3 py-2 align-top">${
                         it.cv_ktp_portofolio_pdf
-                            ? `<a href="${it.cv_ktp_portofolio_pdf}" target="_blank" class="text-emerald-600 underline hover:text-emerald-700">Lihat</a>`
+                            ? `<a href="${it.cv_ktp_portofolio_pdf}" target="_blank" class="text-primary-600 underline hover:text-primary-700">Lihat</a>`
                             : '<span class="text-gray-400">-</span>'}
                     </td>
                     <td class="px-3 py-2 align-top">${
                         it.portofolio_visual
-                            ? `<a href="${it.portofolio_visual}" target="_blank" class="text-emerald-600 underline hover:text-emerald-700">Lihat</a>`
+                            ? `<a href="${it.portofolio_visual}" target="_blank" class="text-primary-600 underline hover:text-primary-700">Lihat</a>`
                             : '<span class="text-gray-400">-</span>'}
                     </td>
 
@@ -1318,7 +1318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     completed: {text:'Selesai',  cls:'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200'},
     exited:    {text:'Keluar',   cls:'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200'},
     pending:   {text:'Pending',  cls:'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'},
-    accepted:  {text:'Diterima', cls:'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'},
+    accepted:  {text:'Diterima', cls:'bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-200'},
     rejected:  {text:'Ditolak',  cls:'bg-gray-200 text-gray-700 dark:bg-gray-800/60 dark:text-gray-200'},
     };
 
@@ -1799,7 +1799,7 @@ document.addEventListener('DOMContentLoaded', () => {
     completed: {text:'Selesai',  cls:'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200'},
     exited:    {text:'Keluar',   cls:'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200'},
     pending:   {text:'Pending',  cls:'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'},
-    accepted:  {text:'Diterima', cls:'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'},
+    accepted:  {text:'Diterima', cls:'bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-200'},
     rejected:  {text:'Ditolak',  cls:'bg-gray-200 text-gray-700 dark:bg-gray-800/60 dark:text-gray-200'},
     };
     function updateBadge(internId, newStatus){

@@ -7,7 +7,7 @@
 
 <div class="p-6">
   <div class="mb-6">
-    <h1 class="text-2xl font-bold text-emerald-800">📘 Daily Reports <span class="text-gray-500">/ {{ $user->name ?? ('User #'.$user->id) }}</span></h1>
+    <h1 class="text-2xl font-bold text-primary-800">📘 Daily Reports <span class="text-gray-500">/ {{ $user->name ?? ('User #'.$user->id) }}</span></h1>
     <p class="text-sm text-gray-500">Kelola catatan laporan harian milik pengguna ini. Gunakan filter untuk mempersempit rentang tanggal atau kata kunci.</p>
   </div>
 
@@ -15,18 +15,18 @@
   <form method="GET" class="grid md:grid-cols-4 gap-3 bg-white border rounded-xl p-4 shadow-sm mb-6">
     <div class="col-span-2">
       <label class="block text-xs font-medium text-gray-600 mb-1">Cari (aktivitas / tantangan)</label>
-      <input type="text" name="q" value="{{ request('q', $filters['q'] ?? '') }}" class="w-full rounded-lg border-gray-300 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Misal: debugging, meeting, API" />
+      <input type="text" name="q" value="{{ request('q', $filters['q'] ?? '') }}" class="w-full rounded-lg border-gray-300 focus:ring-primary-500 focus:border-primary-500" placeholder="Misal: debugging, meeting, API" />
     </div>
     <div>
       <label class="block text-xs font-medium text-gray-600 mb-1">Dari Tanggal</label>
-      <input type="date" name="from" value="{{ request('from', $filters['from'] ?? '') }}" class="w-full rounded-lg border-gray-300 focus:ring-emerald-500 focus:border-emerald-500" />
+      <input type="date" name="from" value="{{ request('from', $filters['from'] ?? '') }}" class="w-full rounded-lg border-gray-300 focus:ring-primary-500 focus:border-primary-500" />
     </div>
     <div>
       <label class="block text-xs font-medium text-gray-600 mb-1">Sampai Tanggal</label>
-      <input type="date" name="to" value="{{ request('to', $filters['to'] ?? '') }}" class="w-full rounded-lg border-gray-300 focus:ring-emerald-500 focus:border-emerald-500" />
+      <input type="date" name="to" value="{{ request('to', $filters['to'] ?? '') }}" class="w-full rounded-lg border-gray-300 focus:ring-primary-500 focus:border-primary-500" />
     </div>
     <div class="md:col-span-4 flex gap-3">
-      <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Terapkan</button>
+      <button type="submit" class="px-4 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700">Terapkan</button>
       <a href="{{ route('admin.user.dailyReports', $user) }}" class="px-4 py-2 rounded-lg border text-gray-700 hover:bg-gray-50">Reset</a>
     </div>
   </form>

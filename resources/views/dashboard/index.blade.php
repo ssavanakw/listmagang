@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="px-4 pt-6 pb-6 bg-emerald-300">
+<div class="px-4 pt-6 pb-6 bg-primary-300">
 
   <!-- Header -->
   <div class="mb-6 flex items-center justify-between">
@@ -30,7 +30,7 @@
 
     <!-- Pendaftar Baru -->
     <a href="{{ route('admin.interns.index') }}"
-      class="block cursor-pointer rounded-lg shadow-lg bg-emerald-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-emerald-900 duration-300"
+      class="block cursor-pointer rounded-lg shadow-lg bg-primary-600 p-6 transition transform hover:scale-105 hover:shadow-xl hover:bg-primary-900 duration-300"
       aria-label="Lihat semua pendaftar">
       <div class="flex justify-between items-center">
         <p class="mb-2 text-sm font-medium text-gray-100">Pendaftar Baru</p>
@@ -98,169 +98,167 @@
   </div>
 
 
-  {{-- === DATA LENGKAP DI BAWAH CHART === --}}
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+  {{-- <!-- === DATA LENGKAP DI BAWAH CHART === -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
-  {{-- === A. USERS + STATUS MAGANG === --}}
-  <div class="bg-white rounded-2xl shadow p-6 ring-1 ring-emerald-100 overflow-hidden">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-lg font-semibold text-emerald-900">Daftar Pengguna & Status Magang</h2>
-    </div>
+    <!-- === A. USERS + STATUS MAGANG === -->
+    <div class="bg-white rounded-2xl shadow p-6 ring-1 ring-primary-100 overflow-hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-primary-900">Daftar Pengguna & Status Magang</h2>
+      </div>
 
-    <div class="overflow-x-auto rounded-xl border border-emerald-100">
-      <table class="min-w-full text-sm divide-y divide-emerald-100">
-        <thead class="bg-emerald-50 text-emerald-700 text-xs font-semibold uppercase">
-          <tr>
-            <th class="w-1/4 px-4 py-3 text-left">Nama</th>
-            <th class="w-1/4 px-4 py-3 text-left">Email</th>
-            <th class="w-1/4 px-4 py-3 text-center">Status</th>
-            <th class="w-1/4 px-4 py-3 text-center">Aksi</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-emerald-50">
-          @forelse($users as $u)
-            @php
-              $st = optional($u->internshipRegistration)->internship_status ?? 'Not Registered';
-              $badge = match($st) {
-                'active'   => 'bg-emerald-100 text-emerald-800 border-emerald-200',
-                'inactive' => 'bg-amber-100 text-amber-800 border-amber-200',
-                'ended'    => 'bg-zinc-100 text-zinc-800 border-zinc-200',
-                default    => 'bg-zinc-50 text-zinc-700 border-zinc-200',
-              };
-            @endphp
-            <tr class="hover:bg-emerald-50/50">
-              <td class="px-4 py-3 text-zinc-900">{{ $u->name }}</td>
-              <td class="px-4 py-3 text-zinc-600">{{ $u->email }}</td>
-              <td class="px-4 py-3 text-center">
-                <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold border {{ $badge }}">
-                  {{ ucfirst($st) }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-center">
-                <div class="flex items-center justify-center gap-2">
-                  <a href="{{ route('admin.user.dailyReports', $u->id) }}"
-                     class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs hover:bg-emerald-200 transition">
-                     Laporan
-                  </a>
-                  <a href="{{ route('admin.user.leaveRequests', $u->id) }}"
-                     class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs hover:bg-blue-200 transition">
-                     Izin
-                  </a>
-                  <a href="{{ route('admin.user.pendingTasks', $u->id) }}"
-                     class="px-2 py-1 bg-amber-100 text-amber-700 rounded-lg text-xs hover:bg-amber-200 transition">
-                     Tugas
-                  </a>
-                </div>
-              </td>
-            </tr>
-          @empty
-            <tr><td colspan="4" class="px-4 py-6 text-center text-zinc-500">Belum ada pengguna.</td></tr>
-          @endforelse
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  {{-- === B. SEMUA DATA (GLOBAL VIEW) === --}}
-  <div class="bg-white rounded-2xl shadow p-6 ring-1 ring-emerald-100 space-y-8">
-
-    {{-- Daily Reports --}}
-    <div>
-      <h3 class="font-semibold text-emerald-800 mb-2 flex items-center gap-2">
-        <i class="fa-solid fa-clipboard-list"></i> Semua Laporan Harian
-      </h3>
-      <div class="overflow-hidden rounded-xl border border-emerald-100">
-        <table class="min-w-full text-sm divide-y divide-emerald-100">
-          <thead class="bg-emerald-50 text-emerald-700 text-xs font-semibold uppercase">
+      <div class="overflow-x-auto rounded-xl border border-primary-100">
+        <table class="min-w-full text-sm divide-y divide-primary-100">
+          <thead class="bg-primary-50 text-primary-700 text-xs font-semibold uppercase">
             <tr>
-              <th class="px-4 py-3 text-left w-40">Nama User</th>
-              <th class="px-4 py-3 text-left w-28">Tanggal</th>
-              <th class="px-4 py-3 text-left">Aktivitas</th>
-              <th class="px-4 py-3 text-left w-40">Tantangan</th>
+              <th class="w-1/4 px-4 py-3 text-left">Nama</th>
+              <th class="w-1/4 px-4 py-3 text-left">Email</th>
+              <th class="w-1/4 px-4 py-3 text-center">Status</th>
+              <th class="w-1/4 px-4 py-3 text-center">Aksi</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-emerald-50">
-            @forelse($allReports ?? [] as $r)
-              <tr class="hover:bg-emerald-50/50">
-                <td class="px-4 py-3 font-medium text-zinc-800">{{ $r->user->name ?? '-' }}</td>
-                <td class="px-4 py-3 text-zinc-700">{{ \Carbon\Carbon::parse($r->date)->isoFormat('D MMM Y') }}</td>
-                <td class="px-4 py-3 text-zinc-800 whitespace-pre-line">{{ $r->activities }}</td>
-                <td class="px-4 py-3 text-zinc-700 whitespace-pre-line">{{ $r->challenges }}</td>
+          <tbody class="divide-y divide-primary-50">
+            @forelse($users as $u)
+              @php
+                $st = optional($u->internshipRegistration)->internship_status ?? 'Not Registered';
+                $badge = match($st) {
+                  'active'   => 'bg-primary-100 text-primary-800 border-primary-200',
+                  'inactive' => 'bg-amber-100 text-amber-800 border-amber-200',
+                  'ended'    => 'bg-zinc-100 text-zinc-800 border-zinc-200',
+                  default    => 'bg-zinc-50 text-zinc-700 border-zinc-200',
+                };
+              @endphp
+              <tr class="hover:bg-primary-50/50">
+                <td class="px-4 py-3 text-zinc-900">{{ $u->name }}</td>
+                <td class="px-4 py-3 text-zinc-600">{{ $u->email }}</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold border {{ $badge }}">
+                    {{ ucfirst($st) }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <a href="{{ route('admin.user.dailyReports', $u->id) }}"
+                      class="px-2 py-1 bg-primary-100 text-primary-700 rounded-lg text-xs hover:bg-primary-200 transition">
+                      Laporan
+                    </a>
+                    <a href="{{ route('admin.user.leaveRequests', $u->id) }}"
+                      class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs hover:bg-blue-200 transition">
+                      Izin
+                    </a>
+                    <a href="{{ route('admin.user.pendingTasks', $u->id) }}"
+                      class="px-2 py-1 bg-amber-100 text-amber-700 rounded-lg text-xs hover:bg-amber-200 transition">
+                      Tugas
+                    </a>
+                  </div>
+                </td>
               </tr>
             @empty
-              <tr><td colspan="4" class="px-4 py-4 text-center text-zinc-500">Belum ada laporan harian.</td></tr>
+              <tr><td colspan="4" class="px-4 py-6 text-center text-zinc-500">Belum ada pengguna.</td></tr>
             @endforelse
           </tbody>
         </table>
       </div>
     </div>
 
-    {{-- Leave Requests --}}
-    <div>
-      <h3 class="font-semibold text-emerald-800 mb-2 flex items-center gap-2">
-        <i class="fa-solid fa-calendar-days"></i> Semua Permintaan Izin
-      </h3>
-      <div class="overflow-hidden rounded-xl border border-emerald-100">
-        <table class="min-w-full text-sm divide-y divide-emerald-100">
-          <thead class="bg-emerald-50 text-emerald-700 text-xs font-semibold uppercase">
-            <tr>
-              <th class="px-4 py-3 text-left w-40">Nama User</th>
-              <th class="px-4 py-3 text-left w-28">Tanggal</th>
-              <th class="px-4 py-3 text-left w-36">Jenis</th>
-              <th class="px-4 py-3 text-left">Alasan</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-emerald-50">
-            @forelse($allLeaves ?? [] as $l)
-              <tr class="hover:bg-emerald-50/50">
-                <td class="px-4 py-3 font-medium text-zinc-800">{{ $l->user->name ?? '-' }}</td>
-                <td class="px-4 py-3 text-zinc-700">{{ \Carbon\Carbon::parse($l->leave_date)->isoFormat('D MMM Y') }}</td>
-                <td class="px-4 py-3 text-zinc-800">{{ $l->leave_type }}</td>
-                <td class="px-4 py-3 text-zinc-700 whitespace-pre-line">{{ $l->reason }}</td>
+    <!-- === B. SEMUA DATA (GLOBAL VIEW) === -->
+    <div class="bg-white rounded-2xl shadow p-6 ring-1 ring-primary-100 space-y-8">
+
+      <!-- Daily Reports -->
+      <div>
+        <h3 class="font-semibold text-primary-800 mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-clipboard-list"></i> Semua Laporan Harian
+        </h3>
+        <div class="overflow-hidden rounded-xl border border-primary-100">
+          <table class="min-w-full text-sm divide-y divide-primary-100">
+            <thead class="bg-primary-50 text-primary-700 text-xs font-semibold uppercase">
+              <tr>
+                <th class="px-4 py-3 text-left w-40">Nama User</th>
+                <th class="px-4 py-3 text-left w-28">Tanggal</th>
+                <th class="px-4 py-3 text-left">Aktivitas</th>
+                <th class="px-4 py-3 text-left w-40">Tantangan</th>
               </tr>
-            @empty
-              <tr><td colspan="4" class="px-4 py-4 text-center text-zinc-500">Belum ada data izin.</td></tr>
-            @endforelse
-          </tbody>
-        </table>
+            </thead>
+            <tbody class="divide-y divide-primary-50">
+              @forelse($allReports ?? [] as $r)
+                <tr class="hover:bg-primary-50/50">
+                  <td class="px-4 py-3 font-medium text-zinc-800">{{ $r->user->name ?? '-' }}</td>
+                  <td class="px-4 py-3 text-zinc-700">{{ \Carbon\Carbon::parse($r->date)->isoFormat('D MMM Y') }}</td>
+                  <td class="px-4 py-3 text-zinc-800 whitespace-pre-line">{{ $r->activities }}</td>
+                  <td class="px-4 py-3 text-zinc-700 whitespace-pre-line">{{ $r->challenges }}</td>
+                </tr>
+              @empty
+                <tr><td colspan="4" class="px-4 py-4 text-center text-zinc-500">Belum ada laporan harian.</td></tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    {{-- Pending Tasks --}}
-    <div>
-      <h3 class="font-semibold text-emerald-800 mb-2 flex items-center gap-2">
-        <i class="fa-solid fa-list-check"></i> Semua Tugas Pending
-      </h3>
-      <div class="overflow-hidden rounded-xl border border-emerald-100">
-        <table class="min-w-full text-sm divide-y divide-emerald-100">
-          <thead class="bg-emerald-50 text-emerald-700 text-xs font-semibold uppercase">
-            <tr>
-              <th class="px-4 py-3 text-left w-40">Nama User</th>
-              <th class="px-4 py-3 text-left w-60">Judul</th>
-              <th class="px-4 py-3 text-left">Deskripsi</th>
-              <th class="px-4 py-3 text-left w-36">Dibuat</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-emerald-50">
-            @forelse($allTasks ?? [] as $t)
-              <tr class="hover:bg-emerald-50/50">
-                <td class="px-4 py-3 font-medium text-zinc-800">{{ $t->user->name ?? '-' }}</td>
-                <td class="px-4 py-3 text-zinc-900">{{ $t->title }}</td>
-                <td class="px-4 py-3 text-zinc-700 whitespace-pre-line">{{ $t->description }}</td>
-                <td class="px-4 py-3 text-zinc-600">{{ \Carbon\Carbon::parse($t->created_at)->isoFormat('D MMM Y, HH:mm') }}</td>
+      <!-- Leave Requests -->
+      <div>
+        <h3 class="font-semibold text-primary-800 mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-calendar-days"></i> Semua Permintaan Izin
+        </h3>
+        <div class="overflow-hidden rounded-xl border border-primary-100">
+          <table class="min-w-full text-sm divide-y divide-primary-100">
+            <thead class="bg-primary-50 text-primary-700 text-xs font-semibold uppercase">
+              <tr>
+                <th class="px-4 py-3 text-left w-40">Nama User</th>
+                <th class="px-4 py-3 text-left w-28">Tanggal</th>
+                <th class="px-4 py-3 text-left w-36">Jenis</th>
+                <th class="px-4 py-3 text-left">Alasan</th>
               </tr>
-            @empty
-              <tr><td colspan="4" class="px-4 py-4 text-center text-zinc-500">Tidak ada tugas pending.</td></tr>
-            @endforelse
-          </tbody>
-        </table>
+            </thead>
+            <tbody class="divide-y divide-primary-50">
+              @forelse($allLeaves ?? [] as $l)
+                <tr class="hover:bg-primary-50/50">
+                  <td class="px-4 py-3 font-medium text-zinc-800">{{ $l->user->name ?? '-' }}</td>
+                  <td class="px-4 py-3 text-zinc-700">{{ \Carbon\Carbon::parse($l->leave_date)->isoFormat('D MMM Y') }}</td>
+                  <td class="px-4 py-3 text-zinc-800">{{ $l->leave_type }}</td>
+                  <td class="px-4 py-3 text-zinc-700 whitespace-pre-line">{{ $l->reason }}</td>
+                </tr>
+              @empty
+                <tr><td colspan="4" class="px-4 py-4 text-center text-zinc-500">Belum ada data izin.</td></tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      <!-- Pending Tasks -->
+      <div>
+        <h3 class="font-semibold text-primary-800 mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-list-check"></i> Semua Tugas Pending
+        </h3>
+        <div class="overflow-hidden rounded-xl border border-primary-100">
+          <table class="min-w-full text-sm divide-y divide-primary-100">
+            <thead class="bg-primary-50 text-primary-700 text-xs font-semibold uppercase">
+              <tr>
+                <th class="px-4 py-3 text-left w-40">Nama User</th>
+                <th class="px-4 py-3 text-left w-60">Judul</th>
+                <th class="px-4 py-3 text-left">Deskripsi</th>
+                <th class="px-4 py-3 text-left w-36">Dibuat</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-primary-50">
+              @forelse($allTasks ?? [] as $t)
+                <tr class="hover:bg-primary-50/50">
+                  <td class="px-4 py-3 font-medium text-zinc-800">{{ $t->user->name ?? '-' }}</td>
+                  <td class="px-4 py-3 text-zinc-900">{{ $t->title }}</td>
+                  <td class="px-4 py-3 text-zinc-700 whitespace-pre-line">{{ $t->description }}</td>
+                  <td class="px-4 py-3 text-zinc-600">{{ \Carbon\Carbon::parse($t->created_at)->isoFormat('D MMM Y, HH:mm') }}</td>
+                </tr>
+              @empty
+                <tr><td colspan="4" class="px-4 py-4 text-center text-zinc-500">Tidak ada tugas pending.</td></tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
-
-  </div>
-</div>
-
-
+  </div> --}}
 
 </div>
 
@@ -290,7 +288,7 @@
     return {
       axis: dark ? '#d1d5db' : '#374151',
       grid: dark ? 'rgba(209,213,219,.15)' : 'rgba(107,114,128,.15)',
-      line: 'rgb(16,185,129)',           // emerald
+      line: 'rgb(16,185,129)',           // primary
       fill: 'rgba(16,185,129,.20)',
     };
   }

@@ -13,9 +13,9 @@
     }
   </script>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-emerald-500
-             bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-700
-             dark:from-emerald-900 dark:via-emerald-950 dark:to-black">
+<body class="min-h-screen flex items-center justify-center bg-primary-500
+             bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700
+             dark:from-primary-900 dark:via-primary-950 dark:to-black">
 
   <div class="w-full max-w-md px-4">
     <div class="rounded-2xl shadow-xl ring-1 ring-black/5 dark:ring-white/10
@@ -51,43 +51,43 @@
                  placeholder="you@example.com"
                  class="mt-1 w-full px-4 py-2 rounded-lg border
                         bg-white text-gray-900 placeholder-gray-400
-                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
-                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-emerald-400 dark:focus:border-emerald-400"/>
+                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-primary-400 dark:focus:border-primary-400"/>
         </div>
 
         <!-- Password -->
         <div>
           <div class="flex items-center justify-between">
             <label for="password" class="block text-sm font-medium text-gray-800 dark:text-gray-200">Password</label>
-            <button type="button" id="togglePassword" class="text-xs text-emerald-700 hover:underline dark:text-emerald-300">Show</button>
+            <button type="button" id="togglePassword" class="text-xs text-primary-700 hover:underline dark:text-primary-300">Show</button>
           </div>
           <input type="password" id="password" name="password" required autocomplete="current-password"
                  placeholder="••••••••"
                  class="mt-1 w-full px-4 py-2 rounded-lg border
                         bg-white text-gray-900 placeholder-gray-400
-                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500
-                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-emerald-400 dark:focus:border-emerald-400"/>
+                        border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                        dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-primary-400 dark:focus:border-primary-400"/>
         </div>
 
         <!-- Remember Me -->
         <div class="flex items-center">
           <input type="checkbox" id="remember" name="remember"
-                 class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500
-                        dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-emerald-400"/>
+                 class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500
+                        dark:bg-gray-800 dark:border-gray-700 dark:focus:ring-primary-400"/>
           <label for="remember" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Remember me</label>
         </div>
 
         <!-- Submit -->
         <button type="submit"
                 class="w-full inline-flex justify-center items-center gap-2
-                       bg-emerald-600 hover:bg-emerald-700 text-white font-medium
-                       py-2.5 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500
+                       bg-primary-600 hover:bg-primary-700 text-white font-medium
+                       py-2.5 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500
                        dark:focus:ring-offset-gray-900">
           Login
         </button>
 
         <div class="mt-4 text-center">
-          <a href="{{ route('user.register') }}" class="text-sm text-emerald-600 hover:underline dark:text-emerald-300">
+          <a href="{{ route('user.register') }}" class="text-sm text-primary-600 hover:underline dark:text-primary-300">
             Don't have an account? Register here
           </a>
         </div>
@@ -96,7 +96,7 @@
 
       </form>
 
-      <p class="mt-6 text-center text-xs text-emerald-900/80 dark:text-emerald-200/70">
+      <p class="mt-6 text-center text-xs text-primary-900/80 dark:text-primary-200/70">
         Secured area — authorized users only.
       </p>
     </div>
