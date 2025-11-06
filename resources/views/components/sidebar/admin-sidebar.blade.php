@@ -41,6 +41,10 @@
             title="Certificates"
         />
         <x-sidebar-menu-dashboard 
+            routeName="admin.generateForm"  
+            title="Surat Penilaian"
+        />
+        <x-sidebar-menu-dashboard 
             routeName="admin.skl.editor"  
             title="SKL Template"
         />

@@ -20,10 +20,10 @@
         margin-bottom: 5px;
     }
   .header img {
-        width: 75px;
-        position: absolute;
+        width: 80px;
+        position: relative;
         left: 0; /* logo mentok kiri */
-        top: 50%;
+        top: 50px;
         transform: translateY(-50%);
     }
   .company { text-align: center; width: 100%; }
@@ -55,9 +55,24 @@
 
   .range { margin-top: 8px; font-size: 12px; }
 
-  .signature { margin-top: 20px; width: 100%; display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
-  .signature img { width: 120px; }
+  .signature { margin-top: 20px; width: 100%; display: flex; flex-direction: column; align-items: flex-end; text-align: right; position: relative;}
+  .signature-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* gambar & nama sejajar vertical center */
+    }
+  .signature img.ttd { width: 120px; z-index: 3; margin-bottom: -20px; margin-top: 10px; position: relative;}
   .signature .name { font-weight: bold; text-decoration: underline; }
+
+  .signature img.logo-bg {
+        position: absolute;
+        right: 0px;
+        bottom: 20px;
+        width: 125px;
+        opacity: 0.2;
+        z-index: 1; /* logo tetap di belakang ttd, tapi tidak invisible */
+        pointer-events: none;
+    }
 
   @media print { .admin-tools, .btn-print { display: none; } }
 </style>
@@ -182,8 +197,14 @@
   <div class="signature">
     Yogyakarta, 14 Mei 2025<br>
     Direktur SEVEN INC<br>
-    <img src="{{ asset('storage/images/signature/ttd_arisetiahusbana.png') }}"><br>
-    <span class="name">Rekario Danny Sanjaya, S. Kom</span>
+    
+    <div class="signature-box">
+        <img class="ttd" src="{{ asset('storage/images/signature/ttd_rekariodanny.png') }}"><br>
+        <span class="name">Rekario Danny Sanjaya, S. Kom</span>
+    </div>
+
+    <img class="logo-bg" src="{{ asset('storage/images/logos/logo_seveninc.png') }}">
+
   </div>
 
 </div>

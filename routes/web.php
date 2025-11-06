@@ -15,12 +15,14 @@ use App\Http\Controllers\Admin\InternApiController;
 use App\Http\Controllers\Admin\CertificateGeneratorController;
 use App\Http\Controllers\SKLController;
 use App\Http\Controllers\Admin\DocumentController;
+use App\Http\Controllers\Admin\SuratPenilaianController;
 // App
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\LoaController;
 use App\Http\Controllers\MembercardController;
+
 
 /*
 |---------------------------------------------------------------------- 
@@ -381,6 +383,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // destroy by code
     Route::delete('membercards/{code}', [MembercardController::class, 'destroy'])
         ->name('membercards.destroy');
+});
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('generate-pdf', [SuratPenilaianController::class, 'showForm'])->name('generateForm');
+    Route::post('generate-pdf', [SuratPenilaianController::class, 'generatePdf'])->name('generatePdf');
 });
 
 // tetap ada route log-download (tidak di dalam admin group, jika publik)
