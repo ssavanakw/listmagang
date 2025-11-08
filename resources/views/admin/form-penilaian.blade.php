@@ -1,6 +1,9 @@
+@extends('layouts.dashboard')
+@section('content')
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
 <meta charset="UTF-8">
 <title>Form Penilaian Magang Seven Inc</title>
 <style>
@@ -259,3 +262,4 @@
 
 </body>
 </html>
+@endsection
