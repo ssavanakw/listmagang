@@ -92,27 +92,27 @@
   <div class="header">
     <img src="{{ asset('storage/images/logos/logo_seveninc.png') }}">
     <div class="company">
-      <h1>SEVEN INC.</h1>
-      <p>Jl. Raya Janti, Gang Arjuna No. 59, Karangjambe,<br>
-      Banguntapan, Bantul, Yogyakarta</p>
+      <h1>{{ $company ?? 'SEVEN INC.'}}</h1>
+      <p>{{ $companyAddress ?? 'Jl. Raya Janti, Gang Arjuna No. 59, Karangjambe,<br>
+      Banguntapan, Bantul, Yogyakarta'}}</p>
     </div>
   </div>
 
   <hr>
 
-  <div class="title">FORM PENILAIAN MAGANG SEVEN INC</div>
+  <div class="title">{{ $title ?? 'FORM PENILAIAN MAGANG SEVEN INC.'}}</div>
 
   <div class="info">
-      Dengan ini pihak SEVEN INC memberikan penilaian selama pelaksanaan magang kepada:<br>
+      {{ $openingSentences ?? 'Dengan ini pihak SEVEN INC memberikan penilaian selama pelaksanaan magang kepada:'}}<br>
 
       <span class="label">Nama</span>:
       <input id="namaInput" class="table-input" style="width:300px" 
-        value="{{ $intern->name ?? 'Aulia Sri Handayani Aritonang' }}">
+        value="{{ $intern->fullname ?? 'Aulia Sri Handayani Aritonang' }}">
       <br>
 
       <span class="label">NIM</span>:
       <input id="nimInput" class="table-input" style="width:200px" 
-        value="{{ $intern->nim ?? '22020144077' }}">
+        value="{{ $intern->nim_or_nis ?? '22020144077' }}">
       <br>
 
       <span class="label">Program Studi</span>:
@@ -122,7 +122,7 @@
 
       <span class="label">Kompetensi Keahlian</span>:
       <input id="keahlianInput" class="table-input" style="width:250px"
-        value="{{ $intern->skill ?? 'Content Writer' }}">
+        value="{{ $intern->div ?? 'Content Writer' }}">
   </div>
 
 
@@ -183,7 +183,7 @@
     <tfoot>
       <tr>
         <td colspan="2" class="center"><b>Rata-rata</b></td>
-        <td class="center"><b id="avg">95</b></td>
+        <td class="center"><b id="avg">{{ $rumusRatarata ?? '95'}}</b></td>
         <td></td>
       </tr>
     </tfoot>
@@ -198,15 +198,15 @@
   </div>
 
   <div class="signature">
-    Yogyakarta, 14 Mei 2025<br>
-    Direktur SEVEN INC<br>
+    {{ $locDate ?? 'Yogyakarta, 14 Mei 2025'}}<br>
+    {{ $ttdposition ?? 'Direktur SEVEN INC'}}<br>
     
     <div class="signature-box">
-        <img class="ttd" src="{{ asset('storage/images/signature/ttd_rekariodanny.png') }}"><br>
-        <span class="name">Rekario Danny Sanjaya, S. Kom</span>
+        <img class="ttd" src="{{$logos ?? asset('storage/images/signature/ttd_rekariodanny.png') }}"><br>
+        <span class="name">{{ $ttdname ?? 'Rekario Danny Sanjaya, S. Kom'}}</span>
     </div>
 
-    <img class="logo-bg" src="{{ asset('storage/images/logos/logo_seveninc.png') }}">
+    <img class="logo-bg" src="{{ $logos ?? asset('storage/images/logos/logo_seveninc.png') }}">
 
   </div>
 

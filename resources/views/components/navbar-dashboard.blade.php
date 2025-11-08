@@ -57,34 +57,84 @@
 </nav>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const button = document.getElementById("profilePictureButton");
-        const dropdown = document.getElementById("profileDropdown");
+document.addEventListener("DOMContentLoaded", function () {
 
-        button.addEventListener("click", function (e) {
-            e.stopPropagation();
-            const isVisible = dropdown.style.maxHeight && dropdown.style.maxHeight !== "0px";
+    const toggleBtn = document.getElementById("toggleSidebarMobile");
+    const sidebar = document.getElementById("sidebar");
+    const backdrop = document.getElementById("sidebarBackdrop");
 
-            if (!isVisible) {
-                dropdown.style.maxHeight = "200px";
-                dropdown.style.opacity = "1";
-                dropdown.style.pointerEvents = "auto";
-            } else {
-                dropdown.style.maxHeight = "0";
-                dropdown.style.opacity = "0";
-                dropdown.style.pointerEvents = "none";
-            }
-        });
+    const iconHamburger = document.getElementById("toggleSidebarMobileHamburger");
+    const iconClose = document.getElementById("toggleSidebarMobileClose");
 
-        // Close on outside click
-        document.addEventListener("click", function (e) {
-            if (!dropdown.contains(e.target) && !button.contains(e.target)) {
-                dropdown.style.maxHeight = "0";
-                dropdown.style.opacity = "0";
-                dropdown.style.pointerEvents = "none";
-            }
-        });
+    const button = document.getElementById("profilePictureButton");
+    const dropdown = document.getElementById("profileDropdown");
+
+    /* ==============================
+       SIDEBAR MOBILE (ANIMASI SLIDE)
+    ============================== */
+
+    function openSidebar() {
+        sidebar.classList.remove("-translate-x-full");
+        backdrop.classList.remove("hidden");
+        iconHamburger.classList.add("hidden");
+        iconClose.classList.remove("hidden");
+    }
+
+    function closeSidebar() {
+        sidebar.classList.add("-translate-x-full");
+        backdrop.classList.add("hidden");
+        iconHamburger.classList.remove("hidden");
+        iconClose.classList.add("hidden");
+    }
+
+    toggleBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+
+        const closed = sidebar.classList.contains("-translate-x-full");
+        closed ? openSidebar() : closeSidebar();
     });
-</script>
 
+    // Klik backdrop → tutup sidebar
+    backdrop.addEventListener("click", closeSidebar);
+
+    // Klik di luar sidebar → tutup sidebar
+    document.addEventListener("click", function (e) {
+        const closed = sidebar.classList.contains("-translate-x-full");
+
+        if (!closed && !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+            closeSidebar();
+        }
+    });
+
+    /* ==============================
+       PROFILE DROPDOWN
+    ============================== */
+
+    button.addEventListener("click", function (e) {
+        e.stopPropagation();
+
+        const opened = dropdown.style.maxHeight && dropdown.style.maxHeight !== "0px";
+
+        if (!opened) {
+            dropdown.style.maxHeight = "200px";
+            dropdown.style.opacity = "1";
+            dropdown.style.pointerEvents = "auto";
+        } else {
+            dropdown.style.maxHeight = "0";
+            dropdown.style.opacity = "0";
+            dropdown.style.pointerEvents = "none";
+        }
+    });
+
+    // Klik luar → tutup dropdown
+    document.addEventListener("click", function (e) {
+        if (!dropdown.contains(e.target) && !button.contains(e.target)) {
+            dropdown.style.maxHeight = "0";
+            dropdown.style.opacity = "0";
+            dropdown.style.pointerEvents = "none";
+        }
+    });
+
+});
+</script>
 

@@ -22,6 +22,7 @@ use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\LoaController;
 use App\Http\Controllers\MembercardController;
+use App\Http\Controllers\InternAssessmentController;
 
 
 /*
@@ -389,6 +390,79 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('generate-pdf', [SuratPenilaianController::class, 'showForm'])->name('generateForm');
     Route::post('generate-pdf', [SuratPenilaianController::class, 'generatePdf'])->name('generatePdf');
 });
+
+
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin/interns')
+    ->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | CRUD Penilaian Magang
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/assessment/list', [InternAssessmentController::class, 'index'])
+        ->name('interns.assessment.index');
+
+    Route::get('/assessment/create', [InternAssessmentController::class, 'create'])
+        ->name('interns.assessment.create');
+
+    Route::post('/assessment/store', [InternAssessmentController::class, 'store'])
+        ->name('interns.assessment.store');
+
+    Route::get('/assessment/{id}/edit', [InternAssessmentController::class, 'edit'])
+        ->name('interns.assessment.edit');
+
+    Route::put('/assessment/{id}', [InternAssessmentController::class, 'update'])
+        ->name('interns.assessment.update');
+
+    Route::delete('/assessment/{id}', [InternAssessmentController::class, 'destroy'])
+        ->name('interns.assessment.destroy');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | AJAX (Aspek Penilaian Otomatis)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/ajax/aspek', [InternAssessmentController::class, 'getAspekByDivision'])
+        ->name('ajax.aspek');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PDF Generate & Preview
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/assessment/{id}/pdf', [InternAssessmentController::class, 'downloadPdf'])
+        ->name('interns.assessment.pdf');
+
+    Route::get('/assessment/{id}/preview-pdf', [InternAssessmentController::class, 'previewPDF'])
+        ->name('interns.assessment.preview');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pengaturan Identitas Perusahaan (Logo, TTD, dsb)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/assessment/settings', [InternAssessmentController::class, 'settings'])
+        ->name('interns.assessment.settings');
+
+    // Menyimpan pengaturan (upload atau dropdown pilihan)
+    Route::post('/assessment/settings', [InternAssessmentController::class, 'updateSettings'])
+        ->name('interns.assessment.settings.update');
+
+    // Preview statis (default PDF dummy)
+    Route::get('/assessment/settings/preview', [InternAssessmentController::class, 'previewSettingsPdf'])
+        ->name('interns.assessment.settings.preview');
+
+    // Preview dinamis langsung (live preview AJAX)
+    Route::post('/assessment/settings/preview/live', [InternAssessmentController::class, 'previewLive'])
+        ->name('interns.assessment.settings.preview.live');
+});
+
+
 
 // tetap ada route log-download (tidak di dalam admin group, jika publik)
 Route::post('/log-download', [MembercardController::class, 'logDownload'])->name('log.download');

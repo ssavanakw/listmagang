@@ -41,8 +41,12 @@
             title="Certificates"
         />
         <x-sidebar-menu-dashboard 
-            routeName="admin.generateForm"  
+            routeName="interns.assessment.index"  
             title="Surat Penilaian"
+        />
+        <x-sidebar-menu-dashboard 
+            routeName="interns.assessment.settings"  
+            title="Surat Penilaian Template"
         />
         <x-sidebar-menu-dashboard 
             routeName="admin.skl.editor"  
