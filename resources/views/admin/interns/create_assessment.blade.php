@@ -45,6 +45,9 @@
                 class="block w-full p-2.5 text-sm border rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 onkeyup="filterInternList()">
 
+            {{-- Hidden input untuk kirim ke server --}}
+            <input type="hidden" name="fullname" id="fullname_hidden">
+
             <div id="internDropdown"
                 class="absolute z-20 hidden mt-1 max-h-56 w-full overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg">
                 @foreach($interns as $intern)
@@ -160,6 +163,9 @@
   const searchInput = document.getElementById('searchIntern');
   const dropdown = document.getElementById('internDropdown');
   const options = dropdown.querySelectorAll('.intern-option');
+  const fullnameHidden = document.getElementById('fullname_hidden');
+  const nimField = document.getElementById('nimField');
+  const prodiField = document.getElementById('prodiField');
 
   searchInput.addEventListener('focus', () => dropdown.classList.remove('hidden'));
   document.addEventListener('click', (e) => {
@@ -179,8 +185,9 @@
   options.forEach(opt => {
       opt.addEventListener('click', () => {
           searchInput.value = opt.dataset.name;
-          document.getElementById('nimField').value = opt.dataset.nim || '';
-          document.getElementById('prodiField').value = opt.dataset.prodi || '';
+          fullnameHidden.value = opt.dataset.name; // ⬅️ kirim fullname ke hidden input
+          nimField.value = opt.dataset.nim || '';
+          prodiField.value = opt.dataset.prodi || '';
           dropdown.classList.add('hidden');
       });
   });
@@ -234,7 +241,6 @@
       } else {
           manualDivision.classList.add('hidden');
           manualDivision.value = '';
-          // optional: load aspek default sesuai pilihan
           loadAspekByDivision(this.value);
       }
   });

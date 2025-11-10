@@ -418,6 +418,9 @@ Route::middleware(['auth', 'role:admin'])
 
     Route::delete('/assessment/{id}', [InternAssessmentController::class, 'destroy'])
         ->name('interns.assessment.destroy');
+    Route::post('/admin/interns/assessment/settings/save', [InternAssessmentController::class, 'saveSettings'])
+    ->name('interns.assessment.settings.save');
+
 
 
     /*

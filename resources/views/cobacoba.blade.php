@@ -1,240 +1,207 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Form Penilaian Magang Seven Inc</title>
-<style>
-  @page { size: A4; margin: 12mm; }
-  body {
-    font-family: "Times New Roman", serif;
-    margin: 0; padding: 0;
-    font-size: 13.5px;
-  }
-  .wrap { max-width: 750px; margin: 0 auto; }
+  <meta charset="UTF-8">
+  <title>Form Penilaian Magang - {{ isset($assessment->fullname) ? $assessment->fullname : 'Nama Tidak Tersedia' }}</title>
+  <style>
+    @page { size: A4; margin: 60px; }
 
-  .header {
+    body {
+        font-family: "Times New Roman", serif;
+        font-size: 13px;
+        color: #000;
+        line-height: 1.5;
+        position: relative;
+    }
+
+    .wrap { width: 100%; max-width: 700px; margin: 0 auto; position: relative; }
+
+    /* ===== HEADER ===== */
+    .header-table {
+        width: 100%;
+        border-collapse: collapse;
+        height: 90px;
+    }
+
+    .header-table td { vertical-align: middle; border: none; }
+
+    .header-logo img {
+        height: {{ isset($assessment->logo_height) ? $assessment->logo_height : 70 }}px;
+        width: auto;
+    }
+
+    .company { text-align: center; }
+    .company h1 { font-size: 20px; margin: 0; font-weight: bold; line-height: 1.3; }
+    .company p { margin: 0; font-size: 12px; line-height: 1.3; }
+
+    hr { border: none; border-top: 2px solid #000; margin: 8px 0 12px; }
+
+    /* ===== BODY ===== */
+    .title {
+        text-align: center;
+        font-weight: bold;
+        text-decoration: underline;
+        margin-bottom: 10px;
+    }
+
+    .info { margin-bottom: 12px; }
+    .label { width: 160px; display: inline-block; }
+    .range { margin-top: 10px; font-size: 12px; }
+
+    /* ===== SIGNATURE ===== */
+    .signature {
+        width: 100%;
+        margin-top: 70px;
+        position: relative;
+        clear: both;
+    }
+
+    .signature-inner {
+        width: 260px;
+        float: right;
+        text-align: center;
+        position: relative;
+    }
+
+    .signature-text {
+        text-align: center;
+        line-height: 1.4;
+        margin-bottom: 60px;
+    }
+
+    .signature-image-block {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center; /* seluruh header di-center */
-        position: relative; /* agar logo bisa fixed di kiri */
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .signature img.ttd {
+        height: {{ isset($assessment->sig_height) ? $assessment->sig_height : 90 }}px;
+        width: auto;
         margin-bottom: 5px;
+        z-index: 2;
     }
-  .header img {
-        width: 75px;
+
+    .signature .name {
+        font-weight: bold;
+        text-decoration: underline;
+        text-align: center;
+        z-index: 3;
+    }
+
+    /* === WATERMARK === */
+    .signature img.logo-bg {
         position: absolute;
-        left: 0; /* logo mentok kiri */
-        top: 50%;
-        transform: translateY(-50%);
+        right: 35px;
+        bottom: 15px;
+        height: calc({{ isset($assessment->logo_height) ? $assessment->logo_height : 70 }}px * 1.8);
+        width: auto;
+        opacity: 0.12;
+        z-index: 1;
+        filter: blur(0.4px);
     }
-  .company { text-align: center; width: 100%; }
-  .company h1 { margin: 0; font-size: 22px; }
-  .company p { margin: 0; font-size: 12px; }
-
-  hr { border: none; border-top: 2px solid #444; margin: 8px 0 12px; }
-
-  .title { text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 10px; }
-  .info { margin-bottom: 10px; line-height: 1.5; }
-  .label { width: 150px; display: inline-block; }
-
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { border: 1px solid #333; padding: 6px; }
-  th { background: #f3f3f3; text-align: center; }
-  .center { text-align: center; }
-
-  input.table-input {
-    width: 100%; border: none; outline: none;
-    font-size: 13px; font-family: inherit;
-  }
-
-  .admin-tools { margin: 14px 0; display: flex; gap: 8px; }
-  button {
-    background: #1f2937; color: white; border: none;
-    padding: 7px 12px; border-radius: 5px; cursor: pointer;
-    font-size: 12px;
-  }
-
-  .range { margin-top: 8px; font-size: 12px; }
-
-  .signature { margin-top: 20px; width: 100%; display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
-  .signature img { width: 120px; }
-  .signature .name { font-weight: bold; text-decoration: underline; }
-
-  @media print { .admin-tools, .btn-print { display: none; } }
-</style>
+  </style>
 </head>
 <body>
-
 <div class="wrap">
 
-  <div class="admin-tools">
-    <button onclick="addRow()">Tambah Aspek</button>
-    <button onclick="window.print()" class="btn-print">Print / PDF</button>
-  </div>
-
-  <div class="header">
-    <img src="{{ asset('storage/images/logos/logo_seveninc.png') }}">
-    <div class="company">
-      <h1>SEVEN INC.</h1>
-      <p>Jl. Raya Janti, Gang Arjuna No. 59, Karangjambe,<br>
-      Banguntapan, Bantul, Yogyakarta</p>
-    </div>
-  </div>
+  {{-- HEADER --}}
+  <table class="header-table">
+      <tr>
+          <td class="header-logo">
+              @php
+                  $logoFile = public_path('storage/' . (isset($assessment->company_logo_path) ? $assessment->company_logo_path : 'images/logos/seveninc_logo.png'));
+                  $logoSrc = file_exists($logoFile)
+                      ? $logoFile
+                      : asset('storage/' . (isset($assessment->company_logo_path) ? $assessment->company_logo_path : 'images/logos/seveninc_logo.png'));
+              @endphp
+              <img src="{{ $logoSrc }}" alt="Logo">
+          </td>
+          <td>
+              <div class="company">
+                  <h1>{{ isset($assessment->company_name) ? $assessment->company_name : 'SEVEN INC.' }}</h1>
+                  <p>{!! nl2br(e(isset($assessment->company_address) ? $assessment->company_address : 'Jl. Raya Janti, Gang Arjuna No. 59, Karangjambe, Banguntapan, Bantul, Yogyakarta')) !!}</p>
+              </div>
+          </td>
+      </tr>
+  </table>
 
   <hr>
 
-  <div class="title">FORM PENILAIAN MAGANG SEVEN INC</div>
+  <div class="title">FORM PENILAIAN MAGANG {{ strtoupper(isset($assessment->company_name) ? $assessment->company_name : 'SEVEN INC.') }}</div>
 
   <div class="info">
-      Dengan ini pihak SEVEN INC memberikan penilaian selama pelaksanaan magang kepada:<br>
+      Dengan ini pihak <b>{{ isset($assessment->company_name) ? $assessment->company_name : 'SEVEN INC.' }}</b> memberikan penilaian selama pelaksanaan magang kepada:<br>
+      <span class="label">Nama</span>: {{ isset($assessment->fullname) ? $assessment->fullname : 'Nama Tidak Tersedia' }}<br>
+      <span class="label">NIM/NIS</span>: {{ isset($assessment->nim_or_nis) ? $assessment->nim_or_nis : 'NIM/NIS Tidak Tersedia' }}<br>
+      <span class="label">Program Studi</span>: {{ isset($assessment->study_program) ? $assessment->study_program : 'Program Studi Tidak Tersedia' }}<br>
+      <span class="label">Divisi/Keahlian</span>: {{ isset($assessment->div) ? $assessment->div : 'Divisi/Keahlian Tidak Tersedia' }}<br>
 
-      <span class="label">Nama</span>:
-      <input id="namaInput" class="table-input" style="width:300px" 
-        value="{{ $intern->name ?? 'Aulia Sri Handayani Aritonang' }}">
-      <br>
-
-      <span class="label">NIM</span>:
-      <input id="nimInput" class="table-input" style="width:200px" 
-        value="{{ $intern->nim ?? '22020144077' }}">
-      <br>
-
-      <span class="label">Program Studi</span>:
-      <input id="prodiInput" class="table-input" style="width:250px"
-        value="{{ $intern->study_program ?? 'Sastra Indonesia' }}">
-      <br>
-
-      <span class="label">Kompetensi Keahlian</span>:
-      <input id="keahlianInput" class="table-input" style="width:250px"
-        value="{{ $intern->skill ?? 'Content Writer' }}">
+      {{-- Menambahkan data statis --}}
+      <span class="label">Tanggal Penilaian</span>: {{ date('d F Y') }}<br>  <!-- Menambahkan tanggal statis -->
+      <span class="label">Lokasi Magang</span>: Yogyakarta, Indonesia<br>  <!-- Menambahkan lokasi magang statis -->
   </div>
 
-
-  <table id="tableNilai">
+  {{-- TABEL ASPEK PENILAIAN --}}
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px; border: 1px solid #000;">
     <thead>
-      <tr>
-        <th style="width:50px">No</th>
-        <th>Aspek Penilaian</th>
-        <th style="width:90px">Nilai</th>
-        <th style="width:50px">Del</th>
+      <tr style="background-color: #f3f3f3; text-align: center;">
+        <th style="width:50px; border: 1px solid #000; padding: 6px;">No</th>
+        <th style="border: 1px solid #000; padding: 6px;">Aspek Penilaian</th>
+        <th style="width:90px; border: 1px solid #000; padding: 6px;">Nilai</th>
       </tr>
     </thead>
-    <tbody id="tbody">
+    <tbody>
+      @foreach(isset($assessment->aspek_penilaian) ? $assessment->aspek_penilaian : [] as $index => $item)
       <tr>
-        <td class="center"></td>
-        <td><input class="table-input" value="Copywriting"></td>
-        <td><input class="table-input center" value="95" oninput="updateAvg()"></td>
-        <td class="center"><button onclick="deleteRow(this)">X</button></td>
+        <td style="border: 1px solid #000; text-align: center; padding: 6px;">{{ $index + 1 }}</td>
+        <td style="border: 1px solid #000; padding: 6px;">{{ $item['aspek'] ?? 'Aspek Tidak Tersedia' }}</td>
+        <td style="border: 1px solid #000; text-align: center; padding: 6px;">{{ $item['nilai'] ?? 'Nilai Tidak Tersedia' }}</td>
       </tr>
+      @endforeach
       <tr>
-        <td class="center"></td>
-        <td><input class="table-input" value="Branding"></td>
-        <td><input class="table-input center" value="95" oninput="updateAvg()"></td>
-        <td class="center"><button onclick="deleteRow(this)">X</button></td>
-      </tr>
-      <tr>
-        <td class="center"></td>
-        <td><input class="table-input" value="Riset Konten"></td>
-        <td><input class="table-input center" value="95" oninput="updateAvg()"></td>
-        <td class="center"><button onclick="deleteRow(this)">X</button></td>
-      </tr>
-      <tr>
-        <td class="center"></td>
-        <td><input class="table-input" value="Kedisiplinan"></td>
-        <td><input class="table-input center" value="95" oninput="updateAvg()"></td>
-        <td class="center"><button onclick="deleteRow(this)">X</button></td>
-      </tr>
-      <tr>
-        <td class="center"></td>
-        <td><input class="table-input" value="Kreativitas"></td>
-        <td><input class="table-input center" value="95" oninput="updateAvg()"></td>
-        <td class="center"><button onclick="deleteRow(this)">X</button></td>
-      </tr>
-      <tr>
-        <td class="center"></td>
-        <td><input class="table-input" value="Kerjasama"></td>
-        <td><input class="table-input center" value="95" oninput="updateAvg()"></td>
-        <td class="center"><button onclick="deleteRow(this)">X</button></td>
-      </tr>
-      <tr>
-        <td class="center"></td>
-        <td><input class="table-input" value="Kehadiran"></td>
-        <td><input class="table-input center" value="95" oninput="updateAvg()"></td>
-        <td class="center"><button onclick="deleteRow(this)">X</button></td>
+        <td colspan="2" style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">Rata-rata</td>
+        <td style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">{{ isset($assessment->rata_rata) ? $assessment->rata_rata : 'Rata-rata Tidak Tersedia' }}</td>
       </tr>
     </tbody>
-
-    <tfoot>
-      <tr>
-        <td colspan="2" class="center"><b>Rata-rata</b></td>
-        <td class="center"><b id="avg">95</b></td>
-        <td></td>
-      </tr>
-    </tfoot>
   </table>
 
   <div class="range">
     <b>Keterangan rentang nilai:</b><br>
-    a. 81–100 : Amat baik<br>
-    b. 65–80 : Baik<br>
-    c. 50–64 : Cukup<br>
-    d. &lt; 50 : Kurang
+    81–100 : Amat Baik<br>
+    65–80 : Baik<br>
+    50–64 : Cukup<br>
+    &lt; 50 : Kurang
   </div>
 
+  {{-- SIGNATURE --}}
   <div class="signature">
-    Yogyakarta, 14 Mei 2025<br>
-    Direktur SEVEN INC<br>
-    <img src="{{ asset('storage/images/signature/ttd_arisetiahusbana.png') }}"><br>
-    <span class="name">Rekario Danny Sanjaya, S. Kom</span>
+      <div class="signature-inner">
+          <p class="signature-text">
+              Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
+              {{ isset($assessment->signature_position) ? $assessment->signature_position : 'Direktur SEVEN INC' }}
+          </p>
+
+          @php
+              $sigFile = public_path('storage/' . (isset($assessment->signature_image_path) ? $assessment->signature_image_path : 'images/signature/ttd_rekariodanny.png'));
+              $sigSrc = file_exists($sigFile)
+                  ? $sigFile
+                  : asset('storage/' . (isset($assessment->signature_image_path) ? $assessment->signature_image_path : 'images/signature/ttd_rekariodanny.png'));
+          @endphp
+
+          <div class="signature-image-block">
+              <img class="ttd" src="{{ $sigSrc }}" alt="Tanda Tangan">
+              <span class="name">{{ isset($assessment->signature_name) ? $assessment->signature_name : 'Rekario Danny Sanjaya, S.Kom' }}</span>
+          </div>
+
+          {{-- WATERMARK --}}
+          <img class="logo-bg" src="{{ $logoSrc }}" alt="Logo Transparan">
+      </div>
   </div>
 
 </div>
-
-<script>
-  function updateNumbers() {
-    const rows = document.querySelectorAll("#tbody tr");
-    rows.forEach((row, i) => {
-      row.children[0].textContent = i + 1;
-    });
-  }
-
-  function updateAvg() {
-    const inputs = document.querySelectorAll("#tbody td:nth-child(3) input");
-    let total = 0, count = 0;
-
-    inputs.forEach(inp => {
-      const val = parseFloat(inp.value);
-      if (!isNaN(val)) {
-        total += val;
-        count++;
-      }
-    });
-
-    const avg = count ? (total / count).toFixed(2) : "-";
-    document.getElementById("avg").textContent = avg;
-  }
-
-  function addRow() {
-    const tbody = document.getElementById("tbody");
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="center"></td>
-      <td><input class="table-input" value="Aspek Baru"></td>
-      <td><input class="table-input center" value="0" oninput="updateAvg()"></td>
-      <td class="center"><button onclick="deleteRow(this)">X</button></td>
-    `;
-    tbody.appendChild(tr);
-    updateNumbers();
-    updateAvg();
-  }
-
-  function deleteRow(btn) {
-    btn.parentElement.parentElement.remove();
-    updateNumbers();
-    updateAvg();
-  }
-
-  updateNumbers();
-  updateAvg();
-</script>
-
 </body>
 </html>

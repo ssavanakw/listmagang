@@ -47,7 +47,7 @@
                     style="max-height: 0; opacity: 0; pointer-events: none;">
                     <ul class="py-1">
                         <li><a href="{{ route('user.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</a></li>
-                        <li><a href="{{ route('user.logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a></li>
+                        
                     </ul>
                 </div>
             </div>
