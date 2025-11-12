@@ -66,7 +66,7 @@
     .signature-text {
         text-align: center;
         line-height: 1.4;
-        margin-bottom: 60px;
+        margin-bottom: 20px;
     }
 
     .signature-image-block {
@@ -97,108 +97,100 @@
         position: absolute;
         right: 35px;
         bottom: 15px;
-        /* Sesuaikan proporsional terhadap tinggi logo utama */
         height: calc({{ $assessment->logo_height ?? 70 }}px * 1.8);
         width: auto;
-        opacity: 0.12;
+        opacity: 0.8;
         z-index: 1;
         filter: blur(0.4px);
     }
   </style>
 </head>
 <body>
-<div class="wrap">
+    <div class="wrap">
+        {{-- HEADER --}}
+        <table class="header-table">
+            <tr>
+                <!-- Column for Logo -->
+                <td class="header-logo" style="width: 25%; text-align: left;">
+                    <img src="{{ $logoSrc }}" alt="Logo">  <!-- Logo perusahaan -->
+                </td>
 
-  {{-- HEADER --}}
-  <table class="header-table">
-      <tr>
-          <td class="header-logo">
-              @php
-                  $logoFile = public_path('storage/' . ($assessment->company_logo_path ?? 'images/logos/seveninc_logo.png'));
-                  $logoSrc = file_exists($logoFile)
-                      ? $logoFile
-                      : asset('storage/' . ($assessment->company_logo_path ?? 'images/logos/seveninc_logo.png'));
-              @endphp
-              <img src="{{ $logoSrc }}" alt="Logo">
-          </td>
-          <td>
-              <div class="company">
-                  <h1>{{ $assessment->company_name ?? 'SEVEN INC.' }}</h1>
-                  <p>{!! nl2br(e($assessment->company_address ?? 'Jl. Raya Janti, Gang Arjuna No. 59, Karangjambe, Banguntapan, Bantul, Yogyakarta')) !!}</p>
-              </div>
-          </td>
-      </tr>
-  </table>
+                <!-- Column for Company Information -->
+                <td style="width: 50%; text-align: center;">
+                    <div class="company">
+                        <h1>{{ $assessment->company_name ?? 'SEVEN INC.' }}</h1>
+                        <p>{!! nl2br(e($assessment->company_address ?? 'Jl. Raya Janti, Gang Arjuna No. 59, Karangjambe, Banguntapan, Bantul, Yogyakarta')) !!}</p>
+                    </div>
+                </td>
 
-  <hr>
+                <!-- Dummy Column -->
+                <td style="width: 25%; text-align: center;">
+                    <!-- This is a placeholder for a dummy column -->
+                </td>
+            </tr>
+        </table>
 
-  <div class="title">FORM PENILAIAN MAGANG {{ strtoupper($assessment->company_name ?? 'SEVEN INC.') }}</div>
+        <hr>
 
-  <div class="info">
-      Dengan ini pihak <b>{{ $assessment->company_name ?? 'SEVEN INC.' }}</b> memberikan penilaian selama pelaksanaan magang kepada:<br>
-      <span class="label">Nama</span>: {{ $assessment->fullname }}<br>
-      <span class="label">NIM/NIS</span>: {{ $assessment->nim_or_nis }}<br>
-      <span class="label">Program Studi</span>: {{ $assessment->study_program }}<br>
-      <span class="label">Divisi/Keahlian</span>: {{ $assessment->div }}
-  </div>
+        <div class="title">FORM PENILAIAN MAGANG {{ strtoupper($assessment->company_name ?? 'SEVEN INC.') }}</div>
 
-  {{-- TABEL ASPEK PENILAIAN --}}
-  <table style="width: 100%; border-collapse: collapse; font-size: 13px; border: 1px solid #000;">
-    <thead>
-      <tr style="background-color: #f3f3f3; text-align: center;">
-        <th style="width:50px; border: 1px solid #000; padding: 6px;">No</th>
-        <th style="border: 1px solid #000; padding: 6px;">Aspek Penilaian</th>
-        <th style="width:90px; border: 1px solid #000; padding: 6px;">Nilai</th>
-      </tr>
-    </thead>
-    <tbody>
-      @foreach($assessment->aspek_penilaian as $index => $item)
-      <tr>
-        <td style="border: 1px solid #000; text-align: center; padding: 6px;">{{ $index + 1 }}</td>
-        <td style="border: 1px solid #000; padding: 6px;">{{ $item['aspek'] }}</td>
-        <td style="border: 1px solid #000; text-align: center; padding: 6px;">{{ $item['nilai'] }}</td>
-      </tr>
-      @endforeach
-      <tr>
-        <td colspan="2" style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">Rata-rata</td>
-        <td style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">{{ $assessment->rata_rata }}</td>
-      </tr>
-    </tbody>
-  </table>
+        <div class="info">
+            Dengan ini pihak <b>{{ $assessment->company_name ?? 'SEVEN INC.' }}</b> memberikan penilaian selama pelaksanaan magang kepada:<br>
+            <span class="label">Nama</span>: {{ $assessment->fullname }}<br>
+            <span class="label">NIM/NIS</span>: {{ $assessment->nim_or_nis }}<br>
+            <span class="label">Program Studi</span>: {{ $assessment->study_program }}<br>
+            <span class="label">Divisi/Keahlian</span>: {{ $assessment->div }}
+        </div>
 
-  <div class="range">
-    <b>Keterangan rentang nilai:</b><br>
-    81–100 : Amat Baik<br>
-    65–80 : Baik<br>
-    50–64 : Cukup<br>
-    &lt; 50 : Kurang
-  </div>
+        {{-- TABEL ASPEK PENILAIAN --}}
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; border: 1px solid #000;">
+            <thead>
+                <tr style="background-color: #f3f3f3; text-align: center;">
+                    <th style="width:50px; border: 1px solid #000; padding: 6px;">No</th>
+                    <th style="border: 1px solid #000; padding: 6px;">Aspek Penilaian</th>
+                    <th style="width:90px; border: 1px solid #000; padding: 6px;">Nilai</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(json_decode($assessment->aspek_penilaian, true) as $index => $item)
+                <tr>
+                    <td style="border: 1px solid #000; text-align: center; padding: 6px;">{{ $index + 1 }}</td>
+                    <td style="border: 1px solid #000; padding: 6px;">{{ $item['aspek'] }}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 6px;">{{ $item['nilai'] }}</td>
+                </tr>
+                @endforeach
+                <tr>
+                    <td colspan="2" style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">Rata-rata</td>
+                    <td style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">{{ $assessment->rata_rata }}</td>
+                </tr>
+            </tbody>
+        </table>
 
-  {{-- SIGNATURE --}}
-  <div class="signature">
-      <div class="signature-inner">
-          <p class="signature-text">
-              Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
-              {{ $assessment->signature_position ?? 'Direktur SEVEN INC' }}
-          </p>
+        <div class="range">
+            <b>Keterangan rentang nilai:</b><br>
+            81–100 : Amat Baik<br>
+            65–80 : Baik<br>
+            50–64 : Cukup<br>
+            &lt; 50 : Kurang
+        </div>
 
-          @php
-              $sigFile = public_path('storage/' . ($assessment->signature_image_path ?? 'images/signature/ttd_rekariodanny.png'));
-              $sigSrc = file_exists($sigFile)
-                  ? $sigFile
-                  : asset('storage/' . ($assessment->signature_image_path ?? 'images/signature/ttd_rekariodanny.png'));
-          @endphp
+        {{-- SIGNATURE --}}
+        <div class="signature">
+            <div class="signature-inner">
+                <p class="signature-text">
+                    Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
+                    {{ $assessment->signature_position ?? 'Direktur SEVEN INC' }}
+                </p>
 
-          <div class="signature-image-block">
-              <img class="ttd" src="{{ $sigSrc }}" alt="Tanda Tangan">
-              <span class="name">{{ $assessment->signature_name ?? 'Rekario Danny Sanjaya, S.Kom' }}</span>
-          </div>
+                <div class="signature-image-block">
+                    <img class="ttd" src="{{ $sigSrc }}" alt="Tanda Tangan">  <!-- Tanda tangan -->
+                    <span class="name">{{ $assessment->signature_name ?? 'Rekario Danny Sanjaya, S.Kom' }}</span>
+                </div>
 
-          {{-- WATERMARK yang ikut resize --}}
-          <img class="logo-bg" src="{{ $logoSrc }}" alt="Logo Transparan">
-      </div>
-  </div>
-
-</div>
+                {{-- WATERMARK yang ikut resize --}}
+                <img class="logo-bg" src="{{ $logoSrc }}" alt="Logo Transparan">
+            </div>
+        </div>
+    </div>
 </body>
 </html>

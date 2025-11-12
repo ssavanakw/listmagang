@@ -34,9 +34,7 @@
             <option value="">Pilih dari daftar logo...</option>
             @foreach($logos as $logo)
               <option value="{{ $logo }}"{{
-                (old('company_logo_select', $company_logo_path ?? 'images/logos/logo_seveninc.png') == $logo) ? 'selected' : '' }}>
-                {{ basename($logo) }}
-              </option>
+                (old('company_logo_select', $company_logo_path ?? 'images/logos/logo_seveninc.png') == $logo) ? 'selected' : '' }}>{{ basename($logo) }}</option>
             @endforeach
           </select>
 
@@ -84,9 +82,7 @@
             <option value="">Pilih dari daftar tanda tangan...</option>
             @foreach($signatures as $sig)
               <option value="{{ $sig }}"{{
-                (old('signature_image_select', $signature_image_path ?? 'images/signature/ttd_rekariodanny.png') == $sig) ? 'selected' : '' }}>
-                {{ basename($sig) }}
-              </option>
+                (old('signature_image_select', $signature_image_path ?? 'images/signature/ttd_rekariodanny.png') == $sig) ? 'selected' : '' }}>{{ basename($sig) }}</option>
             @endforeach
           </select>
 
@@ -115,15 +111,6 @@
         </button>
       </div>
     </form>
-
-    {{-- LOADING --}}
-    <div id="loading" class="hidden mt-4 text-blue-600 text-sm flex items-center gap-2">
-      <svg class="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-      </svg>
-      Memperbarui preview...
-    </div>
   </div>
 
   {{-- === PREVIEW PDF (KANAN) === --}}
@@ -135,8 +122,7 @@
 </div>
 
 {{-- SCRIPT --}}
-<script>
-const form = document.getElementById('settingsForm');
+<script>const form = document.getElementById('settingsForm');
 const iframe = document.getElementById('pdfPreview');
 const loader = document.getElementById('loading');
 const logoThumb = document.getElementById('logoThumbnail');
@@ -149,12 +135,19 @@ const inputs = document.querySelectorAll('.live-input');
 const saveBtn = document.getElementById('saveSettingsBtn');
 let debounceTimer = null;
 
-// Fungsi utama update preview
+// Fungsi untuk mengupdate gambar logo dan tanda tangan
+function updateImageSize() {
+  logoThumb.style.height = logoHeight.value + 'px';
+  sigThumb.style.height = sigHeight.value + 'px';
+}
+
+// Fungsi untuk mengupdate preview PDF
 async function updatePreview() {
-  loader.classList.remove('hidden');
-  const formData = new FormData(form);
+  loader.classList.remove('hidden'); // Tampilkan loader saat menunggu
+  const formData = new FormData(form); // Ambil data dari form
 
   try {
+    // Kirim form data ke server untuk mendapatkan preview PDF terbaru
     const response = await fetch('{{ route('interns.assessment.settings.preview.live') }}', {
       method: 'POST',
       headers: { 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value },
@@ -162,68 +155,161 @@ async function updatePreview() {
     });
 
     if (response.ok) {
-      const blob = await response.blob();
+      const blob = await response.blob();  // Ambil file PDF dari server
       const url = URL.createObjectURL(blob);
-      iframe.src = url;
+      iframe.src = url; // Update iframe dengan URL baru
     }
   } catch (err) {
     console.error("Gagal memperbarui preview:", err);
   }
 
-  setTimeout(() => loader.classList.add('hidden'), 800);
+  setTimeout(() => loader.classList.add('hidden'), 800); // Sembunyikan loader setelah 800ms
 }
 
-// Update tinggi logo & tanda tangan realtime
-function updateImageSize() {
-  logoThumb.style.height = logoHeight.value + 'px';
-  sigThumb.style.height = sigHeight.value + 'px';
-}
-
-// Debounce input agar tidak reload terus
+// Debounce untuk menghindari banyak permintaan saat mengetik
 function debounceUpdate() {
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
-    updateImageSize();
-    updatePreview();
+    updateImageSize(); // Update ukuran gambar logo dan tanda tangan
+    updatePreview();   // Perbarui preview PDF
   }, 700);
 }
 
-// Simpan pengaturan ke database
-saveBtn.addEventListener('click', async () => {
-  const formData = new FormData(form);
-  saveBtn.disabled = true;
-  saveBtn.innerText = '⏳ Menyimpan...';
+// Event handler untuk input form
+inputs.forEach(input => {
+  input.addEventListener('input', debounceUpdate);  // Saat input teks atau range diubah
+  input.addEventListener('change', debounceUpdate); // Saat dropdown atau file dipilih
+});
 
-  try {
-    const response = await fetch('{{ route('interns.assessment.settings.save') }}', {
-      method: 'POST',
-      headers: { 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value },
-      body: formData
-    });
-    const result = await response.json();
-    alert(result.message || 'Pengaturan berhasil disimpan!');
-  } catch (err) {
-    alert('Terjadi kesalahan saat menyimpan pengaturan.');
-  } finally {
-    saveBtn.disabled = false;
-    saveBtn.innerText = '💾 Simpan Pengaturan';
+// Event handler untuk memilih logo dari dropdown
+logoSelect.addEventListener('change', () => {
+  logoThumb.src = logoSelect.value ? "{{ asset('storage') }}/" + logoSelect.value : "{{ asset('storage/images/logos/logo_seveninc.png') }}";
+  updatePreview();  // Update preview PDF setelah memilih logo
+});
+
+// Event handler untuk memilih tanda tangan dari dropdown
+sigSelect.addEventListener('change', () => {
+  sigThumb.src = sigSelect.value ? "{{ asset('storage') }}/" + sigSelect.value : "{{ asset('storage/images/signature/ttd_rekariodanny.png') }}";
+  updatePreview();  // Update preview PDF setelah memilih tanda tangan
+});
+
+// Event handler untuk file logo yang di-upload
+document.querySelector('input[name="company_logo"]').addEventListener('change', () => {
+  const file = document.querySelector('input[name="company_logo"]').files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = function () {
+      logoThumb.src = reader.result; // Menampilkan gambar yang di-upload
+      updatePreview(); // Perbarui preview PDF setelah file di-upload
+    }
+    reader.readAsDataURL(file);
   }
 });
 
-// Event input & dropdown
-inputs.forEach(input => {
-  input.addEventListener('input', debounceUpdate);
-  input.addEventListener('change', debounceUpdate);
+// Event handler untuk file tanda tangan yang di-upload
+document.querySelector('input[name="signature_image"]').addEventListener('change', () => {
+  const file = document.querySelector('input[name="signature_image"]').files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = function () {
+      sigThumb.src = reader.result; // Menampilkan tanda tangan yang di-upload
+      updatePreview(); // Perbarui preview PDF setelah file di-upload
+    }
+    reader.readAsDataURL(file);
+  }
 });
 
-logoSelect.addEventListener('change', () => {
-  logoThumb.src = logoSelect.value ? "{{ asset('storage') }}/" + logoSelect.value : "{{ asset('storage/images/logos/logo_seveninc.png') }}";
-  updatePreview();
-});
+  const form = document.getElementById('settingsForm');
+  const iframe = document.getElementById('pdfPreview');
+  const loader = document.getElementById('loading');
+  const logoThumb = document.getElementById('logoThumbnail');
+  const sigThumb = document.getElementById('signatureThumbnail');
+  const logoSelect = document.getElementById('company_logo_select');
+  const sigSelect = document.getElementById('signature_image_select');
+  const logoHeight = document.getElementById('logo_height');
+  const sigHeight = document.getElementById('sig_height');
+  const inputs = document.querySelectorAll('.live-input');
+  const saveBtn = document.getElementById('saveSettingsBtn');
+  let debounceTimer = null;
 
-sigSelect.addEventListener('change', () => {
-  sigThumb.src = sigSelect.value ? "{{ asset('storage') }}/" + sigSelect.value : "{{ asset('storage/images/signature/ttd_rekariodanny.png') }}";
-  updatePreview();
-});
+  // Fungsi utama update preview PDF
+  async function updatePreview() {
+    loader.classList.remove('hidden'); // Tampilkan loader saat menunggu
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('{{ route('interns.assessment.settings.preview.live') }}', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value },
+        body: formData
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        iframe.src = url; // Memperbarui sumber iframe dengan PDF yang dihasilkan
+      }
+    } catch (err) {
+      console.error("Gagal memperbarui preview:", err);
+    }
+
+    setTimeout(() => loader.classList.add('hidden'), 800); // Sembunyikan loader setelah beberapa saat
+  }
+
+  // Fungsi untuk memperbarui tinggi logo & tanda tangan secara real-time
+  function updateImageSize() {
+    logoThumb.style.height = logoHeight.value + 'px';
+    sigThumb.style.height = sigHeight.value + 'px';
+  }
+
+  // Debounce untuk menghindari banyak permintaan cepat ke server
+  function debounceUpdate() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      updateImageSize();  // Perbarui gambar saat ukuran diubah
+      updatePreview();    // Perbarui preview setelah perubahan
+    }, 700);
+  }
+
+  // Simpan pengaturan ke database
+  saveBtn.addEventListener('click', async () => {
+    const formData = new FormData(form);
+    saveBtn.disabled = true;
+    saveBtn.innerText = '⏳ Menyimpan...';
+
+    try {
+      const response = await fetch('{{ route('interns.assessment.settings.save') }}', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value },
+        body: formData
+      });
+      const result = await response.json();
+      alert(result.message || 'Pengaturan berhasil disimpan!');
+    } catch (err) {
+      alert('Terjadi kesalahan saat menyimpan pengaturan.');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.innerText = '💾 Simpan Pengaturan';
+    }
+  });
+
+  // Event input dan dropdown untuk trigger update preview
+  inputs.forEach(input => {
+    input.addEventListener('input', debounceUpdate);  // Untuk input teks atau range
+    input.addEventListener('change', debounceUpdate); // Untuk select atau file upload
+  });
+
+  // Update logo thumbnail berdasarkan pilihan dari dropdown
+  logoSelect.addEventListener('change', () => {
+    logoThumb.src = logoSelect.value ? "{{ asset('storage') }}/" + logoSelect.value : "{{ asset('storage/images/logos/logo_seveninc.png') }}";
+    updatePreview();  // Perbarui preview PDF setelah perubahan
+  });
+
+  // Update tanda tangan thumbnail berdasarkan pilihan dari dropdown
+  sigSelect.addEventListener('change', () => {
+    sigThumb.src = sigSelect.value ? "{{ asset('storage') }}/" + sigSelect.value : "{{ asset('storage/images/signature/ttd_rekariodanny.png') }}";
+    updatePreview();  // Perbarui preview PDF setelah perubahan
+  });
+
 </script>
 @endsection

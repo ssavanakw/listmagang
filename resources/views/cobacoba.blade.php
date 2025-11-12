@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Form Penilaian Magang - {{ isset($assessment->fullname) ? $assessment->fullname : 'Nama Tidak Tersedia' }}</title>
+  <title>Form Penilaian Magang - {{ $assessment->fullname ?? 'jamal' }}</title>
   <style>
     @page { size: A4; margin: 60px; }
 
@@ -26,7 +26,7 @@
     .header-table td { vertical-align: middle; border: none; }
 
     .header-logo img {
-        height: {{ isset($assessment->logo_height) ? $assessment->logo_height : 70 }}px;
+        height: {{ $assessment->logo_height ?? 70 }}px;
         width: auto;
     }
 
@@ -79,7 +79,7 @@
     }
 
     .signature img.ttd {
-        height: {{ isset($assessment->sig_height) ? $assessment->sig_height : 90 }}px;
+        height: {{ $assessment->sig_height ?? 90 }}px;
         width: auto;
         margin-bottom: 5px;
         z-index: 2;
@@ -97,7 +97,7 @@
         position: absolute;
         right: 35px;
         bottom: 15px;
-        height: calc({{ isset($assessment->logo_height) ? $assessment->logo_height : 70 }}px * 1.8);
+        height: calc({{ $assessment->logo_height ?? 70 }}px * 1.8);
         width: auto;
         opacity: 0.12;
         z-index: 1;
@@ -113,17 +113,24 @@
       <tr>
           <td class="header-logo">
               @php
-                  $logoFile = public_path('storage/' . (isset($assessment->company_logo_path) ? $assessment->company_logo_path : 'images/logos/seveninc_logo.png'));
+                  $logoFile = public_path('storage/' . ($assessment->company_logo_path ?? 'images/logos/seveninc_logo.png'));
                   $logoSrc = file_exists($logoFile)
                       ? $logoFile
-                      : asset('storage/' . (isset($assessment->company_logo_path) ? $assessment->company_logo_path : 'images/logos/seveninc_logo.png'));
+                      : asset('storage/' . ($assessment->company_logo_path ?? 'images/logos/seveninc_logo.png'));
               @endphp
               <img src="{{ $logoSrc }}" alt="Logo">
           </td>
           <td>
               <div class="company">
-                  <h1>{{ isset($assessment->company_name) ? $assessment->company_name : 'SEVEN INC.' }}</h1>
-                  <p>{!! nl2br(e(isset($assessment->company_address) ? $assessment->company_address : 'Jl. Raya Janti, Gang Arjuna No. 59, Karangjambe, Banguntapan, Bantul, Yogyakarta')) !!}</p>
+                  <h1>{{ $assessment->company_name ?? 'SEVEN INC.' }}</h1>
+                  <p>{!! nl2br(e($assessment->company_address ?? 'Jl. Raya Janti, Gang Arjuna No. 59, Karangjambe, Banguntapan, Bantul, Yogyakarta')) !!}</p>
+
+                  {{-- STATIC CONTACT DATA --}}
+                  <p style="margin-top:2px; font-size:11px;">
+                      Telp: (0274) 654321 &nbsp; | &nbsp;
+                      Email: official@seveninc.id &nbsp; | &nbsp;
+                      Website: www.seveninc.id
+                  </p>
               </div>
           </td>
       </tr>
@@ -131,18 +138,27 @@
 
   <hr>
 
-  <div class="title">FORM PENILAIAN MAGANG {{ strtoupper(isset($assessment->company_name) ? $assessment->company_name : 'SEVEN INC.') }}</div>
+  {{-- STATIC DOCUMENT NUMBER --}}
+  <div style="text-align:right; font-size:12px; margin-bottom:15px;">
+      <b>No. Dokumen:</b> SPM-SEVENINC/INT/{{ date('Y') }}/001
+  </div>
+
+  {{-- STATIC SCHOOL / INSTITUTION --}}
+  <div style="font-size:12px; margin-bottom:20px;">
+      <b>Ditujukan kepada:</b><br>
+      Kepala Program Studi / Guru Pembimbing Magang<br>
+      {{ $assessment->school_name ?? 'Universitas / Sekolah Mitra' }}<br>
+      {{ $assessment->school_address ?? 'Alamat institusi pendidikan mitra' }}
+  </div>
+
+  <div class="title">FORM PENILAIAN MAGANG {{ strtoupper($assessment->company_name ?? 'SEVEN INC.') }}</div>
 
   <div class="info">
-      Dengan ini pihak <b>{{ isset($assessment->company_name) ? $assessment->company_name : 'SEVEN INC.' }}</b> memberikan penilaian selama pelaksanaan magang kepada:<br>
-      <span class="label">Nama</span>: {{ isset($assessment->fullname) ? $assessment->fullname : 'Nama Tidak Tersedia' }}<br>
-      <span class="label">NIM/NIS</span>: {{ isset($assessment->nim_or_nis) ? $assessment->nim_or_nis : 'NIM/NIS Tidak Tersedia' }}<br>
-      <span class="label">Program Studi</span>: {{ isset($assessment->study_program) ? $assessment->study_program : 'Program Studi Tidak Tersedia' }}<br>
-      <span class="label">Divisi/Keahlian</span>: {{ isset($assessment->div) ? $assessment->div : 'Divisi/Keahlian Tidak Tersedia' }}<br>
-
-      {{-- Menambahkan data statis --}}
-      <span class="label">Tanggal Penilaian</span>: {{ date('d F Y') }}<br>  <!-- Menambahkan tanggal statis -->
-      <span class="label">Lokasi Magang</span>: Yogyakarta, Indonesia<br>  <!-- Menambahkan lokasi magang statis -->
+      Dengan ini pihak <b>{{ $assessment->company_name ?? 'SEVEN INC.' }}</b> memberikan penilaian selama pelaksanaan magang kepada:<br>
+      <span class="label">Nama</span>: {{ $assessment->fullname ?? 'jamal'}}<br>
+      <span class="label">NIM/NIS</span>: {{ $assessment->nim_or_nis ?? ''}}<br>
+      <span class="label">Program Studi</span>: {{ $assessment->study_program ?? '' }}<br>
+      <span class="label">Divisi/Keahlian</span>: {{ $assessment->div ??'' }}
   </div>
 
   {{-- TABEL ASPEK PENILAIAN --}}
@@ -155,16 +171,16 @@
       </tr>
     </thead>
     <tbody>
-      @foreach(isset($assessment->aspek_penilaian) ? $assessment->aspek_penilaian : [] as $index => $item)
+      @foreach($assessment->aspek_penilaian as $index => $item)
       <tr>
         <td style="border: 1px solid #000; text-align: center; padding: 6px;">{{ $index + 1 }}</td>
-        <td style="border: 1px solid #000; padding: 6px;">{{ $item['aspek'] ?? 'Aspek Tidak Tersedia' }}</td>
-        <td style="border: 1px solid #000; text-align: center; padding: 6px;">{{ $item['nilai'] ?? 'Nilai Tidak Tersedia' }}</td>
+        <td style="border: 1px solid #000; padding: 6px;">{{ $item['aspek'] }}</td>
+        <td style="border: 1px solid #000; text-align: center; padding: 6px;">{{ $item['nilai'] }}</td>
       </tr>
       @endforeach
       <tr>
         <td colspan="2" style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">Rata-rata</td>
-        <td style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">{{ isset($assessment->rata_rata) ? $assessment->rata_rata : 'Rata-rata Tidak Tersedia' }}</td>
+        <td style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">{{ $assessment->rata_rata ?? '' }}</td>
       </tr>
     </tbody>
   </table>
@@ -177,25 +193,45 @@
     &lt; 50 : Kurang
   </div>
 
+  {{-- STATIC NOTE --}}
+  <div style="margin-top:15px; font-size:12px;">
+      <b>Catatan:</b><br>
+      Form ini merupakan dokumen resmi Seven Inc dan digunakan sebagai laporan penilaian magang
+      untuk kebutuhan akademik. Segala bentuk pengubahan isi dokumen tanpa izin tertulis adalah
+      dilarang.
+  </div>
+
+  {{-- QR STATIC --}}
+  <div style="position:absolute; left:0; bottom:160px; text-align:center;">
+      <img src="{{ public_path('storage/images/static/qr_template.png') }}"
+           style="height:75px; opacity:0.7;">
+      <div style="font-size:10px;">QR Verifikasi Dokumen</div>
+  </div>
+
   {{-- SIGNATURE --}}
   <div class="signature">
       <div class="signature-inner">
           <p class="signature-text">
               Yogyakarta, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
-              {{ isset($assessment->signature_position) ? $assessment->signature_position : 'Direktur SEVEN INC' }}
+              {{ $assessment->signature_position ?? 'Direktur SEVEN INC' }}
           </p>
 
           @php
-              $sigFile = public_path('storage/' . (isset($assessment->signature_image_path) ? $assessment->signature_image_path : 'images/signature/ttd_rekariodanny.png'));
+              $sigFile = public_path('storage/' . ($assessment->signature_image_path ?? 'images/signature/ttd_rekariodanny.png'));
               $sigSrc = file_exists($sigFile)
                   ? $sigFile
-                  : asset('storage/' . (isset($assessment->signature_image_path) ? $assessment->signature_image_path : 'images/signature/ttd_rekariodanny.png'));
+                  : asset('storage/' . ($assessment->signature_image_path ?? 'images/signature/ttd_rekariodanny.png'));
           @endphp
 
+          {{-- SIGNATURE BLOCK --}}
           <div class="signature-image-block">
               <img class="ttd" src="{{ $sigSrc }}" alt="Tanda Tangan">
-              <span class="name">{{ isset($assessment->signature_name) ? $assessment->signature_name : 'Rekario Danny Sanjaya, S.Kom' }}</span>
+              <span class="name">{{ $assessment->signature_name ?? 'Rekario Danny Sanjaya, S.Kom' }}</span>
           </div>
+
+          {{-- STATIC STAMP --}}
+          <img src="{{ public_path('storage/images/static/stamp_seveninc.png') }}"
+               style="position:absolute; right:10px; bottom:70px; height:120px; opacity:0.25;">
 
           {{-- WATERMARK --}}
           <img class="logo-bg" src="{{ $logoSrc }}" alt="Logo Transparan">
@@ -203,5 +239,23 @@
   </div>
 
 </div>
+
+{{-- STATIC FOOTER --}}
+<div style="
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 11px;
+    color: #555;
+">
+    Sistem Penilaian Magang – Seven Inc.
+    <br>
+    Dokumen ini dibuat otomatis oleh sistem dan sah tanpa tanda tangan basah.
+    <br>
+    © Seven Inc., Yogyakarta – {{ date('Y') }}
+</div>
+
 </body>
 </html>

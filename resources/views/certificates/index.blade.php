@@ -209,7 +209,7 @@
 {{-- Modal untuk Upload Background --}}
 <div id="modal-bg" class="hidden fixed inset-0 z-50 items-center justify-center">
     <div class="absolute inset-0 bg-black/50" onclick="closeModal('bg')"></div>
-    <div class="relative bg-white w-full max-w-lg mx-4 rounded-xl shadow-xl p-5">
+    <div class="relative bg-white w-full max-w-5xl mx-4 rounded-xl shadow-xl p-8"> <!-- Ukuran modal lebih besar dengan padding lebih banyak -->
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold">Upload Background</h2>
             <button class="text-gray-500 hover:text-gray-700" onclick="closeModal('bg')">✕</button>
@@ -225,17 +225,46 @@
                 Otomatis dinamai ulang: <code>bg_{{'{'}}slug{{'}'}}_YYYYmmdd_HHMMSS.ext</code><br>
                 Maks 2 MB.
             </div>
+            
+            <!-- Penjelasan Penempatan -->
+            <div class="mt-4 text-sm text-gray-700">
+                <p><strong>Petunjuk Penempatan:</strong></p>
+                <ul class="list-inside list-disc">
+                    <li><strong>1 Logo Tengah Atas:</strong> Logo pertama ditempatkan di bagian tengah atas sertifikat.</li>
+                    <li><strong>2 Logo Kanan Kiri:</strong> Logo kedua ditempatkan di bagian kiri dan kanan atas sertifikat secara simetris.</li>
+                    <li><strong>1 Tanda Tangan Tengah Bawah:</strong> Tanda tangan pertama ditempatkan di bagian tengah bawah sertifikat.</li>
+                    <li><strong>2 Tanda Tangan Kanan Kiri:</strong> Tanda tangan kedua ditempatkan di sisi kanan dan kiri bawah sertifikat secara simetris.</li>
+                </ul>
+            </div>
+
             <!-- Preview gambar -->
             <div class="mt-4">
-                <img id="preview_bg" src="" class="max-h-40 w-full object-cover hidden" alt="Preview Background">
+                <img id="preview_bg" src="" class="w-full object-cover hidden max-h-80" alt="Preview Background">  <!-- Diperbesar tinggi preview gambar -->
             </div>
-            <div class="flex justify-end gap-2">
+            
+            <!-- Preview Gambar Sketsa -->
+            <div class="mt-8">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <img src="{{ asset('storage/images/backgrounds/template/1logo1ttd.png') }}" alt="Preview Sketsa 1" class="w-full max-h-80 object-cover border rounded"> <!-- Diperbesar tinggi gambar sketsa -->
+                    </div>
+                    <div>
+                        <img src="{{ asset('storage/images/backgrounds/template/2logo2ttd.png') }}" alt="Preview Sketsa 2" class="w-full max-h-80 object-cover border rounded"> <!-- Diperbesar tinggi gambar sketsa -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4">
                 <button type="button" onclick="closeModal('bg')" class="px-4 py-2 rounded border">Batal</button>
                 <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">Upload</button>
             </div>
         </form>
     </div>
 </div>
+
+
+
+
 
 {{-- Modal untuk Upload Logo --}}
 <div id="modal-logo" class="hidden fixed inset-0 z-50 items-center justify-center">

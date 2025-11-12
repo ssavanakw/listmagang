@@ -45,10 +45,6 @@
             title="Surat Penilaian"
         />
         <x-sidebar-menu-dashboard 
-            routeName="interns.assessment.settings"  
-            title="Surat Penilaian Template"
-        />
-        <x-sidebar-menu-dashboard 
             routeName="admin.skl.editor"  
             title="SKL Template"
         />

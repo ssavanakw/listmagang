@@ -1,12 +1,12 @@
 @extends('layouts.dashboard')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
   {{-- HEADER --}}
   <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-        ✏️ Edit Penilaian Magang
+        📝 Edit Penilaian Magang
       </h1>
       <a href="{{ route('interns.assessment.index') }}"
          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-700 hover:bg-gray-800 rounded-lg shadow transition">
@@ -32,50 +32,117 @@
   @endif
 
   {{-- FORM --}}
-  <form action="{{ route('interns.assessment.update', $assessment->id) }}" method="POST" class="space-y-6">
+  <form id="updateForm" enctype="multipart/form-data" method="POST" action="{{ route('interns.assessment.update', $assessment->id) }}">
     @csrf
     @method('PUT')
 
     {{-- FORM INPUT UTAMA --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div>
-            <label class="block mb-1 text-sm font-medium text-gray-700">Nama Lengkap</label>
-            <input type="text" name="fullname" required value="{{ $assessment->fullname }}"
-              class="block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5">
+        {{-- Nama Pemagang --}}
+        <div class="relative">
+            <label class="block mb-1 text-sm font-medium text-gray-700">Nama Pemagang</label>
+            <input type="text" id="searchIntern" value="{{ old('fullname', $assessment->fullname) }}" placeholder="Cari nama pemagang..."
+                class="block w-full p-2.5 text-sm border rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                onkeyup="filterInternList()">
+
+            {{-- Hidden input untuk kirim ke server --}}
+            <input type="hidden" name="fullname" id="fullname_hidden" value="{{ old('fullname', $assessment->fullname) }}">
+
+            <div id="internDropdown"
+                class="absolute z-20 hidden mt-1 max-h-56 w-full overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg">
+                @foreach($interns as $intern)
+                    <div class="intern-option px-3 py-2 cursor-pointer hover:bg-blue-100 text-sm"
+                         data-name="{{ $intern->fullname }}"
+                         data-nim="{{ $intern->student_id }}"
+                         data-prodi="{{ $intern->study_program }}">
+                         {{ $intern->fullname }}
+                    </div>
+                @endforeach
+            </div>
         </div>
 
+        {{-- NIM / NIS --}}
         <div>
             <label class="block mb-1 text-sm font-medium text-gray-700">NIM / NIS</label>
-            <input type="text" name="nim_or_nis" value="{{ $assessment->nim_or_nis }}"
-              class="block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5">
+            <input type="text" id="nimField" name="nim_or_nis" value="{{ old('nim_or_nis', $assessment->nim_or_nis) }}"
+              class="block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5"
+              placeholder="Masukkan NIM/NIS">
         </div>
 
+        {{-- Program Studi --}}
         <div>
             <label class="block mb-1 text-sm font-medium text-gray-700">Program Studi</label>
-            <input type="text" name="study_program" value="{{ $assessment->study_program }}"
-              class="block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5">
+            <input type="text" id="prodiField" name="study_program" value="{{ old('study_program', $assessment->study_program) }}"
+              class="block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5"
+              placeholder="Contoh: Sistem Informasi">
         </div>
 
-        {{-- ✅ Dropdown Divisi --}}
+        {{-- Dropdown Divisi --}}
         <div>
             <label class="block mb-1 text-sm font-medium text-gray-700">Divisi / Kompetensi Keahlian</label>
             <select name="div" id="divisionSelect"
                 class="block w-full rounded-lg border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5">
                 <option value="">-- Pilih Divisi --</option>
-                <option value="Content Writer" {{ $assessment->div == 'Content Writer' ? 'selected' : '' }}>Content Writer</option>
-                <option value="Programmer" {{ $assessment->div == 'Programmer' ? 'selected' : '' }}>Programmer</option>
-                <option value="UI/UX Designer" {{ $assessment->div == 'UI/UX Designer' ? 'selected' : '' }}>UI/UX Designer</option>
-                <option value="Graphic Designer" {{ $assessment->div == 'Graphic Designer' ? 'selected' : '' }}>Graphic Designer</option>
-                <option value="Digital Marketing" {{ $assessment->div == 'Digital Marketing' ? 'selected' : '' }}>Digital Marketing</option>
-                <option value="other">Lainnya...</option>
+                @foreach($divisions as $div)
+                    <option value="{{ $div }}" {{ old('div', $assessment->div) == $div ? 'selected' : '' }}>{{ $div }}</option>
+                @endforeach
             </select>
-
-            {{-- Input manual divisi --}}
-            <input type="text" id="manualDivision"
-                name="div_manual"
-                placeholder="Masukkan divisi lain..."
-                class="hidden mt-2 block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-sm p-2.5" />
         </div>
+    </div>
+
+    {{-- FORM PERUSAHAAN --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      {{-- Nama Perusahaan --}}
+      <div>
+          <label class="block mb-1 text-sm font-medium text-gray-700">Nama Perusahaan</label>
+          <input type="text" name="company_name" value="{{ old('company_name', $assessment->company_name) }}" class="block w-full text-sm p-2.5 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Masukkan Nama Perusahaan">
+      </div>
+
+      {{-- Alamat Perusahaan --}}
+      <div>
+          <label class="block mb-1 text-sm font-medium text-gray-700">Alamat Perusahaan</label>
+          <textarea name="company_address" class="block w-full text-sm p-2.5 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Masukkan Alamat Perusahaan">{{ old('company_address', $assessment->company_address) }}</textarea>
+      </div>
+
+      {{-- Logo Perusahaan --}}
+      <div>
+          <label class="block mb-1 text-sm font-medium text-gray-700">Logo Perusahaan</label>
+          <select name="company_logo_select" class="block w-full text-sm p-2.5 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+              <option value="">-- Pilih Logo Perusahaan --</option>
+              @foreach($logos as $logo)
+                  <option value="{{ $logo }}" {{ old('company_logo_select', $assessment->company_logo_path) == $logo ? 'selected' : '' }}>{{ basename($logo) }}</option>
+              @endforeach
+          </select>
+          <input type="file" name="company_logo" class="block w-full text-sm p-2.5 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+      </div>
+
+      {{-- Nama Tanda Tangan --}}
+      <div>
+          <label class="block mb-1 text-sm font-medium text-gray-700">Nama Tanda Tangan</label>
+          <input type="text" name="signature_name" value="{{ old('signature_name', $assessment->signature_name) }}" class="block w-full text-sm p-2.5 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+      </div>
+
+      {{-- Jabatan --}}
+      <div>
+          <label class="block mb-1 text-sm font-medium text-gray-700">Jabatan</label>
+          <input type="text" name="signature_position" value="{{ old('signature_position', $assessment->signature_position) }}" class="block w-full text-sm p-2.5 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+      </div>
+
+      {{-- Tanda Tangan --}}
+      <div>
+          <label class="block mb-1 text-sm font-medium text-gray-700">Tanda Tangan</label>
+          <select name="signature_image_select" class="block w-full text-sm p-2.5 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+              <option value="">-- Pilih Tanda Tangan --</option>
+              @foreach($signatures as $signature)
+                  <option value="{{ $signature }}" {{ old('signature_image_select', $assessment->signature_image_path) == $signature ? 'selected' : '' }}>
+                      {{ basename($signature) }}
+                  </option>
+              @endforeach
+          </select>
+          <input type="file" name="signature_image" class="block w-full text-sm p-2.5 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+      </div>
     </div>
 
     {{-- TABLE PENILAIAN --}}
@@ -92,30 +159,32 @@
               <th class="px-4 py-3 text-center w-12">Aksi</th>
             </tr>
           </thead>
+
           <tbody class="[&>tr:nth-child(odd)]:bg-white [&>tr:nth-child(even)]:bg-gray-50">
-            @foreach($assessment->aspek_penilaian as $i => $item)
-            <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
-              <td class="text-center font-medium text-gray-600">{{ $i + 1 }}</td>
-              <td class="px-3 py-2">
-                <input type="text" name="aspek[]" value="{{ $item['aspek'] }}"
-                  class="block w-full p-2 text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-              </td>
-              <td class="px-3 py-2 text-center">
-                <input type="number" name="nilai[]" value="{{ $item['nilai'] }}" min="0" max="100" oninput="updateAvg()"
-                  class="block w-full text-center p-2 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-              </td>
-              <td class="text-center">
-                <button type="button" onclick="deleteRow(this)"
-                  class="px-2.5 py-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-sm transition-all">✖</button>
-              </td>
-            </tr>
+            @foreach($aspekPenilaian as $i => $item)
+                <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                    <td class="text-center font-medium text-gray-600">{{ $i + 1 }}</td>
+                    <td class="px-3 py-2">
+                        <input type="text" name="aspek[]" value="{{ $item['aspek'] }}"
+                            class="block w-full p-2 text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </td>
+                    <td class="px-3 py-2 text-center">
+                        <input type="number" name="nilai[]" value="{{ $item['nilai'] }}" min="0" max="100"
+                            oninput="updateAvg()"
+                            class="block w-full text-center p-2 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </td>
+                    <td class="text-center">
+                        <button type="button" onclick="deleteRow(this)"
+                            class="px-2.5 py-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-sm transition-all">✖</button>
+                    </td>
+                </tr>
             @endforeach
           </tbody>
 
           <tfoot class="bg-gray-50">
             <tr>
               <td colspan="2" class="text-right px-4 py-2 font-semibold">Rata-rata</td>
-              <td class="text-center font-semibold text-blue-700" id="avg">{{ $assessment->rata_rata }}</td>
+              <td class="text-center font-semibold text-blue-700" id="avg">0</td>
               <td></td>
             </tr>
           </tfoot>
@@ -131,20 +200,60 @@
 
         <button type="submit"
           class="inline-flex items-center gap-1 px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition">
-          💾 Update Penilaian
+          💾 Simpan Penilaian
         </button>
       </div>
     </div>
   </form>
 </div>
 
-{{-- SCRIPT --}}
 <script>
-  // ===== FUNGSI DASAR =====
-  function updateNumbers() {
-    document.querySelectorAll("#tableAspek tbody tr").forEach((r, i) => r.children[0].textContent = i + 1);
+  // === Search Pemagang ===
+  const searchInput = document.getElementById('searchIntern');
+  const dropdown = document.getElementById('internDropdown');
+  const options = dropdown.querySelectorAll('.intern-option');
+  const fullnameHidden = document.getElementById('fullname_hidden');
+  const nimField = document.getElementById('nimField');
+  const prodiField = document.getElementById('prodiField');
+
+  // Tampilkan dropdown ketika input fokus
+  searchInput.addEventListener('focus', () => dropdown.classList.remove('hidden'));
+
+  // Tutup dropdown saat klik di luar
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target) && e.target !== searchInput) {
+      dropdown.classList.add('hidden');
+    }
+  });
+
+  // Filter daftar pemagang
+  function filterInternList() {
+    const query = searchInput.value.toLowerCase();
+    options.forEach(opt => {
+      const name = opt.dataset.name.toLowerCase();
+      opt.style.display = name.includes(query) ? 'block' : 'none';
+    });
   }
 
+  // Isi data saat klik nama pemagang
+  options.forEach(opt => {
+    opt.addEventListener('click', () => {
+      searchInput.value = opt.dataset.name;
+      fullnameHidden.value = opt.dataset.name;
+      nimField.value = opt.dataset.nim || '';
+      prodiField.value = opt.dataset.prodi || '';
+      dropdown.classList.add('hidden');
+    });
+  });
+
+  // === Table utilities ===
+  function updateNumbers() {
+    document.querySelectorAll("#tableAspek tbody tr").forEach((r, i) => {
+      r.children[0].textContent = i + 1;
+    });
+  }
+
+  // === Hitung rata-rata nilai ===
   function updateAvg() {
     const inputs = document.querySelectorAll('input[name="nilai[]"]');
     let total = 0, count = 0;
@@ -155,6 +264,7 @@
     document.getElementById('avg').textContent = count ? (total / count).toFixed(2) : '0';
   }
 
+  // === Tambah baris aspek ===
   function addRow() {
     const tbody = document.querySelector("#tableAspek tbody");
     const tr = document.createElement("tr");
@@ -166,8 +276,7 @@
           class="block w-full p-2 text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
       </td>
       <td class="px-3 py-2 text-center">
-        <input type="number" name="nilai[]" value="0" min="0" max="100"
-          oninput="updateAvg()"
+        <input type="number" name="nilai[]" value="0" min="0" max="100" oninput="updateAvg()"
           class="block w-full text-center p-2 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
       </td>
       <td class="text-center">
@@ -177,61 +286,70 @@
     `;
     tbody.appendChild(tr);
     updateNumbers();
+    updateAvg();
   }
 
+  // === Hapus baris aspek ===
   function deleteRow(btn) {
     btn.closest("tr").remove();
     updateNumbers();
     updateAvg();
   }
 
-  // ===== LOAD ASPEK OTOMATIS BERDASARKAN DIVISI =====
+  // === Divisi logic ===
+  const divisionSelect = document.getElementById('divisionSelect');
+
+  // Dengarkan perubahan divisi
+  divisionSelect.addEventListener('change', function () {
+    loadAspekByDivision(this.value);
+  });
+
+  // Muat aspek otomatis berdasarkan divisi
   function loadAspekByDivision(division) {
     if (!division) return;
+
     fetch("{{ route('ajax.aspek') }}?division=" + division)
       .then(res => res.json())
       .then(data => {
         const tbody = document.querySelector("#tableAspek tbody");
-        tbody.innerHTML = "";
-        data.aspek.forEach((item, i) => {
-          const tr = document.createElement("tr");
-          tr.classList.add("border-b", "border-gray-200", "hover:bg-gray-50");
-          tr.innerHTML = `
-            <td class="text-center font-medium text-gray-600">${i + 1}</td>
-            <td class="px-3 py-2">
-              <input type="text" name="aspek[]" value="${item.aspek}"
-                class="block w-full p-2 text-sm border-gray-300 rounded-lg">
-            </td>
-            <td class="px-3 py-2 text-center">
-              <input type="number" name="nilai[]" value="0" min="0" max="100" oninput="updateAvg()"
-                class="block w-full text-center p-2 border-gray-300 rounded-lg">
-            </td>
-            <td class="text-center">
-              <button type="button" onclick="deleteRow(this)"
-                class="px-2.5 py-1 text-xs text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-sm">✖</button>
-            </td>`;
-          tbody.appendChild(tr);
-        });
+        tbody.innerHTML = ""; // Hapus isi sebelumnya
+
+        if (Array.isArray(data.aspek)) {
+          data.aspek.forEach((item, i) => {
+            const tr = document.createElement("tr");
+            tr.classList.add("border-b", "border-gray-200", "hover:bg-gray-50");
+            tr.innerHTML = `
+              <td class="text-center font-medium text-gray-600">${i + 1}</td>
+              <td class="px-3 py-2">
+                <input type="text" name="aspek[]" value="${item.aspek}"
+                  class="block w-full p-2 text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+              </td>
+              <td class="px-3 py-2 text-center">
+                <input type="number" name="nilai[]" value="${item.nilai}" min="0" max="100" oninput="updateAvg()"
+                  class="block w-full text-center p-2 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+              </td>
+              <td class="text-center">
+                <button type="button" onclick="deleteRow(this)"
+                  class="px-2.5 py-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg shadow-sm transition-all">✖</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          console.warn("data.aspek bukan array atau kosong:", data.aspek);
+        }
+
         updateNumbers();
         updateAvg();
-      });
+      })
+      .catch(err => console.error("Gagal memuat aspek:", err));
   }
 
-  // ===== EVENT HANDLER DIVISI =====
-  document.getElementById('divisionSelect').addEventListener('change', function () {
-    const manualInput = document.getElementById('manualDivision');
-    if (this.value === 'other') {
-      manualInput.classList.remove('hidden');
-      manualInput.focus();
-    } else {
-      manualInput.classList.add('hidden');
-      manualInput.value = '';
-      loadAspekByDivision(this.value);
-    }
+  // === INIT ===
+  document.addEventListener('DOMContentLoaded', function() {
+    updateNumbers();
+    updateAvg();
   });
-
-  // ===== INIT =====
-  updateNumbers();
-  updateAvg();
 </script>
+
 @endsection
