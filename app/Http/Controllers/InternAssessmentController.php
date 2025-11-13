@@ -44,6 +44,7 @@ class InternAssessmentController extends Controller
 
 
         // Render Blade template for PDF preview
+        return view('admin.interns.pdf_assessment', [
             'assessment'   => $assessment,
             'logoSrc'      => $logoSrc,
             'sigSrc'       => $sigSrc,
