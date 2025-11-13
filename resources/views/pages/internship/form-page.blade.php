@@ -42,7 +42,7 @@
           <!-- Tahun Lahir (string) -->
           <div>
             <label for="born_date" class="{{ $label }}">Tahun Lahir<span class="text-red-500">*</span></label>
-            <input type="text" id="born_date" name="born_date" placeholder="25 Juni 2005" required class="{{ $input }}" value="{{ old('born_date') }}" />
+            <input type="date" id="born_date" name="born_date" placeholder="25 Juni 2005" required class="{{ $input }}" value="{{ old('born_date') }}" />
           </div>
 
           <!-- NIM/NIS -->
@@ -347,16 +347,36 @@
 
           <!-- Rentang Tanggal (STRING) -->
           <div>
-              <label class="{{ $label }}">
-                Kapan rencana mulai Magang/PKL?
-                <span class="{{ $help }}">Tulis lengkap tanggal, bulan, tahun & durasi (contoh: 10 September 2025)</span>
-              </label>
-              <div class="flex flex-col sm:flex-row items-center gap-4">
-                <input id="start_date" type="date" name="start_date" value="{{ old('start_date', request('start_date')) }}" class="{{ $input }}" placeholder="Tanggal mulai (10 September 2025)" onchange="formatDate(this)">
-                <span class="text-zinc-700 dark:text-zinc-300">s/d</span>
-                <input id="end_date" type="date" name="end_date" value="{{ old('end_date', request('end_date')) }}" class="{{ $input }}" placeholder="Tanggal selesai (10 Desember 2025)" onchange="formatDate(this)">
-              </div>
+            <label for="start_date" class="{{ $label }}">
+              Kapan rencana mulai Magang/PKL?
+              <span class="{{ $help }}">
+                Pilih tanggal mulai dan selesai magang/PKL (contoh: 2025-09-10 s/d 2025-12-10)
+              </span>
+            </label>
+
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+              <input
+                id="start_date"
+                type="date"
+                name="start_date"
+                class="{{ $input }}"
+                value="{{ old('start_date', request('start_date')) }}"
+                required
+              />
+
+              <span class="text-zinc-700 dark:text-zinc-300">s/d</span>
+
+              <input
+                id="end_date"
+                type="date"
+                name="end_date"
+                class="{{ $input }}"
+                value="{{ old('end_date', request('end_date')) }}"
+                required
+              />
+            </div>
           </div>
+
 
           <!-- Sumber Info (benahi other) -->
           <div>
