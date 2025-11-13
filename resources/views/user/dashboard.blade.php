@@ -48,7 +48,7 @@
         </div>
         <h1 class="text-2xl sm:text-3xl font-extrabold text-zinc-900 mb-2">Lengkapi Pendaftaran Magang/PKL</h1>
         <p class="text-zinc-600 mb-6">Kamu belum mengisi form pendaftaran. Yuk isi dulu agar kami bisa memproses.</p>
-        <a href="{{ route('user.internship.form') }}"
+        <a href="{{ route('internship.form') }}"
            class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 focus:outline-none focus:ring-4 focus:ring-primary-300">
           Isi Form Pendaftaran
         </a>

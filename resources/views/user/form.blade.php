@@ -6,6 +6,7 @@
   <title>Form Pendaftaran Magang/PKL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <style>
     @keyframes shake {
       0% { transform: translateX(0); }

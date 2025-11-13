@@ -5,11 +5,30 @@
   <meta charset="UTF-8" />
   <title>Form Pendaftaran Magang/PKL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  @vite(['resources/css/app.css'])
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="bg-primary-700  min-h-screen flex items-start sm:items-center justify-center p-4">
+  @auth
+    @if(auth()->user()->role !== 'admin')
+      <!-- Floating Action Button -->
+      <div class="fixed top-4 left-4 z-50">
+        <!-- Back to Dashboard Button -->
+        <a href="{{ route('user.dashboard') }}" class="bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-full shadow-md">
+          Kembali ke Dashboard
+        </a>
+        <!-- Logout Button -->
+        <form action="{{ route('user.logout') }}" method="POST" class="mt-2">
+          @csrf
+          <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full shadow-md">
+            Logout
+          </button>
+        </form>
+      </div>
+    @endif
+  @endauth
+
+
   <div class="w-full max-w-2xl">
     <div class="bg-white/80 rounded-2xl shadow-xl ring-1 ring-zinc-200 overflow-hidden">
       <section class="py-8 lg:py-10 px-5 sm:px-8">

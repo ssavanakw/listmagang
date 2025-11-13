@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pendaftaran Terkirim</title>
-  @vite(['resources/css/app.css']) <!-- pastikan Tailwind versi build digunakan -->
+  @vite(['resources/css/app.css', 'resources/js/app.js']) <!-- pastikan Tailwind versi build digunakan -->
 </head>
 <body class="bg-primary-700 min-h-screen flex items-center justify-center p-6">
   <main class="w-full max-w-xl">

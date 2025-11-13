@@ -147,7 +147,7 @@
             />
         @else
             <x-sidebar-menu-dashboard 
-                routeName="user.internship.form"
+                routeName="internship.form"
                 title="Daftar Magang"
             />
         @endif
