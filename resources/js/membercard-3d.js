@@ -206,10 +206,6 @@ function initViewer(container, modelUrl) {
       });
   }
 
-
-
-
-
   /* Scene & Environment */
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0f18);
@@ -859,10 +855,6 @@ function goToDefaultElegantAngle(object3D, duration = 420) {
     })(t0);
   });
 }
-
-
-
-
 
 /* ======================= Modal lifecycle ======================= */
 (function bootstrapModal3D() {

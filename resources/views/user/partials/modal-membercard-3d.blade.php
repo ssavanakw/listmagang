@@ -36,7 +36,7 @@
       <div class="relative">
         <div id="membercard3dCanvas"
              class="w-full h-[480px] md:h-[560px] bg-[#0a0f18] select-none"
-             data-model-url="{{ $modelUrl }}"
+             data-model-url="{{ asset($download->model_url) }}"
              data-name="{{ $name }}"
              data-id="{{ $code }}"
              data-angkatan="{{ $angkatan }}"
