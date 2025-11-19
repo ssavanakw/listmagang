@@ -141,9 +141,6 @@
             <a href="{{ route('user.editProfile') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary-600 text-white font-semibold hover:bg-primary-700 focus:outline-none focus:ring-4 focus:ring-primary-300 transition duration-300">
               Edit Profil
             </a>
-            <a href="{{ route('internship.form') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-white text-zinc-900 font-semibold border border-zinc-200 hover:bg-zinc-50 focus:outline-none focus:ring-4 focus:ring-zinc-200 transition duration-300">
-              Ajukan Ulang
-            </a>
           </div>
 
           <form method="POST" action="{{ route('user.logout') }}" class="mt-6">

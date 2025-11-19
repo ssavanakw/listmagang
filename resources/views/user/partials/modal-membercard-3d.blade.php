@@ -10,7 +10,7 @@
   $angkatan = $download->angkatan ?? Carbon::parse($intern->start_date)->format('Y');
   $instansi = $download->instansi ?? $intern->institution_name;
   $brand = $download->brand ?? $intern->brand ?? 'magangjogja.com';
-  $modelUrl = $download->model_url ?? asset('storage/models/Membercard.glb');
+  $modelUrl = $download ? $download->model_url : asset('storage/models/Membercard.glb');
 @endphp
 
 <div id="modalMembercard3d" tabindex="-1" aria-hidden="true"
@@ -36,7 +36,7 @@
       <div class="relative">
         <div id="membercard3dCanvas"
              class="w-full h-[480px] md:h-[560px] bg-[#0a0f18] select-none"
-             data-model-url="{{ asset($download->model_url) }}"
+             data-model-url="{{ $modelUrl }}"
              data-name="{{ $name }}"
              data-id="{{ $code }}"
              data-angkatan="{{ $angkatan }}"
